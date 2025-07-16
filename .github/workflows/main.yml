@@ -10,7 +10,7 @@ env:
   REGISTRY: applyr.cr.cloud.ru
   IMAGE_NAME_BOT: applyr-bot
   IMAGE_NAME_API: applyr-api
-  DEPLOY_SERVER: "84.54.59.21"
+  DEPLOY_HOST: "84.54.59.21"
   DEPLOY_USER: deployer
   # SERVICE_1_HEALTHCHECK: http://your.server.com/service1/health
   # SERVICE_2_HEALTHCHECK: http://your.server.com/service2/health
@@ -93,7 +93,8 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem docker-compose.yml ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/applyr/docker-compose.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/applyr/docker-compose.yml
+          rm private_key.pem
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3

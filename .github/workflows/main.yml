@@ -1,0 +1,124 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: applyr.cr.cloud.ru
+  IMAGE_NAME_BOT: applyr-bot
+  IMAGE_NAME_API: applyr-api
+  DEPLOY_SERVER: "84.54.59.21"
+  DEPLOY_USER: deployer
+  # SERVICE_1_HEALTHCHECK: http://your.server.com/service1/health
+  # SERVICE_2_HEALTHCHECK: http://your.server.com/service2/health
+
+jobs:
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.12'
+
+#       # - name: Install ruff
+#       #   run: pip install ruff
+
+#       # - name: Run ruff linter
+#       #   run: ruff .
+
+  build:
+    # needs: lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Cloud.ru Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_KEY_ID }}
+          password: ${{ secrets.REGISTRY_KEY_SECRET }}
+
+      - name: Build and push Bot
+        run: |
+          docker build ./bot -t $REGISTRY/$IMAGE_NAME_BOT:latest
+          docker push $REGISTRY/$IMAGE_NAME_BOT:latest
+
+
+      - name: Build and push Api
+        run: |
+          docker build ./api -t $REGISTRY/$IMAGE_NAME_API:latest
+          docker push $REGISTRY/$IMAGE_NAME_API:latest
+
+  # test:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.11'
+
+  #     - name: Install dependencies
+  #       run: |
+  #         pip install -r requirements.txt
+  #         pip install pytest
+
+  #     - name: Run tests
+  #       run: pytest tests/
+
+  deploy:
+    # needs: test
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Load docker-compose
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem docker-compose.yml ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/applyr/docker-compose.yml
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.DEPLOY_SERVER }}
+          username: ${{ env.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
+            docker pull $REGISTRY/$IMAGE_NAME_API:latest
+            docker compose -f /applyr/docker-compose.yml up -d
+
+  # healthcheck:
+  #   needs: deploy
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Check service 1 health
+  #       run: |
+  #         for i in {1..5}; do
+  #           curl --fail $SERVICE_1_HEALTHCHECK && break || sleep 5
+  #         done
+
+  #     - name: Check service 2 health
+  #       run: |
+  #         for i in {1..5}; do
+  #           curl --fail $SERVICE_2_HEALTHCHECK && break || sleep 5
+  #         done

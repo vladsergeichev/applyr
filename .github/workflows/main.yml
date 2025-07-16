@@ -96,13 +96,13 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no docker-compose.yml ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/applyr/docker-compose.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no docker-compose.yml ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/docker-compose.yml
           rm private_key.pem
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ env.DEPLOY_SERVER }}
+          host: ${{ env.DEPLOY_HOST }}
           username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |

@@ -94,9 +94,12 @@ jobs:
 
       - name: Load docker-compose
         run: |
+          pwd
+          ls
+          ls ..
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no docker-compose.yml ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/docker-compose.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no ./docker-compose.yml ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/docker-compose.yml
           rm private_key.pem
 
       - name: Deploy

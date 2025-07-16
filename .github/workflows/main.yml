@@ -114,6 +114,10 @@ jobs:
           username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            REGISTRY=applyr.cr.cloud.ru
+            IMAGE_NAME_BOT=applyr-bot
+            IMAGE_NAME_API=applyr-api
+
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest
             docker compose -f /applyr/docker-compose.yml up -d

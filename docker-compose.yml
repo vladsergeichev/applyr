@@ -14,7 +14,8 @@ services:
       - applyr_network
 
   api:
-    build: ./api
+#    build: ./api
+    image: applyr.cr.cloud.ru/applyr-api:latest
     ports:
       - "8000:8000"
     environment:
@@ -30,7 +31,8 @@ services:
       - applyr_network
 
   bot:
-    build: ./bot
+#    build: ./bot
+    image: applyr.cr.cloud.ru/applyr-bot:latest
     environment:
       API_URL: ${API_URL}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}

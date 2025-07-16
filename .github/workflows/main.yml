@@ -107,6 +107,13 @@ jobs:
           scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/.env
           rm .env
 
+      - name: Log in to Cloud.ru Artifact Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_KEY_ID }}
+          password: ${{ secrets.REGISTRY_KEY_SECRET }}
+
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:

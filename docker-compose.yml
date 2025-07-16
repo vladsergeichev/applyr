@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - applyr_network
+
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      LOG_LEVEL: ${LOG_LEVEL}
+    depends_on:
+      - postgres
+    networks:
+      - applyr_network
+
+  bot:
+    build: ./bot
+    environment:
+      API_URL: ${API_URL}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL}
+    depends_on:
+      - api
+    networks:
+      - applyr_network
+
+volumes:
+  postgres_data:
+
+networks:
+  applyr_network:
+    driver: bridge 

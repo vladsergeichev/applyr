@@ -114,8 +114,10 @@ jobs:
           username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "${{ secrets.REGISTRY_KEY_ID }}"
-            echo $REGISTRY
+            export REGISTRY=${{ env.REGISTRY }}
+            export IMAGE_NAME_BOT=${{ env.IMAGE_NAME_BOT }}
+            export IMAGE_NAME_API=${{ env.IMAGE_NAME_API }}
+            echo "${{ secrets.REGISTRY_KEY_SECRET }}" | docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" --password-stdin
             docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" -p "${{ secrets.REGISTRY_KEY_SECRET }}"
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest

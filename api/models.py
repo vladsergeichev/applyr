@@ -11,6 +11,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(BigInteger, primary_key=True)  # telegram_id
+    username = Column(String(255), nullable=True, unique=True)  # telegram username
     name = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=func.now())
 

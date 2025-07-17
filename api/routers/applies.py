@@ -92,14 +92,22 @@ def delete_apply(apply_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Ошибка удаления отклика")
 
 
-@router.get("/get_applies/{user_id}", response_model=List[schemas.Apply])
-def get_applies(user_id: int, db: Session = Depends(get_db)):
-    """Получение всех откликов пользователя"""
+@router.get("/get_applies/{username}", response_model=List[schemas.Apply])
+def get_applies(username: str, db: Session = Depends(get_db)):
+    """Получение всех откликов пользователя по username"""
     try:
-        applies = db.query(models.Apply).filter(models.Apply.user_id == user_id).all()
-        logger.info(f"Получено {len(applies)} откликов для пользователя {user_id}")
+        # Сначала находим пользователя по username
+        user = db.query(models.User).filter(models.User.username == username).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+        # Получаем отклики пользователя
+        applies = db.query(models.Apply).filter(models.Apply.user_id == user.id).all()
+        logger.info(f"Получено {len(applies)} откликов для пользователя @{username}")
         return applies
 
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Ошибка получения откликов для пользователя {user_id}: {e}")
+        logger.error(f"Ошибка получения откликов для пользователя @{username}: {e}")
         raise HTTPException(status_code=500, detail="Ошибка получения откликов")

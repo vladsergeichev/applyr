@@ -31,7 +31,9 @@ async def handle_message(message: Message):
 
     # Создаем пользователя, если его нет
     await api_client.create_user(
-        message.from_user.id, message.from_user.username, message.from_user.first_name
+        message.from_user.id, 
+        message.from_user.username, 
+        message.from_user.first_name
     )
 
     # Создаем отклик
@@ -44,7 +46,8 @@ async def handle_message(message: Message):
             f"✅ <b>Отклик создан!</b>\n\n"
             f"<b>Вакансия:</b> {vacancy_name}\n"
             f"<b>Ссылка:</b> <a href=\"{link}\">Перейти к посту</a>\n\n"
-            f"Используйте /my_applies для просмотра всех откликов",
+            f"Используйте /my_applies для просмотра всех откликов\n"
+            f"Или заходите на сайт applyr.vladsergeichev.ru",
             parse_mode="HTML",
             disable_web_page_preview=True,
         )

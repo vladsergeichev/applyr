@@ -19,6 +19,7 @@ class APIClient:
                 user_data = {
                     "id": user_id,
                     "name": f"{first_name} ({username})" if username else first_name,
+                    "username": username,
                 }
 
                 # Пытаемся создать пользователя (может уже существовать)
@@ -65,12 +66,12 @@ class APIClient:
             logger.error(f"Ошибка при создании отклика: {e}")
             return False, f"Ошибка: {str(e)}"
 
-    async def get_user_applies(self, user_id: int) -> list:
-        """Получает отклики пользователя"""
+    async def get_user_applies(self, username: str) -> list:
+        """Получает отклики пользователя по username"""
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"{self.base_url}/applies/get_applies/{user_id}"
+                    f"{self.base_url}/applies/get_applies/{username}"
                 ) as response:
                     if response.status == 200:
                         return await response.json()

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 # User schemas
 class UserBase(BaseModel):
     name: str
+    username: Optional[str] = None
 
 
 class UserCreate(UserBase):

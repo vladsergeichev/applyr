@@ -14,7 +14,9 @@ api_client = APIClient()
 async def cmd_my_applies(message: Message):
     """Показывает все отклики пользователя"""
     try:
-        applies = await api_client.get_user_applies(message.from_user.id)
+        # Используем username пользователя, если он есть, иначе используем user_id как строку
+        username = message.from_user.username or str(message.from_user.id)
+        applies = await api_client.get_user_applies(username)
 
         if applies:
             text = "📋 <b>Ваши отклики:</b>\n\n"
@@ -32,4 +34,4 @@ async def cmd_my_applies(message: Message):
 
     except Exception as e:
         logger.error(f"Ошибка получения откликов: {e}")
-        await message.answer("Ошибка получения откликов")
+        await message.answer("Произошла ошибка при получении откликов. Попробуйте позже.")

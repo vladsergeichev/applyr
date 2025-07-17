@@ -46,7 +46,7 @@ applyr/
 ## База данных
 
 ### Таблицы:
-- **users** - пользователи (telegram_id, name, created_at)
+- **users** - пользователи (telegram_id, username, name, created_at)
 - **applies** - отклики (id, user_id, name, link, description, timestamps)
 - **states** - состояния (id, name)
 - **apply_states** - состояния откликов (id, apply_id, state_id, description, timestamps)
@@ -66,7 +66,7 @@ applyr/
 - `POST /create_apply` - создание отклика
 - `PUT /update_apply/{id}` - обновление отклика
 - `DELETE /delete_apply/{id}` - удаление отклика
-- `GET /get_applies/{user_id}` - получение откликов пользователя
+- `GET /get_applies/{username}` - получение откликов пользователя по username
 
 ### Состояния (/states)
 - `POST /create_state` - создание состояния

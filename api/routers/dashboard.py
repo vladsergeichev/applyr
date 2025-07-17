@@ -8,8 +8,8 @@ router = APIRouter()
 
 
 @router.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request, user_id: int = None):
-    """Дашборд для просмотра откликов пользователя"""
+async def dashboard(request: Request, username: str = None):
+    """Дашборд для просмотра откликов пользователя по username"""
     
     # Формируем HTML контент
     html_content = f"""
@@ -42,7 +42,7 @@ async def dashboard(request: Request, user_id: int = None):
                 margin-bottom: 30px;
                 text-align: center;
             }}
-            input[type="number"] {{
+            input[type="text"] {{
                 padding: 12px 16px;
                 border: 2px solid #ddd;
                 border-radius: 8px;
@@ -189,44 +189,50 @@ async def dashboard(request: Request, user_id: int = None):
             
             <div class="search-form">
                 <form method="GET">
-                    <input type="number" name="user_id" placeholder="Введите ID пользователя" 
-                           value="{user_id if user_id else ''}" required>
+                    <input type="text" name="username" placeholder="Введите username пользователя" 
+                           value="{username if username else ''}" required>
                     <button type="submit">Показать отклики</button>
                 </form>
             </div>
     """
     
-    if user_id:
+    if username:
         try:
-            # Получаем отклики пользователя
+            # Получаем пользователя по username
             db = next(get_db())
-            applies = db.query(models.Apply).filter(models.Apply.user_id == user_id).order_by(models.Apply.created_at.desc()).all()
+            user = db.query(models.User).filter(models.User.username == username).first()
             
-            if applies:
-                html_content += '<div class="applies-list">'
-                for apply in applies:
-                    # Экранируем название для JavaScript
-                    safe_name = apply.name.replace("'", "\\'").replace('"', '\\"')
-                    html_content += f"""
-                    <div class="apply-item" id="apply-{apply.id}">
-                        <div class="apply-title">{apply.name}</div>
-                        <div class="apply-meta">
-                            📅 Создан: {apply.created_at.strftime('%d.%m.%Y %H:%M')}
-                        </div>
-                        <div class="apply-meta">
-                            🔗 <a href="{apply.link}" class="apply-link" target="_blank">Перейти к вакансии</a>
-                        </div>
-                        <div class="apply-actions">
-                            <button class="delete-btn" onclick="deleteApply('{apply.id}', '{safe_name}')">
-                                🗑️ Удалить
-                            </button>
-                        </div>
-                    </div>
-                    """
-                html_content += '</div>'
+            if not user:
+                html_content += f'<div class="error">Пользователь с username @{username} не найден</div>'
             else:
-                html_content += '<div class="no-applies">У пользователя пока нет откликов</div>'
+                # Получаем отклики пользователя
+                applies = db.query(models.Apply).filter(models.Apply.user_id == user.id).order_by(models.Apply.created_at.desc()).all()
                 
+                if applies:
+                    html_content += f'<div class="applies-list"><h3>Отклики пользователя @{username}:</h3>'
+                    for apply in applies:
+                        # Экранируем название для JavaScript
+                        safe_name = apply.name.replace("'", "\\'").replace('"', '\\"')
+                        html_content += f"""
+                        <div class="apply-item" id="apply-{apply.id}">
+                            <div class="apply-title">{apply.name}</div>
+                            <div class="apply-meta">
+                                📅 Создан: {apply.created_at.strftime('%d.%m.%Y %H:%M')}
+                            </div>
+                            <div class="apply-meta">
+                                🔗 <a href="{apply.link}" class="apply-link" target="_blank">Перейти к вакансии</a>
+                            </div>
+                            <div class="apply-actions">
+                                <button class="delete-btn" onclick="deleteApply('{apply.id}', '{safe_name}')">
+                                    🗑️ Удалить
+                                </button>
+                            </div>
+                        </div>
+                        """
+                    html_content += '</div>'
+                else:
+                    html_content += f'<div class="no-applies">У пользователя @{username} пока нет откликов</div>'
+                    
         except Exception as e:
             html_content += f'<div class="error">Ошибка при получении данных: {str(e)}</div>'
     

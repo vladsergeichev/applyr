@@ -18,15 +18,24 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         # Проверяем, существует ли пользователь
         existing_user = db.query(models.User).filter(models.User.id == user.id).first()
         if existing_user:
+            # Обновляем username если он изменился
+            if user.username and existing_user.username != user.username:
+                existing_user.username = user.username
+                db.commit()
+                db.refresh(existing_user)
             return existing_user  # Возвращаем существующего пользователя
 
         # Создаем нового пользователя
-        db_user = models.User(id=user.id, name=user.name)
+        db_user = models.User(
+            id=user.id, 
+            name=user.name,
+            username=user.username
+        )
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
 
-        logger.info(f"Создан пользователь {user.id}: {user.name}")
+        logger.info(f"Создан пользователь {user.id}: {user.name} (@{user.username})")
         return db_user
 
     except Exception as e:

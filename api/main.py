@@ -30,9 +30,9 @@ app.include_router(users.router)
 app.include_router(dashboard.router)
 
 
-@app.get("/")
-def read_root():
-    return {"message": "Applyr API работает"}
+# @app.get("/")
+# def read_root():
+#     return {"message": "Applyr API работает"}
 
 
 @app.get("/health")

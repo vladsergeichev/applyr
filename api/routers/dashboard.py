@@ -7,7 +7,7 @@ import models
 router = APIRouter()
 
 
-@router.get("/dashboard", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request, user_id: int = None):
     """Дашборд для просмотра откликов пользователя"""
     

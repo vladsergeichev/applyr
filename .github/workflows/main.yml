@@ -114,7 +114,9 @@ jobs:
           username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "${{ secrets.REGISTRY_KEY_SECRET }}" | docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" --password-stdin
+            echo "${{ secrets.REGISTRY_KEY_ID }}"
+            echo $REGISTRY
+            docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" -p "${{ secrets.REGISTRY_KEY_SECRET }}"
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest
             docker compose -f /applyr/docker-compose.yml up -d

@@ -17,7 +17,7 @@ services:
 #    build: ./api
     image: applyr.cr.cloud.ru/applyr-api:latest
     ports:
-      - "8000:8000"
+      - "80:8000"
     environment:
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}

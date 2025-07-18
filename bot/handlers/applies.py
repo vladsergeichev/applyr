@@ -34,4 +34,6 @@ async def cmd_my_applies(message: Message):
 
     except Exception as e:
         logger.error(f"Ошибка получения откликов: {e}")
-        await message.answer("Произошла ошибка при получении откликов. Попробуйте позже.")
+        await message.answer(
+            "Произошла ошибка при получении откликов. Попробуйте позже."
+        )

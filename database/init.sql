@@ -53,21 +53,6 @@ INSERT INTO states (name) VALUES
     ('Принят')
 ON CONFLICT (name) DO NOTHING;
 
--- Миграция: добавление колонки username если её нет
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns 
-        WHERE table_name = 'users' AND column_name = 'username'
-    ) THEN
-        ALTER TABLE users ADD COLUMN username VARCHAR(255) UNIQUE;
-        CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-        RAISE NOTICE 'Колонка username добавлена в таблицу users';
-    ELSE
-        RAISE NOTICE 'Колонка username уже существует в таблице users';
-    END IF;
-END $$;
-
 -- Функция для обновления updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$

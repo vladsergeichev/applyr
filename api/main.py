@@ -2,10 +2,11 @@ import logging
 import os
 
 import models
-from fastapi import FastAPI
-from routers import applies, states, users, dashboard
-
 from config import app_config
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from routers import applies, dashboard, states, users
+
 from database import engine
 
 # Настройка логирования
@@ -23,16 +24,21 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Подключение статики
+app.mount(
+    "/static",
+    StaticFiles(directory="static" if os.path.isdir("static") else "api/static"),
+    name="static",
+)
+
+# Подключение шаблонов из config
+from config import templates
+
 # Подключение роутеров
 app.include_router(applies.router)
 app.include_router(states.router)
 app.include_router(users.router)
 app.include_router(dashboard.router)
-
-
-# @app.get("/")
-# def read_root():
-#     return {"message": "Applyr API работает"}
 
 
 @app.get("/health")

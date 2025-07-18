@@ -1,3 +1,6 @@
+import os
+
+from fastapi.templating import Jinja2Templates
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,3 +26,10 @@ class AppConfig(BaseSettings):
 
 
 app_config = AppConfig()
+
+# Подключение шаблонов
+templates = Jinja2Templates(
+    directory="static/templates"
+    if os.path.isdir("static/templates")
+    else "api/static/templates"
+)

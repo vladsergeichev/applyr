@@ -11,7 +11,7 @@ class AppConfig(BaseSettings):
 
     # Логирование
     LOG_LEVEL: str = "INFO"
-    
+
     # API
     API_URL: str
 

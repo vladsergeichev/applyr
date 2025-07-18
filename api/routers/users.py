@@ -26,11 +26,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             return existing_user  # Возвращаем существующего пользователя
 
         # Создаем нового пользователя
-        db_user = models.User(
-            id=user.id, 
-            name=user.name,
-            username=user.username
-        )
+        db_user = models.User(id=user.id, name=user.name, username=user.username)
         db.add(db_user)
         db.commit()
         db.refresh(db_user)

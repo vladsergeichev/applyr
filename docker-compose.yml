@@ -14,7 +14,7 @@ services:
       - applyr_network
 
   api:
-    build: ${API_BUILD_PATH:-./api}
+    build: ${LOCAL_MODE:-./api}
     image: applyr.cr.cloud.ru/applyr-api:latest
     ports:
       - "80:8000"
@@ -27,21 +27,21 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       PYTHONPATH: /app
     volumes:
-      - ${API_VOLUME:-./api:/app}
+      - ${LOCAL_MODE:-./api:/app}
     depends_on:
       - postgres
     networks:
       - applyr_network
 
   bot:
-    build: ${BOT_BUILD_PATH:-./bot}
+    build: ${LOCAL_MODE:-./bot}
     image: applyr.cr.cloud.ru/applyr-bot:latest
     environment:
       API_URL: ${API_URL}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       LOG_LEVEL: ${LOG_LEVEL}
     volumes:
-      - ${BOT_VOLUME:-./bot:/app}
+      - ${LOCAL_MODE:-./bot:/app}
     depends_on:
       - api
     networks:

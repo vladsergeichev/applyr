@@ -1,3 +1,4 @@
+import logging
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 from models import UserModel
@@ -8,6 +9,7 @@ from services.auth_service import AuthService
 from services.stage_service import StageService
 from services.vacancy_service import VacancyService
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from core.exceptions import (
     InvalidCredentialsError,
@@ -19,6 +21,43 @@ from core.security import verify_token
 from database import get_async_db
 
 security = HTTPBearer()
+logger = logging.getLogger(__name__)
+
+
+async def get_current_user(
+    token: str = Depends(security), db: AsyncSession = Depends(get_async_db)
+) -> UserModel:
+    """Получение текущего пользователя из токена"""
+    try:
+        payload = verify_token(token.credentials)
+        if not payload or payload.get("type") != "access":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Недействительный токен",
+            )
+
+        user_id = payload.get("user_id")
+        result = await db.execute(
+            select(UserModel).where(UserModel.id == user_id)
+        )
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Пользователь не найден",
+            )
+
+        return user
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка получения пользователя: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Ошибка аутентификации",
+        )
 
 
 def get_auth_repository(db: AsyncSession = Depends(get_async_db)) -> AuthRepository:

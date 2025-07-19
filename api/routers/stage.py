@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 from core.dependencies import get_stage_service
+from core.exceptions import VacancyNotFoundError
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from schemas.stage import StageCreateSchema, StageSchema, StageUpdateSchema
 from services.stage_service import StageService
@@ -18,6 +19,12 @@ async def create_stage(
     """Создание нового этапа"""
     try:
         return await stage_service.create_stage(stage_data)
+    except VacancyNotFoundError as e:
+        logger.error(f"Вакансия не найдена: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
     except Exception as e:
         logger.error(f"Ошибка создания этапа: {e}")
         raise HTTPException(

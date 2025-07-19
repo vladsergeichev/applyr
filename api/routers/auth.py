@@ -1,6 +1,13 @@
 import logging
 from datetime import datetime, timedelta
+from typing import Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
+from fastapi.security import HTTPBearer
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.dependencies import get_current_user, get_auth_service
 from core.security import (
     create_access_token,
     create_refresh_token,
@@ -9,86 +16,34 @@ from core.security import (
     verify_password,
     verify_token,
 )
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.security import HTTPBearer
-from models import RefreshModel, UserModel
+from database import get_async_db
+from models import UserModel, RefreshModel
 from schemas.auth import (
     AuthLoginSchema,
     AuthRegisterSchema,
     AuthResponseSchema,
+    UpdateTelegramSchema,
+    UserInfoSchema,
 )
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from database import get_async_db
+from services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 logger = logging.getLogger(__name__)
-security = HTTPBearer()
 
 
 @router.post("/register", response_model=AuthResponseSchema)
 async def register(
     user_data: AuthRegisterSchema,
     response: Response,
+    auth_service: AuthService = Depends(get_auth_service),
     db: AsyncSession = Depends(get_async_db),
 ):
     """Регистрация нового пользователя"""
     try:
-        # Проверяем, существует ли пользователь с таким username
-        result = await db.execute(
-            select(UserModel).where(UserModel.username == user_data.username)
-        )
-        existing_user = result.scalar_one_or_none()
-
-        if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Пользователь с таким username уже существует",
-            )
-
-        # Создаем нового пользователя
-        db_user = UserModel(
-            username=user_data.username,
-            password_hash=get_password_hash(user_data.password),
-        )
-        db.add(db_user)
-        await db.commit()
-        await db.refresh(db_user)
-
-        # Создаем токены
-        access_token = create_access_token(
-            data={"user_id": db_user.id, "username": db_user.username}
-        )
-        refresh_token = create_refresh_token(
-            data={"user_id": db_user.id, "username": db_user.username}
-        )
-
-        # Сохраняем refresh токен в БД
-        token_hash = get_token_hash(refresh_token)
-        expires_at = datetime.utcnow() + timedelta(days=10)
-
-        db_refresh_token = RefreshModel(
-            user_id=db_user.id,
-            token_hash=token_hash,
-            expires_at=expires_at,
-        )
-        db.add(db_refresh_token)
-        await db.commit()
-
-        # Устанавливаем refresh токен в cookie
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=False,  # True для HTTPS
-            samesite="lax",
-            max_age=10 * 24 * 60 * 60,  # 10 дней
-        )
-
-        logger.info(f"Зарегистрирован пользователь: {user_data.username}")
-        return AuthResponseSchema(access_token=access_token)
-
+        result, refresh_token = await auth_service.register_user(user_data, db)
+        # Устанавливаем cookie в response
+        auth_service._set_refresh_cookie(refresh_token, response)
+        return result
     except HTTPException:
         raise
     except Exception as e:
@@ -104,62 +59,15 @@ async def register(
 async def login(
     user_data: AuthLoginSchema,
     response: Response,
+    auth_service: AuthService = Depends(get_auth_service),
     db: AsyncSession = Depends(get_async_db),
 ):
     """Вход пользователя"""
     try:
-        # Ищем пользователя
-        result = await db.execute(
-            select(UserModel).where(UserModel.username == user_data.username)
-        )
-        user = result.scalar_one_or_none()
-
-        if not user or not user.password_hash:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Неверный username или пароль",
-            )
-
-        # Проверяем пароль
-        if not verify_password(user_data.password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Неверный username или пароль",
-            )
-
-        # Создаем токены
-        access_token = create_access_token(
-            data={"user_id": user.id, "username": user.username}
-        )
-        refresh_token = create_refresh_token(
-            data={"user_id": user.id, "username": user.username}
-        )
-
-        # Сохраняем refresh токен в БД
-        token_hash = get_token_hash(refresh_token)
-        expires_at = datetime.utcnow() + timedelta(days=10)
-
-        db_refresh_token = RefreshModel(
-            user_id=user.id,
-            token_hash=token_hash,
-            expires_at=expires_at,
-        )
-        db.add(db_refresh_token)
-        await db.commit()
-
-        # Устанавливаем refresh токен в cookie
-        response.set_cookie(
-            key="refresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=False,  # True для HTTPS
-            samesite="lax",
-            max_age=10 * 24 * 60 * 60,  # 10 дней
-        )
-
-        logger.info(f"Пользователь вошел в систему: {user.username}")
-        return AuthResponseSchema(access_token=access_token)
-
+        result, refresh_token = await auth_service.login_user(user_data, db)
+        # Устанавливаем cookie в response
+        auth_service._set_refresh_cookie(refresh_token, response)
+        return result
     except HTTPException:
         raise
     except Exception as e:
@@ -172,7 +80,11 @@ async def login(
 
 
 @router.post("/refresh", response_model=AuthResponseSchema)
-async def refresh_token(request: Request, db: AsyncSession = Depends(get_async_db)):
+async def refresh_token(
+    request: Request, 
+    auth_service: AuthService = Depends(get_auth_service),
+    db: AsyncSession = Depends(get_async_db)
+):
     """Обновление access токена"""
     try:
         # Получаем refresh токен из cookie
@@ -183,40 +95,7 @@ async def refresh_token(request: Request, db: AsyncSession = Depends(get_async_d
                 detail="Refresh токен не найден",
             )
 
-        # Проверяем refresh токен
-        payload = verify_token(refresh_token)
-        if not payload or payload.get("type") != "refresh":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Недействительный refresh токен",
-            )
-
-        user_id = payload.get("user_id")
-        username = payload.get("username")
-
-        # Проверяем, существует ли токен в БД
-        result = await db.execute(
-            select(RefreshModel).where(
-                RefreshModel.user_id == user_id,
-                RefreshModel.expires_at > datetime.utcnow(),
-            )
-        )
-        db_token = result.scalar_one_or_none()
-
-        if not db_token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh токен недействителен",
-            )
-
-        # Создаем новый access токен
-        access_token = create_access_token(
-            data={"user_id": user_id, "username": username}
-        )
-
-        logger.info(f"Обновлен токен для пользователя: {username}")
-        return AuthResponseSchema(access_token=access_token)
-
+        return await auth_service.refresh_access_token(refresh_token, db)
     except HTTPException:
         raise
     except Exception as e:
@@ -229,39 +108,59 @@ async def refresh_token(request: Request, db: AsyncSession = Depends(get_async_d
 
 @router.post("/logout")
 async def logout(
-    request: Request, response: Response, db: AsyncSession = Depends(get_async_db)
+    request: Request, 
+    response: Response, 
+    auth_service: AuthService = Depends(get_auth_service),
+    db: AsyncSession = Depends(get_async_db)
 ):
     """Выход пользователя"""
     try:
         # Получаем refresh токен из cookie
         refresh_token = request.cookies.get("refresh_token")
-        if refresh_token:
-            # Проверяем токен
-            payload = verify_token(refresh_token)
-            if payload:
-                user_id = payload.get("user_id")
-                # Удаляем токен из БД
-                result = await db.execute(
-                    select(RefreshModel).where(
-                        RefreshModel.user_id == user_id,
-                        RefreshModel.expires_at > datetime.utcnow(),
-                    )
-                )
-                db_token = result.scalar_one_or_none()
-                if db_token:
-                    await db.delete(db_token)
-                    await db.commit()
-
+        
+        await auth_service.logout_user(refresh_token, db)
+        
         # Удаляем cookie
-        response.delete_cookie(key="refresh_token")
-
-        logger.info("Пользователь вышел из системы")
-        return {"message": "Успешный выход"}
-
+        auth_service._delete_refresh_cookie(response)
+        
+        return {"message": "Успешный выход из системы"}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Ошибка выхода: {e}")
-        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка выхода",
         )
+
+
+@router.put("/update_telegram")
+async def update_telegram_username(
+    telegram_data: UpdateTelegramSchema,
+    current_user: UserModel = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+    db: AsyncSession = Depends(get_async_db),
+):
+    """Обновление Telegram username"""
+    try:
+        await auth_service.update_telegram_username(
+            current_user.id, telegram_data.telegram_username, db
+        )
+        return {"message": "Telegram username успешно обновлен"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Ошибка обновления Telegram username: {e}")
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка обновления Telegram username",
+        )
+
+
+@router.get("/me", response_model=UserInfoSchema)
+async def get_current_user_info(
+    current_user: UserModel = Depends(get_current_user),
+):
+    """Получение информации о текущем пользователе"""
+    return current_user

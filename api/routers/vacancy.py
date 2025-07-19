@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 from core.dependencies import get_vacancy_service
+from core.exceptions import UserNotFoundError
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from schemas.vacancy import VacancyCreateSchema, VacancySchema, VacancyUpdateSchema
 from services.vacancy_service import VacancyService
@@ -18,6 +19,12 @@ async def create_vacancy(
     """Создание новой вакансии"""
     try:
         return await vacancy_service.create_vacancy(vacancy_data)
+    except UserNotFoundError as e:
+        logger.error(f"Пользователь не найден: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
     except Exception as e:
         logger.error(f"Ошибка создания вакансии: {e}")
         raise HTTPException(

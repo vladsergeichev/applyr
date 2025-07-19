@@ -28,6 +28,7 @@ def get_password_hash(password: str) -> str:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Создает access токен"""
     to_encode = data.copy()
+    to_encode["type"] = "access"  # обязательно указываем тип
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:

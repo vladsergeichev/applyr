@@ -1,12 +1,24 @@
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel
-
+from pydantic import BaseModel, Field, validator
+import re
 
 class AuthRegisterSchema(BaseModel):
-    username: str
-    password: str
-    name: str
+    username: str = Field(..., min_length=3, max_length=50, description="Username пользователя")
+    password: str = Field(..., min_length=6, max_length=100, description="Пароль пользователя")
+
+    @validator('username')
+    def validate_username(cls, v):
+        if not re.match(r'^[a-zA-Z0-9_]+$', v):
+            raise ValueError('Username должен содержать только буквы, цифры и подчеркивания')
+        return v
+
+    @validator('password')
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise ValueError('Пароль должен содержать минимум 6 символов')
+        return v
 
 
 class AuthLoginSchema(BaseModel):
@@ -31,10 +43,14 @@ class AuthResultSchema(BaseModel):
     username: str
 
 
+class UpdateTelegramSchema(BaseModel):
+    telegram_username: str = Field(..., min_length=1, max_length=50)
+
+
 class UserInfoSchema(BaseModel):
     id: int
     username: str
-    name: str
+    telegram_username: Optional[str] = None
     created_at: datetime
 
     class Config:

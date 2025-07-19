@@ -6,8 +6,8 @@ from faker import Faker
 from fastapi import FastAPI
 
 from tests.common.api_client import AsyncTestAPIClient
-from tests.common.utils import create_test_apply_data, create_test_user_data
-from tests.factories.base_factories import ApplyFactory, UserFactory
+from tests.common.utils import create_test_vacancy_data, create_test_user_data
+from tests.factories.base_factories import VacancyFactory, StageFactory, UserFactory
 
 
 @pytest.fixture(scope="session")
@@ -54,9 +54,15 @@ def user_factory(faker: Faker) -> UserFactory:
 
 
 @pytest.fixture
-def apply_factory(faker: Faker) -> ApplyFactory:
-    """Фикстура для фабрики откликов"""
-    return ApplyFactory()
+def vacancy_factory(faker: Faker) -> VacancyFactory:
+    """Фикстура для фабрики вакансий"""
+    return VacancyFactory()
+
+
+@pytest.fixture
+def stage_factory(faker: Faker) -> StageFactory:
+    """Фикстура для фабрики этапов"""
+    return StageFactory()
 
 
 @pytest.fixture
@@ -78,21 +84,21 @@ async def test_user_with_token(async_client: AsyncTestAPIClient) -> tuple[dict, 
 
 
 @pytest.fixture
-def test_apply_data(apply_factory: ApplyFactory) -> dict:
-    """Фикстура для тестовых данных отклика"""
-    return apply_factory.build_apply_data()
-
-
-@pytest.fixture
-def test_apply_data_with_faker(faker: Faker) -> dict:
-    """Фикстура для тестовых данных отклика с использованием Faker"""
-    return create_test_apply_data(faker)
-
-
-@pytest.fixture
-def test_vacancy_data(apply_factory: ApplyFactory) -> dict:
+def test_vacancy_data(vacancy_factory: VacancyFactory) -> dict:
     """Фикстура для тестовых данных вакансии"""
-    return apply_factory.build_vacancy_data()
+    return vacancy_factory.build_vacancy_data()
+
+
+@pytest.fixture
+def test_vacancy_data_with_faker(faker: Faker) -> dict:
+    """Фикстура для тестовых данных вакансии с использованием Faker"""
+    return create_test_vacancy_data(faker)
+
+
+@pytest.fixture
+def test_stage_data(stage_factory: StageFactory) -> dict:
+    """Фикстура для тестовых данных этапа"""
+    return stage_factory.build_stage_data()
 
 
 @pytest.fixture

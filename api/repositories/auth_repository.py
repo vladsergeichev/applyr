@@ -36,11 +36,7 @@ class AuthRepository:
     async def create(self, username: str, password: str) -> UserModel:
         """Создает нового пользователя"""
         password_hash = get_password_hash(password)
-        user = UserModel(
-            username=username,
-            password_hash=password_hash,
-            telegram_username=None,  # telegram_username будет добавлен позже
-        )
+        user = UserModel(username=username, password_hash=password_hash)
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)
@@ -85,6 +81,19 @@ class AuthRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return user
+
+    @staticmethod
+    async def update_telegram_username(
+        user_id: int, telegram_username: str, db: AsyncSession
+    ) -> None:
+        """Обновляет Telegram username пользователя"""
+        result = await db.execute(select(UserModel).where(UserModel.id == user_id))
+        user = result.scalar_one_or_none()
+
+        if user:
+            user.telegram_username = telegram_username
+            await db.commit()
+            await db.refresh(user)
 
     # Методы для работы с refresh токенами
     async def save_refresh_token(

@@ -32,3 +32,9 @@ class UserNotFoundError(AuthError):
     """Пользователь не найден"""
 
     pass
+
+
+class VacancyNotFoundError(AuthError):
+    """Вакансия не найдена"""
+
+    pass

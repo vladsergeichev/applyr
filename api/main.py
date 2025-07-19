@@ -4,7 +4,7 @@ import os
 from config import app_config
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from routers import applies, auth, states, templates, users
+from routers import auth, stage, templates, vacancy
 
 # Настройка логирования
 logging.basicConfig(
@@ -14,7 +14,7 @@ logging.basicConfig(
 
 app = FastAPI(
     title="Applyr API",
-    description="API для управления откликами на вакансии",
+    description="API для управления вакансиями и этапами",
     version="1.0.0",
 )
 
@@ -25,13 +25,10 @@ app.mount(
     name="static",
 )
 
-# Подключение шаблонов из config
-
 # Подключение роутеров
 app.include_router(auth.router)
-app.include_router(applies.router)
-app.include_router(states.router)
-app.include_router(users.router)
+app.include_router(vacancy.router)
+app.include_router(stage.router)
 app.include_router(templates.router)
 
 

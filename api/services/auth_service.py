@@ -8,15 +8,13 @@ from core.exceptions import (
 )
 from core.security import create_access_token, create_refresh_token, verify_token
 from repositories.auth_repository import AuthRepository
-from repositories.user_repository import UserRepository
 from schemas.auth import AuthResultSchema
 
 logger = logging.getLogger(__name__)
 
 
 class AuthService:
-    def __init__(self, user_repo: UserRepository, auth_repo: AuthRepository):
-        self.user_repo = user_repo
+    def __init__(self, auth_repo: AuthRepository):
         self.auth_repo = auth_repo
 
     async def register(
@@ -24,14 +22,14 @@ class AuthService:
     ) -> AuthResultSchema:
         """Регистрация нового пользователя"""
         # Проверяем, существует ли пользователь
-        existing_user = await self.user_repo.get_by_username(username)
+        existing_user = await self.auth_repo.get_by_username(username)
         if existing_user:
             raise UserAlreadyExistsError(
                 f"Пользователь с username '{username}' уже существует"
             )
 
         # Создаем пользователя
-        user = await self.user_repo.create(username, password, name)
+        user = await self.auth_repo.create(username, password)
 
         # Создаем токены
         tokens = await self._create_tokens(user)
@@ -47,7 +45,7 @@ class AuthService:
     async def login(self, username: str, password: str) -> AuthResultSchema:
         """Вход пользователя"""
         # Проверяем учетные данные
-        user = await self.user_repo.get_user_with_password_check(username, password)
+        user = await self.auth_repo.get_user_with_password_check(username, password)
         if not user:
             raise InvalidCredentialsError("Неверный username или пароль")
 

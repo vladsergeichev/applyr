@@ -1,17 +1,14 @@
 # Импортируем Base для Alembic
 from database import Base
 
-from .apply import ApplyModel
-from .apply_state import ApplyStateModel
-from .refresh_token import RefreshTokenModel
-from .state import StateModel
-from .user import UserModel
+from .auth import RefreshModel, UserModel
+from .stage import StageModel
+from .vacancy import VacancyModel
 
 __all__ = [
     "Base",
     "UserModel",
-    "RefreshTokenModel",
-    "StateModel",
-    "ApplyModel",
-    "ApplyStateModel",
+    "RefreshModel",
+    "VacancyModel",
+    "StageModel",
 ]

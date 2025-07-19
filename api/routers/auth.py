@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
 
 from core.security import (
     create_access_token,
@@ -12,12 +11,11 @@ from core.security import (
 )
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPBearer
-from models import RefreshTokenModel, UserModel
+from models import RefreshModel, UserModel
 from schemas.auth import (
     AuthLoginSchema,
     AuthRegisterSchema,
     AuthResponseSchema,
-    UserInfoSchema,
 )
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,42 +25,6 @@ from database import get_async_db
 router = APIRouter(prefix="/auth", tags=["auth"])
 logger = logging.getLogger(__name__)
 security = HTTPBearer()
-
-
-async def get_current_user(
-    token: str = Depends(security), db: AsyncSession = Depends(get_async_db)
-) -> UserModel:
-    """Получает текущего пользователя из токена"""
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Не удалось проверить учетные данные",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    payload = verify_token(token.credentials)
-    if payload is None:
-        raise credentials_exception
-
-    user_id: int = payload.get("user_id")
-    if user_id is None:
-        raise credentials_exception
-
-    result = await db.execute(select(UserModel).where(UserModel.id == user_id))
-    user = result.scalar_one_or_none()
-
-    if user is None:
-        raise credentials_exception
-
-    return user
-
-
-async def get_refresh_token_from_cookie(
-    response: Response, db: AsyncSession = Depends(get_async_db)
-) -> Optional[str]:
-    """Получает refresh токен из cookie"""
-    # В реальной реализации здесь будет получение из cookie
-    # Пока возвращаем None для демонстрации
-    return None
 
 
 @router.post("/register", response_model=AuthResponseSchema)
@@ -86,11 +48,9 @@ async def register(
             )
 
         # Создаем нового пользователя
-        password_hash = get_password_hash(user_data.password)
         db_user = UserModel(
             username=user_data.username,
-            name=user_data.name,
-            password_hash=password_hash,
+            password_hash=get_password_hash(user_data.password),
         )
         db.add(db_user)
         await db.commit()
@@ -108,8 +68,7 @@ async def register(
         token_hash = get_token_hash(refresh_token)
         expires_at = datetime.utcnow() + timedelta(days=10)
 
-        db_refresh_token = RefreshTokenModel(
-            id=RefreshTokenModel.generate_id(db_user.id),
+        db_refresh_token = RefreshModel(
             user_id=db_user.id,
             token_hash=token_hash,
             expires_at=expires_at,
@@ -180,8 +139,7 @@ async def login(
         token_hash = get_token_hash(refresh_token)
         expires_at = datetime.utcnow() + timedelta(days=10)
 
-        db_refresh_token = RefreshTokenModel(
-            id=RefreshTokenModel.generate_id(user.id),
+        db_refresh_token = RefreshModel(
             user_id=user.id,
             token_hash=token_hash,
             expires_at=expires_at,
@@ -238,9 +196,9 @@ async def refresh_token(request: Request, db: AsyncSession = Depends(get_async_d
 
         # Проверяем, существует ли токен в БД
         result = await db.execute(
-            select(RefreshTokenModel).where(
-                RefreshTokenModel.user_id == user_id,
-                RefreshTokenModel.expires_at > datetime.utcnow(),
+            select(RefreshModel).where(
+                RefreshModel.user_id == user_id,
+                RefreshModel.expires_at > datetime.utcnow(),
             )
         )
         db_token = result.scalar_one_or_none()
@@ -284,9 +242,9 @@ async def logout(
                 user_id = payload.get("user_id")
                 # Удаляем токен из БД
                 result = await db.execute(
-                    select(RefreshTokenModel).where(
-                        RefreshTokenModel.user_id == user_id,
-                        RefreshTokenModel.expires_at > datetime.utcnow(),
+                    select(RefreshModel).where(
+                        RefreshModel.user_id == user_id,
+                        RefreshModel.expires_at > datetime.utcnow(),
                     )
                 )
                 db_token = result.scalar_one_or_none()
@@ -307,9 +265,3 @@ async def logout(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка выхода",
         )
-
-
-@router.get("/me", response_model=UserInfoSchema)
-async def get_current_user_info(current_user: UserModel = Depends(get_current_user)):
-    """Получение информации о текущем пользователе"""
-    return current_user

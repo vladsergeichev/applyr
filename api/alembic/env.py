@@ -4,9 +4,8 @@ from alembic import context
 from config import app_config
 from sqlalchemy import engine_from_config, pool
 
-from database import Base
+from models import Base
 
-# Импорт всех моделей нужен, чтобы они зарегистрировались в Base.metadata
 # для Alembic autogenerate
 
 # this is the Alembic Config object, which provides

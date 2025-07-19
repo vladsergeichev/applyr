@@ -1,109 +1,107 @@
-import asyncio
+from collections.abc import AsyncIterator
+
 import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from asgi_lifespan import LifespanManager
+from faker import Faker
+from fastapi import FastAPI
 
-from database import Base, get_async_db
-from main import app
+from tests.common.api_client import AsyncTestAPIClient
+from tests.common.utils import create_test_apply_data, create_test_user_data
+from tests.factories.base_factories import ApplyFactory, UserFactory
 
 
-# Тестовая база данных
-TEST_DATABASE_URL = "postgresql+asyncpg://test_user:test_pass@localhost:5433/test_db"
+@pytest.fixture(scope="session")
+def anyio_backend() -> str:
+    """Бэкенд для асинхронных тестов"""
+    return "asyncio"
 
 
 @pytest.fixture(scope="session")
 def event_loop():
-    """Создает event loop для тестов"""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    """Фикстура для event loop с session scope"""
+    import asyncio
+
+    loop = asyncio.new_event_loop()
     yield loop
     loop.close()
 
 
 @pytest.fixture(scope="session")
-async def test_engine():
-    """Создает тестовый engine для БД"""
-    engine = create_async_engine(TEST_DATABASE_URL, echo=False)
-    
-    # Создаем все таблицы
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-    
-    yield engine
-    
-    # Очищаем БД после тестов
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-    
-    await engine.dispose()
+async def lifespanned_app(event_loop) -> AsyncIterator[FastAPI]:
+    """Фикстура для управления жизненным циклом FastAPI приложения"""
+    from main import app
+
+    async with LifespanManager(app):
+        yield app
+
+
+@pytest.fixture(scope="session")
+def faker() -> Faker:
+    """Фикстура для генерации тестовых данных"""
+    return Faker(locale=["ru_RU", "en_US"])
+
+
+@pytest.fixture(scope="session")
+async def async_client(lifespanned_app: FastAPI) -> AsyncTestAPIClient:
+    """Фикстура для асинхронного API клиента"""
+    return AsyncTestAPIClient.build_app_client(app=lifespanned_app)
 
 
 @pytest.fixture
-async def test_session(test_engine):
-    """Создает тестовую сессию БД"""
-    async_session = sessionmaker(
-        test_engine, class_=AsyncSession, expire_on_commit=False
+def user_factory(faker: Faker) -> UserFactory:
+    """Фикстура для фабрики пользователей"""
+    return UserFactory()
+
+
+@pytest.fixture
+def apply_factory(faker: Faker) -> ApplyFactory:
+    """Фикстура для фабрики откликов"""
+    return ApplyFactory()
+
+
+@pytest.fixture
+def test_user_data(user_factory: UserFactory) -> dict:
+    """Фикстура для тестовых данных пользователя"""
+    return user_factory.build_user_data()
+
+
+@pytest.fixture
+def test_user_data_with_faker(faker: Faker) -> dict:
+    """Фикстура для тестовых данных пользователя с использованием Faker"""
+    return create_test_user_data(faker)
+
+
+@pytest.fixture
+async def test_user_with_token(async_client: AsyncTestAPIClient) -> tuple[dict, str]:
+    """Фикстура для создания тестового пользователя с токеном"""
+    return await async_client.create_test_user()
+
+
+@pytest.fixture
+def test_apply_data(apply_factory: ApplyFactory) -> dict:
+    """Фикстура для тестовых данных отклика"""
+    return apply_factory.build_apply_data()
+
+
+@pytest.fixture
+def test_apply_data_with_faker(faker: Faker) -> dict:
+    """Фикстура для тестовых данных отклика с использованием Faker"""
+    return create_test_apply_data(faker)
+
+
+@pytest.fixture
+def test_vacancy_data(apply_factory: ApplyFactory) -> dict:
+    """Фикстура для тестовых данных вакансии"""
+    return apply_factory.build_vacancy_data()
+
+
+@pytest.fixture
+def authorized_client(
+    async_client: AsyncTestAPIClient, test_user_with_token: tuple[dict, str]
+) -> AsyncTestAPIClient:
+    """Фикстура для авторизованного клиента"""
+    user_data, access_token = test_user_with_token
+    return AsyncTestAPIClient.build_authorized_app_client(
+        app=async_client._transport.app,  # type: ignore
+        access_token=access_token,
     )
-    
-    async with async_session() as session:
-        yield session
-        # Очищаем данные после каждого теста
-        for table in reversed(Base.metadata.sorted_tables):
-            await session.execute(table.delete())
-        await session.commit()
-
-
-@pytest.fixture
-async def client(test_session):
-    """Создает тестовый клиент"""
-    async def override_get_db():
-        yield test_session
-    
-    app.dependency_overrides[get_async_db] = override_get_db
-    
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        yield ac
-    
-    app.dependency_overrides.clear()
-
-
-# Фикстуры для тестовых данных
-@pytest.fixture
-def test_user_data():
-    """Тестовые данные пользователя"""
-    return {
-        "id": 123456789,
-        "name": "Test User",
-        "username": "testuser"
-    }
-
-
-@pytest.fixture
-def test_apply_data():
-    """Тестовые данные отклика"""
-    return {
-        "user_id": 123456789,
-        "name": "Python Developer",
-        "link": "https://example.com/job",
-        "company_name": "Test Company",
-        "description": "Test job description"
-    }
-
-
-@pytest.fixture
-def test_state_data():
-    """Тестовые данные состояния"""
-    return {
-        "name": "Applied"
-    }
-
-
-@pytest.fixture
-def test_auth_data():
-    """Тестовые данные для аутентификации"""
-    return {
-        "username": "testuser",
-        "password": "testpass123",
-        "name": "Test User"
-    } 

@@ -4,53 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Applyr Dashboard</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>📋 Applyr Dashboard</h1>
+        <h1>Applyr</h1>
         
         <div class="search-form">
-            <form method="GET">
-                <input type="text" name="username" placeholder="Введите username пользователя" 
-                       value="{{ username if username else '' }}" required>
-                <button type="submit">Показать отклики</button>
-            </form>
-        </div>
-
-        {% if error_message %}
-        <div class="error">{{ error_message }}</div>
-        {% endif %}
-
-        {% if success_message %}
-        <div class="success">{{ success_message }}</div>
-        {% endif %}
-
-        {% if applies %}
-        <div class="applies-list">
-            <h3>Отклики пользователя @{{ username }}:</h3>
-            {% for apply in applies %}
-            <div class="apply-item" id="apply-{{ apply.id }}">
-                <div class="apply-title">{{ apply.name }}</div>
-                <div class="apply-meta">
-                    📅 Создан: {{ apply.created_at.strftime('%d.%m.%Y %H:%M') }}
-                </div>
-                <div class="apply-meta">
-                    🔗 <a href="{{ apply.link }}" class="apply-link" target="_blank">Перейти к вакансии</a>
-                </div>
-                <div class="apply-actions">
-                    <button class="delete-btn" onclick="deleteApply('{{ apply.id }}', '{{ apply.name|replace("'", "&#39;")|replace('"', '&quot;') }}')">
-                        🗑️ Удалить
-                    </button>
-                </div>
+            <div class="search-input-group">
+                <input type="text" id="username-input" placeholder="Введите username пользователя" required>
+                <button type="button" id="search-btn">Показать отклики</button>
             </div>
-            {% endfor %}
         </div>
-        {% elif username and not error_message %}
-        <div class="no-applies">У пользователя @{{ username }} пока нет откликов</div>
-        {% endif %}
+
+        <div id="message-container"></div>
+        
+        <div id="loading-spinner" class="loading-spinner hidden">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+
+        <div id="applies-container">
+            <div id="no-applies" class="no-applies hidden">
+                У пользователя пока нет откликов
+            </div>
+            <div id="applies-list" class="applies-list hidden"></div>
+        </div>
     </div>
 
-    <script src="/static/script.js"></script>
+    <!-- API Clients -->
+    <script src="/static/js/api/baseClient.js"></script>
+    <script src="/static/js/api/userClient.js"></script>
+    <script src="/static/js/api/applyClient.js"></script>
+    
+    <!-- Components -->
+    <script src="/static/js/components/messageManager.js"></script>
+    <script src="/static/js/components/applyRenderer.js"></script>
+    <script src="/static/js/utils/domUtils.js"></script>
+    
+    <!-- Main App -->
+    <script src="/static/js/app.js"></script>
 </body>
 </html> 

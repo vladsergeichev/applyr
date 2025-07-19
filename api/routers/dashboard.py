@@ -11,39 +11,11 @@ router = APIRouter()
 
 
 @router.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request, username: str = None):
-    """Дашборд для просмотра откликов пользователя по username"""
-    applies = None
-    error_message = None
-    if username:
-        try:
-            async for db in get_async_db():
-                # Сначала находим пользователя по username
-                result = await db.execute(
-                    select(models.User).where(models.User.username == username)
-                )
-                user = result.scalar_one_or_none()
-                if not user:
-                    error_message = f"Пользователь с username @{username} не найден"
-                else:
-                    # Получаем отклики пользователя
-                    result = await db.execute(
-                        select(models.Apply)
-                        .where(models.Apply.user_id == user.id)
-                        .order_by(models.Apply.created_at.desc())
-                    )
-                    applies = result.scalars().all()
-                break
-        except Exception as e:
-            error_message = f"Ошибка при получении данных: {str(e)}"
+async def dashboard(request: Request):
+    """Дашборд - возвращает только HTML страницу для SPA"""
     return templates.TemplateResponse(
         "main.html",
-        {
-            "request": request,
-            "username": username,
-            "applies": applies,
-            "error_message": error_message,
-        },
+        {"request": request},
     )
 
 

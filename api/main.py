@@ -15,9 +15,6 @@ logging.basicConfig(
     format="[%(levelname)s] %(asctime)s - %(name)s - %(message)s",
 )
 
-# Создание таблиц
-models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title="Applyr API",
     description="API для управления откликами на вакансии",

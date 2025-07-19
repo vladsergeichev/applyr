@@ -32,6 +32,7 @@ class Apply(Base):
     )
     name = Column(String(500), nullable=False)  # название вакансии
     link = Column(Text, nullable=False)  # ссылка на вакансию
+    company_name = Column(Text)
     description = Column(Text)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

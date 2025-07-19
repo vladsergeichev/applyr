@@ -1,13 +1,10 @@
 import logging
 import os
 
-import models
 from config import app_config
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from routers import applies, dashboard, states, users
-
-from database import engine
 
 # Настройка логирования
 logging.basicConfig(
@@ -29,7 +26,6 @@ app.mount(
 )
 
 # Подключение шаблонов из config
-from config import templates
 
 # Подключение роутеров
 app.include_router(applies.router)

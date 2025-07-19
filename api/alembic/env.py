@@ -1,7 +1,12 @@
 from logging.config import fileConfig
 
 from alembic import context
+from config import app_config
+from models import Base
 from sqlalchemy import engine_from_config, pool
+
+# from models import Base нужен, чтобы модели зарегистрировались в Base.metadata
+# TODO: возможно, стоит использовать другой путь импорта
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -14,13 +19,6 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from database import Base
-from config import app_config
-
-# импорт Base из моделей нужен, чтобы модели зарегистрировались в Base.metadata
-# TODO: возможно, стоит использовать другой путь импорта
-from models import Base
-
 target_metadata = [Base.metadata]
 
 # other values from the config, defined by the needs of env.py,

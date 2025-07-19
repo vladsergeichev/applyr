@@ -25,9 +25,6 @@ services:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       LOG_LEVEL: ${LOG_LEVEL}
-      PYTHONPATH: /app
-    volumes:
-      - ${LOCAL_MODE:-./api:/app}
     depends_on:
       - postgres
     networks:
@@ -40,8 +37,6 @@ services:
       API_URL: ${API_URL}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
       LOG_LEVEL: ${LOG_LEVEL}
-    volumes:
-      - ${LOCAL_MODE:-./bot:/app}
     depends_on:
       - api
     networks:

@@ -1,11 +1,15 @@
 import logging
 
-import models
-import schemas
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from models import ApplyModel, ApplyStateModel, StateModel
+from schemas.apply_state import (
+    ApplyStateCreateSchema,
+    ApplyStateSchema,
+    ApplyStateUpdateSchema,
+)
+from schemas.state import StateCreateSchema, StateSchema, StateUpdateSchema
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette import status
 
 from database import get_async_db
 
@@ -13,15 +17,15 @@ router = APIRouter(prefix="/states", tags=["states"])
 logger = logging.getLogger(__name__)
 
 
-@router.post("/create_state", response_model=schemas.State)
+@router.post("/create_state", response_model=StateSchema)
 async def create_state(
-    state: schemas.StateCreate, db: AsyncSession = Depends(get_async_db)
+    state: StateCreateSchema, db: AsyncSession = Depends(get_async_db)
 ):
     """Создание нового состояния"""
     try:
         # Проверяем уникальность имени
         result = await db.execute(
-            select(models.State).where(models.State.name == state.name)
+            select(StateModel).where(StateModel.name == state.name)
         )
         existing_state = result.scalar_one_or_none()
         if existing_state:
@@ -31,7 +35,7 @@ async def create_state(
             )
 
         # Создаем состояние
-        db_state = models.State(name=state.name)
+        db_state = StateModel(name=state.name)
         db.add(db_state)
         await db.commit()
         await db.refresh(db_state)
@@ -48,17 +52,15 @@ async def create_state(
         )
 
 
-@router.put("/update_state/{state_id}", response_model=schemas.State)
+@router.put("/update_state/{state_id}", response_model=StateSchema)
 async def update_state(
     state_id: int,
-    state_update: schemas.StateUpdate,
+    state_update: StateUpdateSchema,
     db: AsyncSession = Depends(get_async_db),
 ):
     """Обновление состояния"""
     try:
-        result = await db.execute(
-            select(models.State).where(models.State.id == state_id)
-        )
+        result = await db.execute(select(StateModel).where(StateModel.id == state_id))
         db_state = result.scalar_one_or_none()
         if not db_state:
             raise HTTPException(
@@ -68,7 +70,7 @@ async def update_state(
         # Проверяем уникальность нового имени
         if state_update.name != db_state.name:
             result = await db.execute(
-                select(models.State).where(models.State.name == state_update.name)
+                select(StateModel).where(StateModel.name == state_update.name)
             )
             existing_state = result.scalar_one_or_none()
             if existing_state:
@@ -98,9 +100,7 @@ async def update_state(
 async def delete_state(state_id: int, db: AsyncSession = Depends(get_async_db)):
     """Удаление состояния"""
     try:
-        result = await db.execute(
-            select(models.State).where(models.State.id == state_id)
-        )
+        result = await db.execute(select(StateModel).where(StateModel.id == state_id))
         db_state = result.scalar_one_or_none()
         if not db_state:
             raise HTTPException(
@@ -109,7 +109,7 @@ async def delete_state(state_id: int, db: AsyncSession = Depends(get_async_db)):
 
         # Проверяем, используется ли состояние
         result = await db.execute(
-            select(models.ApplyState).where(models.ApplyState.state_id == state_id)
+            select(ApplyStateModel).where(ApplyStateModel.state_id == state_id)
         )
         apply_states = result.scalar_one_or_none()
         if apply_states:
@@ -133,15 +133,15 @@ async def delete_state(state_id: int, db: AsyncSession = Depends(get_async_db)):
         )
 
 
-@router.post("/create_apply_state", response_model=schemas.ApplyState)
+@router.post("/create_apply_state", response_model=ApplyStateSchema)
 async def create_apply_state(
-    apply_state: schemas.ApplyStateCreate, db: AsyncSession = Depends(get_async_db)
+    apply_state: ApplyStateCreateSchema, db: AsyncSession = Depends(get_async_db)
 ):
     """Создание нового состояния отклика"""
     try:
         # Проверяем существование отклика
         result = await db.execute(
-            select(models.Apply).where(models.Apply.id == apply_state.apply_id)
+            select(ApplyModel).where(ApplyModel.id == apply_state.apply_id)
         )
         apply = result.scalar_one_or_none()
         if not apply:
@@ -151,7 +151,7 @@ async def create_apply_state(
 
         # Проверяем существование состояния
         result = await db.execute(
-            select(models.State).where(models.State.id == apply_state.state_id)
+            select(StateModel).where(StateModel.id == apply_state.state_id)
         )
         state = result.scalar_one_or_none()
         if not state:
@@ -160,12 +160,12 @@ async def create_apply_state(
             )
 
         # Генерируем ID для состояния отклика
-        apply_state_id = models.ApplyState.generate_id(
+        apply_state_id = ApplyStateModel.generate_id(
             apply_state.apply_id, apply_state.state_id
         )
 
         # Создаем состояние отклика
-        db_apply_state = models.ApplyState(
+        db_apply_state = ApplyStateModel(
             id=apply_state_id,
             apply_id=apply_state.apply_id,
             state_id=apply_state.state_id,
@@ -190,16 +190,16 @@ async def create_apply_state(
         )
 
 
-@router.put("/update_apply_state/{apply_state_id}", response_model=schemas.ApplyState)
+@router.put("/update_apply_state/{apply_state_id}", response_model=ApplyStateSchema)
 async def update_apply_state(
     apply_state_id: str,
-    apply_state_update: schemas.ApplyStateUpdate,
+    apply_state_update: ApplyStateUpdateSchema,
     db: AsyncSession = Depends(get_async_db),
 ):
     """Обновление состояния отклика"""
     try:
         result = await db.execute(
-            select(models.ApplyState).where(models.ApplyState.id == apply_state_id)
+            select(ApplyStateModel).where(ApplyStateModel.id == apply_state_id)
         )
         db_apply_state = result.scalar_one_or_none()
         if not db_apply_state:
@@ -208,10 +208,13 @@ async def update_apply_state(
                 detail="Состояние отклика не найдено",
             )
 
-        # Обновляем поля
-        update_data = apply_state_update.dict(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_apply_state, field, value)
+        # Обновляем только переданные поля
+        if apply_state_update.state_id is not None:
+            db_apply_state.state_id = apply_state_update.state_id
+        if apply_state_update.description is not None:
+            db_apply_state.description = apply_state_update.description
+        if apply_state_update.occurred_at is not None:
+            db_apply_state.occurred_at = apply_state_update.occurred_at
 
         await db.commit()
         await db.refresh(db_apply_state)
@@ -235,7 +238,7 @@ async def delete_apply_state(
     """Удаление состояния отклика"""
     try:
         result = await db.execute(
-            select(models.ApplyState).where(models.ApplyState.id == apply_state_id)
+            select(ApplyStateModel).where(ApplyStateModel.id == apply_state_id)
         )
         db_apply_state = result.scalar_one_or_none()
         if not db_apply_state:

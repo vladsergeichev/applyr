@@ -29,8 +29,8 @@ services:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       LOG_LEVEL: ${LOG_LEVEL}
-#    volumes:
-#      - ${LOCAL_MODE:-./api:/app}
+    volumes:
+      - ${LOCAL_MODE:-./api:/app}
     depends_on:
       postgres:
         condition: service_healthy

@@ -4,7 +4,7 @@ import os
 from config import app_config
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from routers import applies, dashboard, states, users
+from routers import applies, auth, states, templates, users
 
 # Настройка логирования
 logging.basicConfig(
@@ -28,10 +28,11 @@ app.mount(
 # Подключение шаблонов из config
 
 # Подключение роутеров
+app.include_router(auth.router)
 app.include_router(applies.router)
 app.include_router(states.router)
 app.include_router(users.router)
-app.include_router(dashboard.router)
+app.include_router(templates.router)
 
 
 @app.get("/health")

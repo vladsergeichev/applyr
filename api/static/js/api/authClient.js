@@ -16,12 +16,12 @@ class AuthClient extends BaseClient {
 
     // Обновление access токена
     async refreshToken() {
-        return this.post('/refresh');
+        return this.post('/refresh', null, { credentials: 'include' });
     }
 
     // Выход пользователя
     async logout() {
-        return this.post('/logout');
+        return this.post('/logout', null, { credentials: 'include' });
     }
 
     // Обновление Telegram username

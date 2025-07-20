@@ -13,7 +13,6 @@ class App {
 
         this.currentUser = null;
         this.accessToken = localStorage.getItem('accessToken');
-        this.refreshTokenInterval = null;
 
         this.initializeApp();
     }
@@ -136,7 +135,6 @@ class App {
             this.stageClient.setAuthToken(this.accessToken);
 
             this.getCurrentUserInfo();
-            this.startTokenRefresh();
         } else {
             this.showAuthButtons();
         }
@@ -185,7 +183,7 @@ class App {
 
         try {
             this.vacancyRenderer.showLoading();
-            const vacancies = await this.vacancyClient.getVacancies(this.currentUser.username);
+            const vacancies = await this.vacancyClient.getVacancies();
             this.vacancyRenderer.renderVacancies(vacancies, this.currentUser.username);
         } catch (error) {
             console.error('Ошибка загрузки вакансий:', error);
@@ -292,7 +290,6 @@ class App {
 
             this.hideLoginModal();
             await this.getCurrentUserInfo();
-            this.startTokenRefresh();
             this.messageManager.showSuccess('Успешный вход в систему!');
         } catch (error) {
             console.error('Ошибка входа:', error);
@@ -321,7 +318,6 @@ class App {
 
             this.hideRegisterModal();
             await this.getCurrentUserInfo();
-            this.startTokenRefresh();
             this.messageManager.showSuccess('Регистрация успешна!');
         } catch (error) {
             console.error('Ошибка регистрации:', error);
@@ -354,30 +350,16 @@ class App {
         }
     }
 
-    // Автоматическое обновление токенов
-    startTokenRefresh() {
-        // Очищаем предыдущий интервал
-        if (this.refreshTokenInterval) {
-            clearInterval(this.refreshTokenInterval);
-        }
+    // Обновление токенов во всех клиентах
+    updateTokens(newAccessToken) {
+        this.accessToken = newAccessToken;
+        localStorage.setItem('accessToken', this.accessToken);
 
-        // Обновляем токен каждые 14 минут (токен живет 15 минут)
-        this.refreshTokenInterval = setInterval(async () => {
-            try {
-                const response = await this.authClient.refreshToken();
-                this.accessToken = response.access_token;
-                localStorage.setItem('accessToken', this.accessToken);
+        this.authClient.setAuthToken(this.accessToken);
+        this.vacancyClient.setAuthToken(this.accessToken);
+        this.stageClient.setAuthToken(this.accessToken);
 
-                this.authClient.setAuthToken(this.accessToken);
-                this.vacancyClient.setAuthToken(this.accessToken);
-                this.stageClient.setAuthToken(this.accessToken);
-
-                console.log('Токен обновлен');
-            } catch (error) {
-                console.error('Ошибка обновления токена:', error);
-                this.logout();
-            }
-        }, 14 * 60 * 1000); // 14 минут
+        console.log('Токены обновлены во всех клиентах');
     }
 
     // Выход
@@ -390,12 +372,6 @@ class App {
             this.accessToken = null;
             this.currentUser = null;
             localStorage.removeItem('accessToken');
-
-            // Останавливаем обновление токенов
-            if (this.refreshTokenInterval) {
-                clearInterval(this.refreshTokenInterval);
-                this.refreshTokenInterval = null;
-            }
 
             this.authClient.clearAuthToken();
             this.vacancyClient.clearAuthToken();

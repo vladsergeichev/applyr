@@ -144,7 +144,7 @@ class AuthService:
                 value=refresh_token,
                 httponly=True,
                 secure=False,  # True для HTTPS
-                samesite="lax",
+                samesite="strict",  # Защита от CSRF атак
                 max_age=10 * 24 * 60 * 60,  # 10 дней
             )
 

@@ -2,9 +2,10 @@ import logging
 import os
 
 from config import app_config
+from core.exception_handlers import register_exception_handlers
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from routers import auth, stage, templates, vacancy
+from routers import admin, auth, stage, templates, vacancy
 
 # Настройка логирования
 logging.basicConfig(
@@ -18,6 +19,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Регистрация обработчиков исключений
+register_exception_handlers(app)
+
 # Подключение статики
 app.mount(
     "/static",
@@ -30,6 +34,7 @@ app.include_router(auth.router)
 app.include_router(vacancy.router)
 app.include_router(stage.router)
 app.include_router(templates.router)
+app.include_router(admin.router)
 
 
 @app.get("/health")

@@ -2,8 +2,7 @@ import logging
 from typing import List
 
 from core.dependencies import get_stage_service
-from core.exceptions import VacancyNotFoundError
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, Path
 from schemas.stage import StageCreateSchema, StageSchema, StageUpdateSchema
 from services.stage_service import StageService
 
@@ -17,20 +16,7 @@ async def create_stage(
     stage_service: StageService = Depends(get_stage_service),
 ):
     """Создание нового этапа"""
-    try:
-        return await stage_service.create_stage(stage_data)
-    except VacancyNotFoundError as e:
-        logger.error(f"Вакансия не найдена: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e),
-        )
-    except Exception as e:
-        logger.error(f"Ошибка создания этапа: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Ошибка создания этапа",
-        )
+    return await stage_service.create_stage(stage_data)
 
 
 @router.get("/get_stage/{stage_id}", response_model=StageSchema)
@@ -39,22 +25,7 @@ async def get_stage(
     stage_service: StageService = Depends(get_stage_service),
 ):
     """Получение этапа по ID"""
-    try:
-        stage = await stage_service.get_stage_by_id(stage_id)
-        if not stage:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Этап не найден",
-            )
-        return stage
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Ошибка получения этапа: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Ошибка получения этапа",
-        )
+    return await stage_service.get_stage_by_id(stage_id)
 
 
 @router.get("/get_stages/{vacancy_id}", response_model=List[StageSchema])
@@ -63,14 +34,7 @@ async def get_stages(
     stage_service: StageService = Depends(get_stage_service),
 ):
     """Получение этапов вакансии"""
-    try:
-        return await stage_service.get_stages_by_vacancy_id(vacancy_id)
-    except Exception as e:
-        logger.error(f"Ошибка получения этапов: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Ошибка получения этапов",
-        )
+    return await stage_service.get_stages_by_vacancy_id(vacancy_id)
 
 
 @router.put("/update_stage/{stage_id}", response_model=StageSchema)
@@ -80,22 +44,7 @@ async def update_stage(
     stage_service: StageService = Depends(get_stage_service),
 ):
     """Обновление этапа"""
-    try:
-        updated_stage = await stage_service.update_stage(stage_id, stage_data)
-        if not updated_stage:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Этап не найден",
-            )
-        return updated_stage
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Ошибка обновления этапа: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Ошибка обновления этапа",
-        )
+    return await stage_service.update_stage(stage_id, stage_data)
 
 
 @router.delete("/delete_stage/{stage_id}")
@@ -104,19 +53,5 @@ async def delete_stage(
     stage_service: StageService = Depends(get_stage_service),
 ):
     """Удаление этапа"""
-    try:
-        success = await stage_service.delete_stage(stage_id)
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Этап не найден",
-            )
-        return {"message": "Этап успешно удален"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Ошибка удаления этапа: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Ошибка удаления этапа",
-        )
+    await stage_service.delete_stage(stage_id)
+    return {"message": "Этап успешно удален"}

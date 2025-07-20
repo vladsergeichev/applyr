@@ -20,22 +20,22 @@ class MessageManager {
     }
 
     // Показывает сообщение об успехе
-    success(message, duration = 3000) {
+    showSuccess(message, duration = 3000) {
         this.show(message, 'success', duration);
     }
 
     // Показывает сообщение об ошибке
-    error(message, duration = 5000) {
+    showError(message, duration = 5000) {
         this.show(message, 'error', duration);
     }
 
     // Показывает предупреждение
-    warning(message, duration = 4000) {
+    showWarning(message, duration = 4000) {
         this.show(message, 'warning', duration);
     }
 
     // Показывает информационное сообщение
-    info(message, duration = 3000) {
+    showInfo(message, duration = 3000) {
         this.show(message, 'info', duration);
     }
 
@@ -86,7 +86,7 @@ class MessageManager {
             <div class="message-content">
                 <span class="message-icon">${icon}</span>
                 <span class="message-text">${messageData.message}</span>
-                <button class="message-close" onclick="messageManager.removeMessage(this.parentElement.parentElement)">
+                <button class="message-close" onclick="this.parentElement.parentElement.remove()">
                     ×
                 </button>
             </div>

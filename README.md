@@ -49,7 +49,7 @@ applyr/
 - **users** - пользователи (telegram_id, username, name, created_at)
 - **applies** - отклики (id, user_id, name, link, description, timestamps)
 - **states** - состояния (id, name)
-- **apply_states** - состояния откликов (id, apply_id, state_id, description, timestamps)
+- **apply_states** - состояния откликов (id, vacancy_id, state_id, description, timestamps)
 
 ### Базовые состояния:
 - Создан

@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS applies (
 -- Таблица состояний откликов
 CREATE TABLE IF NOT EXISTS apply_states (
     id VARCHAR(64) PRIMARY KEY, -- хэш-идентификатор
-    apply_id VARCHAR(64) NOT NULL REFERENCES applies(id) ON DELETE CASCADE,
+    vacancy_id VARCHAR(64) NOT NULL REFERENCES applies(id) ON DELETE CASCADE,
     state_id INTEGER NOT NULL REFERENCES states(id) ON DELETE CASCADE,
     description TEXT,
     occurred_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS apply_states (
 -- Создание индексов
 CREATE INDEX IF NOT EXISTS idx_applies_user_id ON applies(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-CREATE INDEX IF NOT EXISTS idx_apply_states_apply_id ON apply_states(apply_id);
+CREATE INDEX IF NOT EXISTS idx_apply_states_vacancy_id ON apply_states(vacancy_id);
 CREATE INDEX IF NOT EXISTS idx_apply_states_state_id ON apply_states(state_id);
 
 -- Вставка базовых состояний

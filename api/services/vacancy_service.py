@@ -1,7 +1,7 @@
 import logging
-from typing import List, Optional
+from typing import List
 
-from core.exceptions import UserNotFoundError
+from exceptions import UserNotFoundException, VacancyNotFoundException
 from repositories.auth_repository import AuthRepository
 from repositories.vacancy_repository import VacancyRepository
 from schemas.vacancy import VacancyCreateSchema, VacancySchema, VacancyUpdateSchema
@@ -19,9 +19,7 @@ class VacancyService:
         # Проверяем, существует ли пользователь
         user = await self.auth_repo.get_by_id(vacancy_data.user_id)
         if not user:
-            raise UserNotFoundError(
-                f"Пользователь с ID {vacancy_data.user_id} не найден"
-            )
+            raise UserNotFoundException()
 
         vacancy = await self.vacancy_repo.create(vacancy_data)
         logger.info(
@@ -29,11 +27,11 @@ class VacancyService:
         )
         return vacancy
 
-    async def get_vacancy_by_id(self, vacancy_id: int) -> Optional[VacancySchema]:
+    async def get_vacancy_by_id(self, vacancy_id: int) -> VacancySchema:
         """Получает вакансию по ID"""
         vacancy = await self.vacancy_repo.get_by_id(vacancy_id)
         if not vacancy:
-            return None
+            raise VacancyNotFoundException()
 
         logger.info(f"Получена вакансия {vacancy_id}")
         return vacancy
@@ -51,22 +49,21 @@ class VacancyService:
 
     async def update_vacancy(
         self, vacancy_id: int, vacancy_data: VacancyUpdateSchema
-    ) -> Optional[VacancySchema]:
+    ) -> VacancySchema:
         """Обновляет вакансию"""
         vacancy = await self.vacancy_repo.get_by_id(vacancy_id)
         if not vacancy:
-            return None
+            raise VacancyNotFoundException()
 
         updated_vacancy = await self.vacancy_repo.update(vacancy_id, vacancy_data)
         logger.info(f"Обновлена вакансия {vacancy_id}")
         return updated_vacancy
 
-    async def delete_vacancy(self, vacancy_id: int) -> bool:
+    async def delete_vacancy(self, vacancy_id: int) -> None:
         """Удаляет вакансию"""
         vacancy = await self.vacancy_repo.get_by_id(vacancy_id)
         if not vacancy:
-            return False
+            raise VacancyNotFoundException()
 
         await self.vacancy_repo.delete(vacancy_id)
         logger.info(f"Удалена вакансия {vacancy_id}")
-        return True

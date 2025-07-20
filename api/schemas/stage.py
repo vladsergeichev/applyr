@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class StageBaseSchema(BaseModel):
-    apply_id: int = Field(..., gt=0, description="ID вакансии")
-    state_type: str = Field(..., min_length=1, max_length=255, description="Тип этапа")
+    vacancy_id: int = Field(..., gt=0, description="ID вакансии")
+    stage_type: str = Field(..., min_length=1, max_length=255, description="Тип этапа")
     description: Optional[str] = Field(
         None, max_length=1000, description="Описание этапа"
     )
@@ -18,7 +18,7 @@ class StageCreateSchema(StageBaseSchema):
 
 
 class StageUpdateSchema(BaseModel):
-    state_type: Optional[str] = Field(
+    stage_type: Optional[str] = Field(
         None, min_length=1, max_length=255, description="Тип этапа"
     )
     description: Optional[str] = Field(

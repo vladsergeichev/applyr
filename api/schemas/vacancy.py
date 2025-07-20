@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 from urllib.parse import urlparse
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class VacancyBaseSchema(BaseModel):
@@ -15,13 +15,13 @@ class VacancyBaseSchema(BaseModel):
     )
     description: Optional[str] = Field(None, max_length=1000, description="Описание")
 
-    @validator("name")
+    @field_validator("name")
     def validate_name(cls, v):
         if not v.strip():
             raise ValueError("Название вакансии не может быть пустым")
         return v.strip()
 
-    @validator("link")
+    @field_validator("link")
     def validate_link(cls, v):
         if not v.strip():
             raise ValueError("Ссылка не может быть пустой")
@@ -37,7 +37,7 @@ class VacancyBaseSchema(BaseModel):
 class VacancyCreateSchema(VacancyBaseSchema):
     user_id: int = Field(..., gt=0, description="ID пользователя")
 
-    @validator("user_id")
+    @field_validator("user_id")
     def validate_user_id(cls, v):
         if v <= 0:
             raise ValueError("ID пользователя должен быть положительным числом")
@@ -54,13 +54,13 @@ class VacancyUpdateSchema(BaseModel):
     )
     description: Optional[str] = Field(None, max_length=1000, description="Описание")
 
-    @validator("name")
+    @field_validator("name")
     def validate_name(cls, v):
         if v is not None and not v.strip():
             raise ValueError("Название вакансии не может быть пустым")
         return v.strip() if v else v
 
-    @validator("link")
+    @field_validator("link")
     def validate_link(cls, v):
         if v is not None:
             if not v.strip():

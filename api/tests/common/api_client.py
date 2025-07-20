@@ -1,6 +1,7 @@
 import uuid
 from typing import Any, Dict, Optional, Self
 
+from core.security import verify_token
 from faker import Faker
 from fastapi import FastAPI, status
 from httpx import ASGITransport, AsyncClient, Response
@@ -38,6 +39,13 @@ class AsyncTestAPIClient(AsyncClient):
         """Устанавливает токен авторизации"""
         self.headers["Authorization"] = f"Bearer {access_token}"
 
+    def get_user_id_from_token(self, access_token: str) -> int:
+        """Получает user_id из access-токена"""
+        payload = verify_token(access_token)
+        if payload and "user_id" in payload:
+            return payload["user_id"]
+        raise ValueError("Invalid access token or missing user_id")
+
     # Аутентификация
     async def register_user(
         self, user_data: Optional[Dict[str, Any]] = None
@@ -67,10 +75,6 @@ class AsyncTestAPIClient(AsyncClient):
         """Обновление Telegram username"""
         return await self.put("/auth/update_telegram", json=telegram_data)
 
-    async def get_current_user_info(self) -> Response:
-        """Получение информации о текущем пользователе"""
-        return await self.get("/auth/me")
-
     # Вакансии
     async def create_vacancy(
         self, vacancy_data: Optional[Dict[str, Any]] = None
@@ -94,9 +98,13 @@ class AsyncTestAPIClient(AsyncClient):
         """Получение вакансий пользователя"""
         return await self.get(f"/vacancy/get_vacancies/{username}")
 
-    async def update_vacancy(self, vacancy_id: int, vacancy_data: Dict[str, Any]) -> Response:
+    async def update_vacancy(
+        self, vacancy_id: int, vacancy_data: Dict[str, Any]
+    ) -> Response:
         """Обновление вакансии"""
-        return await self.put(f"/vacancy/update_vacancy/{vacancy_id}", json=vacancy_data)
+        return await self.put(
+            f"/vacancy/update_vacancy/{vacancy_id}", json=vacancy_data
+        )
 
     async def delete_vacancy(self, vacancy_id: int) -> Response:
         """Удаление вакансии"""
@@ -109,8 +117,8 @@ class AsyncTestAPIClient(AsyncClient):
         """Создание этапа"""
         if stage_data is None:
             stage_data = {
-                "apply_id": 1,
-                "state_type": "Отклик отправлен",
+                "vacancy_id": 1,
+                "stage_type": "Отклик отправлен",
                 "description": self.faker.text(max_nb_chars=200),
                 "occurred_at": self.faker.date_time().isoformat(),
             }

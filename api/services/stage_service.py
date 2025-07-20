@@ -1,7 +1,7 @@
 import logging
-from typing import List, Optional
+from typing import List
 
-from core.exceptions import VacancyNotFoundError
+from exceptions import StageNotFoundException, VacancyNotFoundException
 from repositories.stage_repository import StageRepository
 from repositories.vacancy_repository import VacancyRepository
 from schemas.stage import StageCreateSchema, StageSchema, StageUpdateSchema
@@ -17,32 +17,29 @@ class StageService:
     async def create_stage(self, stage_data: StageCreateSchema) -> StageSchema:
         """Создает новый этап"""
         # Проверяем, существует ли вакансия
-        vacancy = await self.vacancy_repo.get_by_id(stage_data.apply_id)
+        vacancy = await self.vacancy_repo.get_by_id(stage_data.vacancy_id)
         if not vacancy:
-            raise VacancyNotFoundError(
-                f"Вакансия с ID {stage_data.apply_id} не найдена"
-            )
+            raise VacancyNotFoundException()
 
         stage = await self.stage_repo.create(stage_data)
-        logger.info(f"Создан этап {stage.id} для вакансии {stage_data.apply_id}")
+        logger.info(f"Создан этап {stage.id} для вакансии {stage_data.vacancy_id}")
         return stage
 
-    async def get_stage_by_id(self, stage_id: int) -> Optional[StageSchema]:
+    async def get_stage_by_id(self, stage_id: int) -> StageSchema:
         """Получает этап по ID"""
         stage = await self.stage_repo.get_by_id(stage_id)
         if not stage:
-            return None
+            raise StageNotFoundException()
 
         logger.info(f"Получен этап {stage_id}")
         return stage
 
     async def get_stages_by_vacancy_id(self, vacancy_id: int) -> List[StageSchema]:
-        """Получает все этапы вакансии"""
+        """Получает этапы вакансии"""
         # Проверяем, существует ли вакансия
         vacancy = await self.vacancy_repo.get_by_id(vacancy_id)
         if not vacancy:
-            logger.warning(f"Вакансия с ID {vacancy_id} не найдена")
-            return []
+            raise VacancyNotFoundException()
 
         stages = await self.stage_repo.get_by_vacancy_id(vacancy_id)
         logger.info(f"Получено {len(stages)} этапов для вакансии {vacancy_id}")
@@ -50,22 +47,21 @@ class StageService:
 
     async def update_stage(
         self, stage_id: int, stage_data: StageUpdateSchema
-    ) -> Optional[StageSchema]:
+    ) -> StageSchema:
         """Обновляет этап"""
         stage = await self.stage_repo.get_by_id(stage_id)
         if not stage:
-            return None
+            raise StageNotFoundException()
 
         updated_stage = await self.stage_repo.update(stage_id, stage_data)
         logger.info(f"Обновлен этап {stage_id}")
         return updated_stage
 
-    async def delete_stage(self, stage_id: int) -> bool:
+    async def delete_stage(self, stage_id: int) -> None:
         """Удаляет этап"""
         stage = await self.stage_repo.get_by_id(stage_id)
         if not stage:
-            return False
+            raise StageNotFoundException()
 
         await self.stage_repo.delete(stage_id)
         logger.info(f"Удален этап {stage_id}")
-        return True

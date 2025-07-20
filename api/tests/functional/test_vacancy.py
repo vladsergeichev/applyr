@@ -4,15 +4,16 @@ from fastapi import status
 from tests.common.api_client import AsyncTestAPIClient
 from tests.common.utils import (
     assert_response_contains,
-    assert_response_has_error,
     assert_response_status,
 )
-from tests.factories.base_factories import VacancyFactory, UserFactory
+from tests.factories.base_factories import UserFactory, VacancyFactory
 
 
 @pytest.mark.asyncio
 async def test_create_vacancy_success(
-    async_client: AsyncTestAPIClient, vacancy_factory: VacancyFactory, user_factory: UserFactory
+    async_client: AsyncTestAPIClient,
+    vacancy_factory: VacancyFactory,
+    user_factory: UserFactory,
 ):
     """Тест успешного создания вакансии"""
     # Создаем пользователя
@@ -24,11 +25,8 @@ async def test_create_vacancy_success(
     access_token = register_response.json().get("access_token")
     async_client.set_auth_token(access_token)
 
-    # Получаем информацию о пользователе для получения ID
-    user_info_response = await async_client.get_current_user_info()
-    assert_response_status(user_info_response, status.HTTP_200_OK)
-    user_info = user_info_response.json()
-    user_id = user_info["id"]
+    # Получаем user_id из токена
+    user_id = async_client.get_user_id_from_token(access_token)
 
     # Создаем вакансию
     vacancy_data = vacancy_factory.build_vacancy_data(user_id=user_id)
@@ -53,7 +51,9 @@ async def test_create_vacancy_invalid_data(
 
 @pytest.mark.asyncio
 async def test_get_vacancy_success(
-    async_client: AsyncTestAPIClient, vacancy_factory: VacancyFactory, user_factory: UserFactory
+    async_client: AsyncTestAPIClient,
+    vacancy_factory: VacancyFactory,
+    user_factory: UserFactory,
 ):
     """Тест успешного получения вакансии"""
     # Создаем пользователя и вакансию
@@ -65,18 +65,15 @@ async def test_get_vacancy_success(
     access_token = register_response.json().get("access_token")
     async_client.set_auth_token(access_token)
 
-    # Получаем информацию о пользователе для получения ID
-    user_info_response = await async_client.get_current_user_info()
-    assert_response_status(user_info_response, status.HTTP_200_OK)
-    user_info = user_info_response.json()
-    user_id = user_info["id"]
+    # Получаем user_id из токена
+    user_id = async_client.get_user_id_from_token(access_token)
 
     vacancy_data = vacancy_factory.build_vacancy_data(user_id=user_id)
     create_response = await async_client.create_vacancy(vacancy_data)
     assert_response_status(create_response, status.HTTP_200_OK)
-    
+
     vacancy_id = create_response.json()["id"]
-    
+
     # Получаем вакансию
     response = await async_client.get_vacancy(vacancy_id)
     assert_response_status(response, status.HTTP_200_OK)
@@ -92,7 +89,9 @@ async def test_get_vacancy_not_found(async_client: AsyncTestAPIClient):
 
 @pytest.mark.asyncio
 async def test_get_vacancies_by_username_success(
-    async_client: AsyncTestAPIClient, vacancy_factory: VacancyFactory, user_factory: UserFactory
+    async_client: AsyncTestAPIClient,
+    vacancy_factory: VacancyFactory,
+    user_factory: UserFactory,
 ):
     """Тест успешного получения вакансий пользователя"""
     # Создаем пользователя
@@ -104,11 +103,8 @@ async def test_get_vacancies_by_username_success(
     access_token = register_response.json().get("access_token")
     async_client.set_auth_token(access_token)
 
-    # Получаем информацию о пользователе для получения ID
-    user_info_response = await async_client.get_current_user_info()
-    assert_response_status(user_info_response, status.HTTP_200_OK)
-    user_info = user_info_response.json()
-    user_id = user_info["id"]
+    # Получаем user_id из токена
+    user_id = async_client.get_user_id_from_token(access_token)
 
     # Создаем несколько вакансий
     for _ in range(3):
@@ -119,7 +115,7 @@ async def test_get_vacancies_by_username_success(
     # Получаем вакансии пользователя
     response = await async_client.get_vacancies_by_username(user_data["username"])
     assert_response_status(response, status.HTTP_200_OK)
-    
+
     # Проверяем, что получили список
     data = response.json()
     assert isinstance(data, list)
@@ -130,7 +126,7 @@ async def test_get_vacancies_by_username_not_found(async_client: AsyncTestAPICli
     """Тест получения вакансий несуществующего пользователя"""
     response = await async_client.get_vacancies_by_username("nonexistent_user")
     assert_response_status(response, status.HTTP_200_OK)
-    
+
     # Должен вернуться пустой список
     data = response.json()
     assert isinstance(data, list)
@@ -139,7 +135,9 @@ async def test_get_vacancies_by_username_not_found(async_client: AsyncTestAPICli
 
 @pytest.mark.asyncio
 async def test_update_vacancy_success(
-    async_client: AsyncTestAPIClient, vacancy_factory: VacancyFactory, user_factory: UserFactory
+    async_client: AsyncTestAPIClient,
+    vacancy_factory: VacancyFactory,
+    user_factory: UserFactory,
 ):
     """Тест успешного обновления вакансии"""
     # Создаем пользователя и вакансию
@@ -151,18 +149,15 @@ async def test_update_vacancy_success(
     access_token = register_response.json().get("access_token")
     async_client.set_auth_token(access_token)
 
-    # Получаем информацию о пользователе для получения ID
-    user_info_response = await async_client.get_current_user_info()
-    assert_response_status(user_info_response, status.HTTP_200_OK)
-    user_info = user_info_response.json()
-    user_id = user_info["id"]
+    # Получаем user_id из токена
+    user_id = async_client.get_user_id_from_token(access_token)
 
     vacancy_data = vacancy_factory.build_vacancy_data(user_id=user_id)
     create_response = await async_client.create_vacancy(vacancy_data)
     assert_response_status(create_response, status.HTTP_200_OK)
-    
+
     vacancy_id = create_response.json()["id"]
-    
+
     # Обновляем вакансию
     update_data = vacancy_factory.build_vacancy_update_data()
     response = await async_client.update_vacancy(vacancy_id, update_data)
@@ -182,7 +177,9 @@ async def test_update_vacancy_not_found(
 
 @pytest.mark.asyncio
 async def test_delete_vacancy_success(
-    async_client: AsyncTestAPIClient, vacancy_factory: VacancyFactory, user_factory: UserFactory
+    async_client: AsyncTestAPIClient,
+    vacancy_factory: VacancyFactory,
+    user_factory: UserFactory,
 ):
     """Тест успешного удаления вакансии"""
     # Создаем пользователя и вакансию
@@ -194,18 +191,15 @@ async def test_delete_vacancy_success(
     access_token = register_response.json().get("access_token")
     async_client.set_auth_token(access_token)
 
-    # Получаем информацию о пользователе для получения ID
-    user_info_response = await async_client.get_current_user_info()
-    assert_response_status(user_info_response, status.HTTP_200_OK)
-    user_info = user_info_response.json()
-    user_id = user_info["id"]
+    # Получаем user_id из токена
+    user_id = async_client.get_user_id_from_token(access_token)
 
     vacancy_data = vacancy_factory.build_vacancy_data(user_id=user_id)
     create_response = await async_client.create_vacancy(vacancy_data)
     assert_response_status(create_response, status.HTTP_200_OK)
-    
+
     vacancy_id = create_response.json()["id"]
-    
+
     # Удаляем вакансию
     response = await async_client.delete_vacancy(vacancy_id)
     assert_response_status(response, status.HTTP_200_OK)
@@ -247,4 +241,4 @@ async def test_vacancy_validation_errors(async_client: AsyncTestAPIClient):
         "user_id": -1,
     }
     response = await async_client.create_vacancy(invalid_data)
-    assert_response_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY) 
+    assert_response_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY)

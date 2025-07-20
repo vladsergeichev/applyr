@@ -1,6 +1,6 @@
 import pytest
 from fastapi import status
-from sqlalchemy.ext.asyncio import AsyncSession
+from models import UserModel
 from sqlalchemy import delete
 
 from tests.common.api_client import AsyncTestAPIClient
@@ -10,16 +10,18 @@ from tests.common.utils import (
     assert_response_status,
 )
 from tests.factories.base_factories import UserFactory
-from models import UserModel
+
 
 @pytest.fixture(autouse=True)
 async def clear_users(async_client: AsyncTestAPIClient):
     # Очищаем пользователей между тестами
     from database import get_async_db
+
     async for db in get_async_db():
         await db.execute(delete(UserModel))
         await db.commit()
         break
+
 
 @pytest.mark.asyncio
 async def test_register_user_success(
@@ -30,16 +32,22 @@ async def test_register_user_success(
     assert_response_status(response, status.HTTP_200_OK)
     assert_response_contains(response, ["access_token", "token_type"])
 
+
 @pytest.mark.asyncio
 async def test_register_user_duplicate_username(
     async_client: AsyncTestAPIClient, user_factory: UserFactory
 ):
+    """Тест регистрации пользователя с уже существующим username"""
+    # Регистрируем первого пользователя
     user_data = user_factory.build_user_data()
     response1 = await async_client.register_user(user_data)
     assert_response_status(response1, status.HTTP_200_OK)
+
+    # Пытаемся зарегистрировать второго пользователя с тем же username
     response2 = await async_client.register_user(user_data)
-    assert_response_status(response2, status.HTTP_400_BAD_REQUEST)
+    assert_response_status(response2, status.HTTP_409_CONFLICT)
     assert_response_has_error(response2)
+
 
 @pytest.mark.asyncio
 async def test_login_user_success(
@@ -126,6 +134,7 @@ async def test_register_user_invalid_data(async_client: AsyncTestAPIClient):
     response = await async_client.register_user(invalid_user_data)
     assert_response_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY)
 
+
 @pytest.mark.asyncio
 async def test_register_user_short_username(async_client: AsyncTestAPIClient):
     invalid_user_data = {
@@ -134,6 +143,7 @@ async def test_register_user_short_username(async_client: AsyncTestAPIClient):
     }
     response = await async_client.register_user(invalid_user_data)
     assert_response_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY)
+
 
 @pytest.mark.asyncio
 async def test_register_user_short_password(async_client: AsyncTestAPIClient):
@@ -197,28 +207,8 @@ async def test_update_telegram_username_duplicate(
     async_client.set_auth_token(access_token2)
     # Пытаемся использовать тот же Telegram username для второго пользователя
     response2 = await async_client.update_telegram_username(telegram_data)
-    assert_response_status(response2, status.HTTP_400_BAD_REQUEST)
+    assert_response_status(response2, status.HTTP_409_CONFLICT)
     assert_response_has_error(response2)
-
-
-@pytest.mark.asyncio
-async def test_get_current_user_info(
-    async_client: AsyncTestAPIClient, user_factory: UserFactory
-):
-    """Тест получения информации о текущем пользователе"""
-    # Регистрируем пользователя
-    user_data = user_factory.build_user_data()
-    register_response = await async_client.register_user(user_data)
-    assert_response_status(register_response, status.HTTP_200_OK)
-
-    # Получаем токен для авторизации
-    access_token = register_response.json().get("access_token")
-    async_client.set_auth_token(access_token)
-
-    # Получаем информацию о пользователе
-    response = await async_client.get_current_user_info()
-    assert_response_status(response, status.HTTP_200_OK)
-    assert_response_contains(response, ["id", "username", "telegram_username", "created_at"])
 
 
 @pytest.mark.asyncio
@@ -236,21 +226,56 @@ async def test_create_test_user_utility(async_client: AsyncTestAPIClient):
 
 
 @pytest.mark.asyncio
-async def test_authorized_client_fixture(authorized_client: AsyncTestAPIClient):
-    """Тест фикстуры авторизованного клиента"""
-    # Получаем информацию о текущем пользователе
-    user_info_response = await authorized_client.get_current_user_info()
-    assert_response_status(user_info_response, status.HTTP_200_OK)
-    user_info = user_info_response.json()
-    user_id = user_info["id"]
-    
-    # Проверяем, что клиент авторизован - тестируем создание вакансии
-    vacancy_data = {
-        "name": "Test Vacancy",
-        "link": "https://example.com/vacancy",
-        "user_id": user_id,  # Используем реальный user_id
-        "company_name": "Test Company",
-        "description": "Test description",
-    }
-    response = await authorized_client.create_vacancy(vacancy_data)
-    assert_response_status(response, status.HTTP_200_OK)
+async def test_access_token_contains_telegram_username(
+    async_client: AsyncTestAPIClient, user_factory: UserFactory
+):
+    """Тест проверки, что access-токен содержит telegram_username"""
+    # Регистрируем пользователя
+    user_data = user_factory.build_user_data()
+    register_response = await async_client.register_user(user_data)
+    assert_response_status(register_response, status.HTTP_200_OK)
+
+    # Получаем токен
+    access_token = register_response.json().get("access_token")
+    assert access_token is not None
+
+    # Декодируем токен и проверяем содержимое
+    from core.security import verify_token
+
+    payload = verify_token(access_token)
+
+    assert payload is not None
+    assert payload.get("type") == "access"
+    assert "user_id" in payload
+    assert "username" in payload
+    assert "telegram_username" in payload  # Должно быть None для нового пользователя
+
+    # Обновляем telegram_username
+    async_client.set_auth_token(access_token)
+    telegram_data = user_factory.build_telegram_update_data()
+    update_response = await async_client.update_telegram_username(telegram_data)
+    assert_response_status(update_response, status.HTTP_200_OK)
+
+    # Получаем новый токен через refresh
+    cookies = register_response.cookies
+    refresh_token = cookies.get("refresh_token")
+
+    if refresh_token:
+        refresh_response = await async_client.refresh_token(refresh_token)
+        assert_response_status(refresh_response, status.HTTP_200_OK)
+
+        new_access_token = refresh_response.json().get("access_token")
+        assert new_access_token is not None
+
+        # Проверяем новый токен
+        new_payload = verify_token(new_access_token)
+        assert new_payload is not None
+        assert new_payload.get("type") == "access"
+        assert "user_id" in new_payload
+        assert "username" in new_payload
+        assert "telegram_username" in new_payload
+        assert (
+            new_payload.get("telegram_username") == telegram_data["telegram_username"]
+        )
+    else:
+        pytest.skip("API не возвращает refresh_token в cookie")

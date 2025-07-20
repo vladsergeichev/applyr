@@ -120,15 +120,17 @@ class StageFactory(BaseModelFactory):
     def build_stage_data(cls, **overrides) -> dict[str, Any]:
         """Создает данные для создания этапа"""
         data = {
-            "state_type": cls.__faker__.random_element([
-                "Отклик отправлен",
-                "Резюме просмотрено", 
-                "Приглашение на собеседование",
-                "Собеседование пройдено",
-                "Тестовое задание",
-                "Оффер",
-                "Отказ"
-            ]),
+            "stage_type": cls.__faker__.random_element(
+                [
+                    "Отклик отправлен",
+                    "Резюме просмотрено",
+                    "Приглашение на собеседование",
+                    "Собеседование пройдено",
+                    "Тестовое задание",
+                    "Оффер",
+                    "Отказ",
+                ]
+            ),
             "description": cls.__faker__.text(max_nb_chars=200),
             "occurred_at": cls.__faker__.date_time().isoformat(),
         }
@@ -139,15 +141,17 @@ class StageFactory(BaseModelFactory):
     def build_stage_update_data(cls, **overrides) -> dict[str, Any]:
         """Создает данные для обновления этапа"""
         data = {
-            "state_type": cls.__faker__.random_element([
-                "Отклик отправлен",
-                "Резюме просмотрено", 
-                "Приглашение на собеседование",
-                "Собеседование пройдено",
-                "Тестовое задание",
-                "Оффер",
-                "Отказ"
-            ]),
+            "stage_type": cls.__faker__.random_element(
+                [
+                    "Отклик отправлен",
+                    "Резюме просмотрено",
+                    "Приглашение на собеседование",
+                    "Собеседование пройдено",
+                    "Тестовое задание",
+                    "Оффер",
+                    "Отказ",
+                ]
+            ),
             "description": cls.__faker__.text(max_nb_chars=200),
             "occurred_at": cls.__faker__.date_time().isoformat(),
         }

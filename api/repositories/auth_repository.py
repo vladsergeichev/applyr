@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
 
 from core.security import get_password_hash, get_token_hash, verify_password
 from models import RefreshModel, UserModel
@@ -33,6 +33,11 @@ class AuthRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_all_users(self) -> List[UserModel]:
+        """Получает всех пользователей"""
+        result = await self.db.execute(select(UserModel))
+        return result.scalars().all()
+
     async def create(self, username: str, password: str) -> UserModel:
         """Создает нового пользователя"""
         password_hash = get_password_hash(password)
@@ -41,13 +46,6 @@ class AuthRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return user
-
-    async def verify_password(self, username: str, password: str) -> bool:
-        """Проверяет пароль пользователя"""
-        user = await self.get_by_username(username)
-        if not user or not user.password_hash:
-            return False
-        return verify_password(password, user.password_hash)
 
     async def get_user_with_password_check(
         self, username: str, password: str
@@ -62,38 +60,17 @@ class AuthRepository:
 
         return user
 
-    async def create_with_id(
-        self, user_id: int, telegram_username: str, username: Optional[str] = None
-    ) -> UserModel:
-        """Создает пользователя с указанным ID (для Telegram)"""
-        user = UserModel(
-            id=user_id,
-            username=username,
-            telegram_username=telegram_username,
-        )
-        self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
-        return user
-
-    async def update(self, user: UserModel) -> UserModel:
-        """Обновляет пользователя"""
-        await self.db.commit()
-        await self.db.refresh(user)
-        return user
-
-    @staticmethod
     async def update_telegram_username(
-        user_id: int, telegram_username: str, db: AsyncSession
+        self, user_id: int, telegram_username: str
     ) -> None:
         """Обновляет Telegram username пользователя"""
-        result = await db.execute(select(UserModel).where(UserModel.id == user_id))
+        result = await self.db.execute(select(UserModel).where(UserModel.id == user_id))
         user = result.scalar_one_or_none()
 
         if user:
             user.telegram_username = telegram_username
-            await db.commit()
-            await db.refresh(user)
+            await self.db.commit()
+            await self.db.refresh(user)
 
     # Методы для работы с refresh токенами
     async def save_refresh_token(
@@ -144,3 +121,8 @@ class AuthRepository:
 
         await self.db.commit()
         return len(expired_tokens)
+
+    async def get_all_refresh_tokens(self) -> List[RefreshModel]:
+        """Получает все refresh токены"""
+        result = await self.db.execute(select(RefreshModel))
+        return result.scalars().all()

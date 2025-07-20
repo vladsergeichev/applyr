@@ -6,8 +6,8 @@ from faker import Faker
 from fastapi import FastAPI
 
 from tests.common.api_client import AsyncTestAPIClient
-from tests.common.utils import create_test_vacancy_data, create_test_user_data
-from tests.factories.base_factories import VacancyFactory, StageFactory, UserFactory
+from tests.common.utils import create_test_user_data, create_test_vacancy_data
+from tests.factories.base_factories import StageFactory, UserFactory, VacancyFactory
 
 
 @pytest.fixture(scope="session")

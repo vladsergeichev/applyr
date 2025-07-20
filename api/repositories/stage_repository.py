@@ -13,8 +13,8 @@ class StageRepository:
     async def create(self, stage_data: StageCreateSchema) -> StageModel:
         """Создает новый этап"""
         stage = StageModel(
-            apply_id=stage_data.apply_id,
-            state_type=stage_data.state_type,
+            vacancy_id=stage_data.vacancy_id,
+            stage_type=stage_data.stage_type,
             description=stage_data.description,
             occurred_at=stage_data.occurred_at,
         )
@@ -33,8 +33,13 @@ class StageRepository:
     async def get_by_vacancy_id(self, vacancy_id: int) -> List[StageModel]:
         """Получает все этапы вакансии"""
         result = await self.db.execute(
-            select(StageModel).where(StageModel.apply_id == vacancy_id)
+            select(StageModel).where(StageModel.vacancy_id == vacancy_id)
         )
+        return result.scalars().all()
+
+    async def get_all(self) -> List[StageModel]:
+        """Получает все этапы"""
+        result = await self.db.execute(select(StageModel))
         return result.scalars().all()
 
     async def update(
@@ -46,8 +51,8 @@ class StageRepository:
             return None
 
         # Обновляем только переданные поля
-        if stage_data.state_type is not None:
-            stage.state_type = stage_data.state_type
+        if stage_data.stage_type is not None:
+            stage.stage_type = stage_data.stage_type
         if stage_data.description is not None:
             stage.description = stage_data.description
         if stage_data.occurred_at is not None:

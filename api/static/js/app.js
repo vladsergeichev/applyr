@@ -1,178 +1,429 @@
-/**
- * Главное приложение Applyr Dashboard
- */
+// Главное приложение Applyr Dashboard
+// Основное приложение
 class App {
     constructor() {
-        this.messageManager = null;
-        this.applyRenderer = null;
-        this.userClient = null;
-        this.applyClient = null;
-        this.currentUsername = null;
-        this.isLoading = false;
-    }
+        console.log('Инициализация приложения...');
 
-    // Инициализирует приложение
-    init() {
-        this.initializeComponents();
-        this.attachEventListeners();
-        this.loadFromURL();
-    }
+        this.authClient = new AuthClient();
+        this.vacancyClient = new VacancyClient();
+        this.stageClient = new StageClient();
 
-    // Инициализирует компоненты
-    initializeComponents() {
-        // Инициализируем менеджер сообщений
         this.messageManager = new MessageManager();
-        
-        // Инициализируем рендерер откликов
-        this.applyRenderer = new ApplyRenderer();
-        
-        // Инициализируем API клиенты
-        this.userClient = new UserClient();
-        this.applyClient = new ApplyClient();
+        this.vacancyRenderer = new VacancyRenderer();
+
+        this.currentUser = null;
+        this.accessToken = localStorage.getItem('accessToken');
+        this.refreshTokenInterval = null;
+
+        this.initializeApp();
     }
 
-    // Прикрепляет обработчики событий
-    attachEventListeners() {
-        // Обработчик поиска
-        const searchBtn = document.getElementById('search-btn');
-        const usernameInput = document.getElementById('username-input');
+    initializeApp() {
+        console.log('Настройка приложения...');
+        this.setupEventListeners();
+        this.checkAuthStatus();
+        console.log('Приложение инициализировано');
+    }
 
-        if (searchBtn) {
-            searchBtn.addEventListener('click', () => this.handleSearch());
+    setupEventListeners() {
+        console.log('Настройка обработчиков событий...');
+
+        // Кнопки аутентификации
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        if (loginBtn) {
+            loginBtn.addEventListener('click', () => {
+                console.log('Кнопка входа нажата');
+                this.showLoginModal();
+            });
+        } else {
+            console.error('Кнопка входа не найдена');
         }
 
-        if (usernameInput) {
-            // Поиск по Enter
-            usernameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.handleSearch();
-                }
+        if (registerBtn) {
+            registerBtn.addEventListener('click', () => {
+                console.log('Кнопка регистрации нажата');
+                this.showRegisterModal();
+            });
+        } else {
+            console.error('Кнопка регистрации не найдена');
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.logout());
+        }
+
+        // Модальные окна
+        const closeLoginBtn = document.getElementById('close-login');
+        const closeRegisterBtn = document.getElementById('close-register');
+        const closeTelegramBtn = document.getElementById('close-telegram');
+
+        if (closeLoginBtn) {
+            closeLoginBtn.addEventListener('click', () => this.hideLoginModal());
+        }
+
+        if (closeRegisterBtn) {
+            closeRegisterBtn.addEventListener('click', () => this.hideRegisterModal());
+        }
+
+        if (closeTelegramBtn) {
+            closeTelegramBtn.addEventListener('click', () => this.hideTelegramModal());
+        }
+
+        // Переключение между модальными окнами
+        const switchToRegisterBtn = document.getElementById('switch-to-register');
+        const switchToLoginBtn = document.getElementById('switch-to-login');
+
+        if (switchToRegisterBtn) {
+            switchToRegisterBtn.addEventListener('click', () => {
+                this.hideLoginModal();
+                this.showRegisterModal();
             });
         }
-    }
 
-    // Обрабатывает поиск откликов
-
-    async handleSearch() {
-        const username = DomUtils.getInputValue('#username-input');
-        
-        if (DomUtils.isInputEmpty('#username-input')) {
-            this.messageManager.warning('Введите username пользователя');
-            return;
+        if (switchToLoginBtn) {
+            switchToLoginBtn.addEventListener('click', () => {
+                this.hideRegisterModal();
+                this.showLoginModal();
+            });
         }
 
-        if (this.isLoading) {
-            return;
+        // Формы
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const telegramForm = document.getElementById('telegram-form');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
         }
 
-        await this.searchApplies(username);
-    }
+        if (registerForm) {
+            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
+        }
 
-    // Выполняет поиск откликов
-    async searchApplies(username) {
-        try {
-            this.setLoading(true);
-            this.currentUsername = username;
-            
-            // Обновляем URL
-            this.updateURL(username);
-            
-            // Показываем индикатор загрузки
-            this.applyRenderer.showLoading();
-            DomUtils.show('#loading-spinner');
-            
-            // Получаем отклики
-            const applies = await this.applyClient.getApplies(username);
-            
-            // Рендерим результат
-            this.applyRenderer.render(applies, username);
-            
-            this.messageManager.success(`Найдено ${applies.length} откликов для @${username}`);
-            
-        } catch (error) {
-            console.error('Ошибка при поиске откликов:', error);
-            
-            if (error.message.includes('не найден')) {
-                this.applyRenderer.showError(`Пользователь @${username} не найден`);
-                this.messageManager.error(`Пользователь @${username} не найден`);
-            } else {
-                this.applyRenderer.showError('Ошибка при загрузке откликов');
-                this.messageManager.error('Ошибка при загрузке откликов');
+        if (telegramForm) {
+            telegramForm.addEventListener('submit', (e) => this.handleTelegramConnect(e));
+        }
+
+        // Кнопка подключения Telegram
+        const connectTelegramBtn = document.getElementById('connect-telegram-btn');
+        if (connectTelegramBtn) {
+            connectTelegramBtn.addEventListener('click', () => this.showTelegramModal());
+        }
+
+        // Кнопка отмены подключения Telegram
+        const cancelTelegramBtn = document.getElementById('cancel-telegram');
+        if (cancelTelegramBtn) {
+            cancelTelegramBtn.addEventListener('click', () => this.hideTelegramModal());
+        }
+
+        // Закрытие модальных окон по клику вне их
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                this.hideAllModals();
             }
-        } finally {
-            this.setLoading(false);
-            DomUtils.hide('#loading-spinner');
-        }
+        });
+
+        console.log('Обработчики событий настроены');
     }
 
-    // Устанавливает состояние загрузки
-    setLoading(loading) {
-        this.isLoading = loading;
-        const searchBtn = document.getElementById('search-btn');
-        const usernameInput = document.getElementById('username-input');
-        
-        if (searchBtn) {
-            searchBtn.disabled = loading;
-            searchBtn.textContent = loading ? 'Поиск...' : 'Показать отклики';
-        }
-        
-        if (usernameInput) {
-            usernameInput.disabled = loading;
-        }
-    }
+    checkAuthStatus() {
+        if (this.accessToken) {
+            this.authClient.setAuthToken(this.accessToken);
+            this.vacancyClient.setAuthToken(this.accessToken);
+            this.stageClient.setAuthToken(this.accessToken);
 
-    // Обновляет URL с параметрами
-    updateURL(username) {
-        const url = new URL(window.location);
-        if (username) {
-            url.searchParams.set('username', username);
+            this.getCurrentUserInfo();
+            this.startTokenRefresh();
         } else {
-            url.searchParams.delete('username');
-        }
-        window.history.pushState({}, '', url);
-    }
-
-    // Загружает данные из URL при загрузке страницы
-    loadFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const username = urlParams.get('username');
-        
-        if (username) {
-            DomUtils.setInputValue('#username-input', username);
-            this.searchApplies(username);
+            this.showAuthButtons();
         }
     }
 
-    // Очищает результаты поиска
-    clearResults() {
-        this.applyRenderer.clear();
-        this.currentUsername = null;
-        this.updateURL('');
-        DomUtils.clearInput('#username-input');
+    async getUserInfoFromJWT() {
+        try {
+            return JSON.parse(atob(this.accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        } catch (e) {
+            return null;
+        }
     }
 
-    // Обновляет отклики для текущего пользователя
-    async refreshApplies() {
-        if (this.currentUsername) {
-            await this.searchApplies(this.currentUsername);
+    async getCurrentUserInfo() {
+        try {
+            const userInfo = await this.getUserInfoFromJWT();
+            this.currentUser = userInfo;
+            this.showMainContent();
+            this.updateUserInfo();
+            this.messageManager.showSuccess(`Добро пожаловать, ${userInfo.username}!`);
+
+            // Автоматически загружаем вакансии текущего пользователя
+            await this.loadUserVacancies();
+        } catch (error) {
+            console.error('Ошибка получения информации о пользователе:', error);
+            this.logout();
+        }
+    }
+
+    updateUserInfo() {
+        const userInfoElement = document.getElementById('current-user-info');
+        if (userInfoElement && this.currentUser) {
+            let userText = `Пользователь: ${this.currentUser.username}`;
+            if (this.currentUser.telegram_username) {
+                userText += ` | Telegram: @${this.currentUser.telegram_username}`;
+            }
+            userInfoElement.textContent = userText;
+        }
+    }
+
+    // Загрузка вакансий текущего пользователя
+    async loadUserVacancies() {
+        if (!this.currentUser) {
+            return;
+        }
+
+        try {
+            this.vacancyRenderer.showLoading();
+            const vacancies = await this.vacancyClient.getVacancies(this.currentUser.username);
+            this.vacancyRenderer.renderVacancies(vacancies, this.currentUser.username);
+        } catch (error) {
+            console.error('Ошибка загрузки вакансий:', error);
+            this.vacancyRenderer.showError(error.message || 'Ошибка загрузки вакансий');
+        }
+    }
+
+    showAuthButtons() {
+        document.getElementById('login-btn').classList.remove('hidden');
+        document.getElementById('register-btn').classList.remove('hidden');
+        document.getElementById('logout-btn').classList.add('hidden');
+        document.getElementById('main-content').classList.add('hidden');
+    }
+
+    showMainContent() {
+        document.getElementById('login-btn').classList.add('hidden');
+        document.getElementById('register-btn').classList.add('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+    }
+
+    // Модальные окна
+    showLoginModal() {
+        console.log('Показ модального окна входа');
+        const modal = document.getElementById('login-modal');
+        if (modal) {
+            modal.classList.add('show');
+        } else {
+            console.error('Модальное окно входа не найдено');
+        }
+    }
+
+    hideLoginModal() {
+        console.log('Скрытие модального окна входа');
+        const modal = document.getElementById('login-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.getElementById('login-form').reset();
+        }
+    }
+
+    showRegisterModal() {
+        console.log('Показ модального окна регистрации');
+        const modal = document.getElementById('register-modal');
+        if (modal) {
+            modal.classList.add('show');
+        } else {
+            console.error('Модальное окно регистрации не найдено');
+        }
+    }
+
+    hideRegisterModal() {
+        console.log('Скрытие модального окна регистрации');
+        const modal = document.getElementById('register-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.getElementById('register-form').reset();
+        }
+    }
+
+    showTelegramModal() {
+        console.log('Показ модального окна подключения Telegram');
+        const modal = document.getElementById('telegram-modal');
+        if (modal) {
+            modal.classList.add('show');
+        } else {
+            console.error('Модальное окно Telegram не найдено');
+        }
+    }
+
+    hideTelegramModal() {
+        console.log('Скрытие модального окна подключения Telegram');
+        const modal = document.getElementById('telegram-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.getElementById('telegram-form').reset();
+        }
+    }
+
+    hideAllModals() {
+        this.hideLoginModal();
+        this.hideRegisterModal();
+        this.hideTelegramModal();
+    }
+
+    // Обработка входа
+    async handleLogin(e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        const userData = {
+            username: formData.get('username'),
+            password: formData.get('password')
+        };
+
+        try {
+            const response = await this.authClient.login(userData);
+            this.accessToken = response.access_token;
+            localStorage.setItem('accessToken', this.accessToken);
+
+            this.authClient.setAuthToken(this.accessToken);
+            this.vacancyClient.setAuthToken(this.accessToken);
+            this.stageClient.setAuthToken(this.accessToken);
+
+            this.hideLoginModal();
+            await this.getCurrentUserInfo();
+            this.startTokenRefresh();
+            this.messageManager.showSuccess('Успешный вход в систему!');
+        } catch (error) {
+            console.error('Ошибка входа:', error);
+            this.messageManager.showError(error.message || 'Ошибка входа в систему');
+        }
+    }
+
+    // Обработка регистрации
+    async handleRegister(e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        const userData = {
+            username: formData.get('username'),
+            password: formData.get('password')
+        };
+
+        try {
+            const response = await this.authClient.register(userData);
+            this.accessToken = response.access_token;
+            localStorage.setItem('accessToken', this.accessToken);
+
+            this.authClient.setAuthToken(this.accessToken);
+            this.vacancyClient.setAuthToken(this.accessToken);
+            this.stageClient.setAuthToken(this.accessToken);
+
+            this.hideRegisterModal();
+            await this.getCurrentUserInfo();
+            this.startTokenRefresh();
+            this.messageManager.showSuccess('Регистрация успешна!');
+        } catch (error) {
+            console.error('Ошибка регистрации:', error);
+            this.messageManager.showError(error.message || 'Ошибка регистрации');
+        }
+    }
+
+    // Обработка подключения Telegram
+    async handleTelegramConnect(e) {
+        e.preventDefault();
+
+        const formData = new FormData(e.target);
+        let telegramUsername = formData.get('telegram_username');
+
+        // Убираем @ если пользователь его ввел
+        if (telegramUsername.startsWith('@')) {
+            telegramUsername = telegramUsername.substring(1);
+        }
+
+        try {
+            await this.authClient.updateTelegramUsername({telegram_username: telegramUsername});
+            this.hideTelegramModal();
+
+            // Обновляем информацию о пользователе
+            await this.getCurrentUserInfo();
+            this.messageManager.showSuccess('Telegram успешно подключен!');
+        } catch (error) {
+            console.error('Ошибка подключения Telegram:', error);
+            this.messageManager.showError(error.message || 'Ошибка подключения Telegram');
+        }
+    }
+
+    // Автоматическое обновление токенов
+    startTokenRefresh() {
+        // Очищаем предыдущий интервал
+        if (this.refreshTokenInterval) {
+            clearInterval(this.refreshTokenInterval);
+        }
+
+        // Обновляем токен каждые 14 минут (токен живет 15 минут)
+        this.refreshTokenInterval = setInterval(async () => {
+            try {
+                const response = await this.authClient.refreshToken();
+                this.accessToken = response.access_token;
+                localStorage.setItem('accessToken', this.accessToken);
+
+                this.authClient.setAuthToken(this.accessToken);
+                this.vacancyClient.setAuthToken(this.accessToken);
+                this.stageClient.setAuthToken(this.accessToken);
+
+                console.log('Токен обновлен');
+            } catch (error) {
+                console.error('Ошибка обновления токена:', error);
+                this.logout();
+            }
+        }, 14 * 60 * 1000); // 14 минут
+    }
+
+    // Выход
+    async logout() {
+        try {
+            await this.authClient.logout();
+        } catch (error) {
+            console.error('Ошибка выхода:', error);
+        } finally {
+            this.accessToken = null;
+            this.currentUser = null;
+            localStorage.removeItem('accessToken');
+
+            // Останавливаем обновление токенов
+            if (this.refreshTokenInterval) {
+                clearInterval(this.refreshTokenInterval);
+                this.refreshTokenInterval = null;
+            }
+
+            this.authClient.clearAuthToken();
+            this.vacancyClient.clearAuthToken();
+            this.stageClient.clearAuthToken();
+
+            this.showAuthButtons();
+            this.vacancyRenderer.clear();
+            this.messageManager.showInfo('Вы вышли из системы');
         }
     }
 }
 
-// Глобальные экземпляры для доступа из других компонентов
-let messageManager;
-let applyClient;
-let userClient;
+// Глобальные функции для кнопок в карточках
+function deleteVacancy(vacancyId) {
+    if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
+        app.vacancyClient.deleteVacancy(vacancyId)
+            .then(() => {
+                app.messageManager.showSuccess('Вакансия удалена');
+                // Перезагружаем вакансии текущего пользователя
+                app.loadUserVacancies();
+            })
+            .catch(error => {
+                console.error('Ошибка удаления вакансии:', error);
+                app.messageManager.showError(error.message || 'Ошибка удаления вакансии');
+            });
+    }
+}
 
-// Инициализация приложения после загрузки DOM
-document.addEventListener('DOMContentLoaded', () => {
-    const app = new App();
-    app.init();
-    
-    // Делаем компоненты доступными глобально
-    messageManager = app.messageManager;
-    applyClient = app.applyClient;
-    userClient = app.userClient;
-    
-    console.log('Applyr Dashboard инициализирован');
-}); 
+// Инициализация приложения
+console.log('Загрузка приложения...');
+const app = new App(); 

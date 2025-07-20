@@ -50,16 +50,18 @@ def create_test_vacancy_data(faker: Faker, **overrides) -> Dict[str, Any]:
 def create_test_stage_data(faker: Faker, **overrides) -> Dict[str, Any]:
     """Создает тестовые данные этапа"""
     data = {
-        "apply_id": 1,
-        "state_type": faker.random_element([
-            "Отклик отправлен",
-            "Резюме просмотрено",
-            "Приглашение на собеседование",
-            "Собеседование пройдено",
-            "Тестовое задание",
-            "Оффер",
-            "Отказ"
-        ]),
+        "vacancy_id": 1,
+        "stage_type": faker.random_element(
+            [
+                "Отклик отправлен",
+                "Резюме просмотрено",
+                "Приглашение на собеседование",
+                "Собеседование пройдено",
+                "Тестовое задание",
+                "Оффер",
+                "Отказ",
+            ]
+        ),
         "description": faker.text(max_nb_chars=200),
         "occurred_at": faker.date_time().isoformat(),
     }

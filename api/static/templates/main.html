@@ -8,38 +8,121 @@
 </head>
 <body>
     <div class="container">
-        <h1>Applyr</h1>
-        
-        <div class="search-form">
-            <div class="search-input-group">
-                <input type="text" id="username-input" placeholder="Введите username пользователя" required>
-                <button type="button" id="search-btn">Показать отклики</button>
+        <header class="header">
+            <h1>Applyr</h1>
+            <div class="auth-buttons">
+                <button id="login-btn" class="btn btn-primary">Войти</button>
+                <button id="register-btn" class="btn btn-secondary">Регистрация</button>
+                <button id="logout-btn" class="btn btn-danger hidden">Выйти</button>
+            </div>
+        </header>
+
+        <!-- Окно входа -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Вход в систему</h2>
+                    <button class="close-btn" id="close-login">&times;</button>
+                </div>
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-username">Username:</label>
+                        <input type="text" id="login-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Пароль:</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Войти</button>
+                        <button type="button" class="btn btn-secondary" id="switch-to-register">Регистрация</button>
+                    </div>
+                </form>
             </div>
         </div>
 
+        <!-- Окно регистрации -->
+        <div id="register-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Регистрация</h2>
+                    <button class="close-btn" id="close-register">&times;</button>
+                </div>
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-username">Username:</label>
+                        <input type="text" id="register-username" name="username" required>
+                        <small>Минимум 3 символа, только буквы, цифры и подчеркивания</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Пароль:</label>
+                        <input type="password" id="register-password" name="password" required>
+                        <small>Минимум 6 символов</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                        <button type="button" class="btn btn-secondary" id="switch-to-login">Войти</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Окно подключения Telegram -->
+        <div id="telegram-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Подключение Telegram</h2>
+                    <button class="close-btn" id="close-telegram">&times;</button>
+                </div>
+                <form id="telegram-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="telegram-username">Telegram Username:</label>
+                        <input type="text" id="telegram-username" name="telegram_username" placeholder="@username" required>
+                        <small>Введите ваш Telegram username без символа @</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Подключить</button>
+                        <button type="button" class="btn btn-secondary" id="cancel-telegram">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div id="main-content" class="hidden">
+            <div class="user-info">
+                <div class="user-details">
+                    <span id="current-user-info"></span>
+                    <button id="connect-telegram-btn" class="btn btn-secondary">Подключить Telegram</button>
+                </div>
+            </div>
+
+            <div id="loading-spinner" class="loading-spinner hidden">
+                <div class="spinner"></div>
+                <p>Загрузка...</p>
+            </div>
+
+            <div id="vacancies-container">
+                <div id="no-vacancies" class="no-vacancies hidden">
+                    У вас пока нет вакансий
+                </div>
+                <div id="vacancies-list" class="vacancies-list hidden"></div>
+            </div>
+        </div>
+
+        <!-- Контейнер сообщений -->
         <div id="message-container"></div>
-        
-        <div id="loading-spinner" class="loading-spinner hidden">
-            <div class="spinner"></div>
-            <p>Загрузка...</p>
-        </div>
-
-        <div id="applies-container">
-            <div id="no-applies" class="no-applies hidden">
-                У пользователя пока нет откликов
-            </div>
-            <div id="applies-list" class="applies-list hidden"></div>
-        </div>
     </div>
 
     <!-- API Clients -->
     <script src="/static/js/api/baseClient.js"></script>
-    <script src="/static/js/api/userClient.js"></script>
-    <script src="/static/js/api/applyClient.js"></script>
+    <script src="/static/js/api/authClient.js"></script>
+    <script src="/static/js/api/vacancyClient.js"></script>
+    <script src="/static/js/api/stageClient.js"></script>
     
     <!-- Components -->
     <script src="/static/js/components/messageManager.js"></script>
-    <script src="/static/js/components/applyRenderer.js"></script>
+    <script src="/static/js/components/vacancyRenderer.js"></script>
     <script src="/static/js/utils/domUtils.js"></script>
     
     <!-- Main App -->

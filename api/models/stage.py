@@ -8,10 +8,10 @@ class StageModel(Base):
     __tablename__ = "stage"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    apply_id = Column(
+    vacancy_id = Column(
         BigInteger, ForeignKey("vacancy.id", ondelete="CASCADE"), nullable=False
     )
-    state_type = Column(String(255))
+    stage_type = Column(String(255))
     description = Column(Text)
     occurred_at = Column(DateTime, default=func.now())
     created_at = Column(DateTime, default=func.now())

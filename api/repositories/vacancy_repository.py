@@ -38,6 +38,11 @@ class VacancyRepository:
         )
         return result.scalars().all()
 
+    async def get_all(self) -> List[VacancyModel]:
+        """Получает все вакансии"""
+        result = await self.db.execute(select(VacancyModel))
+        return result.scalars().all()
+
     async def update(
         self, vacancy_id: int, vacancy_data: VacancyUpdateSchema
     ) -> Optional[VacancyModel]:

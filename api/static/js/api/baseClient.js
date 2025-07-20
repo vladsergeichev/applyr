@@ -2,6 +2,17 @@
 class BaseClient {
     constructor(baseURL = '') {
         this.baseURL = baseURL;
+        this.accessToken = null;
+    }
+
+    // Устанавливает токен авторизации
+    setAuthToken(token) {
+        this.accessToken = token;
+    }
+
+    // Очищает токен авторизации
+    clearAuthToken() {
+        this.accessToken = null;
     }
 
     async request(url, options = {}) {
@@ -12,6 +23,11 @@ class BaseClient {
                 'Content-Type': 'application/json',
             },
         };
+
+        // Добавляем токен авторизации, если он есть
+        if (this.accessToken) {
+            defaultOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
+        }
 
         const requestOptions = {
             ...defaultOptions,

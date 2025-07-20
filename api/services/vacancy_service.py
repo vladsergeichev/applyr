@@ -36,15 +36,10 @@ class VacancyService:
         logger.info(f"Получена вакансия {vacancy_id}")
         return vacancy
 
-    async def get_vacancies_by_username(self, username: str) -> List[VacancySchema]:
+    async def get_vacancies_by_user_id(self, user_id: int) -> List[VacancySchema]:
         """Получает вакансии пользователя по username"""
-        user = await self.auth_repo.get_by_username(username)
-        if not user:
-            logger.warning(f"Пользователь с username '{username}' не найден")
-            return []
-
-        vacancies = await self.vacancy_repo.get_by_user_id(user.id)
-        logger.info(f"Получено {len(vacancies)} вакансий для пользователя @{username}")
+        vacancies = await self.vacancy_repo.get_by_user_id(user_id)
+        logger.info(f"Получено {len(vacancies)} вакансий для пользователя {user_id}")
         return vacancies
 
     async def update_vacancy(

@@ -88,12 +88,12 @@ async def test_get_vacancy_not_found(async_client: AsyncTestAPIClient):
 
 
 @pytest.mark.asyncio
-async def test_get_vacancies_by_username_success(
+async def test_get_vacancies_success(
     async_client: AsyncTestAPIClient,
     vacancy_factory: VacancyFactory,
     user_factory: UserFactory,
 ):
-    """Тест успешного получения вакансий пользователя"""
+    """Тест успешного получения вакансий текущего пользователя"""
     # Создаем пользователя
     user_data = user_factory.build_user_data()
     register_response = await async_client.register_user(user_data)
@@ -112,25 +112,54 @@ async def test_get_vacancies_by_username_success(
         create_response = await async_client.create_vacancy(vacancy_data)
         assert_response_status(create_response, status.HTTP_200_OK)
 
-    # Получаем вакансии пользователя
-    response = await async_client.get_vacancies_by_username(user_data["username"])
+    # Получаем вакансии текущего пользователя
+    response = await async_client.get_vacancies()
     assert_response_status(response, status.HTTP_200_OK)
 
     # Проверяем, что получили список
     data = response.json()
     assert isinstance(data, list)
+    assert len(data) == 3  # Должно быть 3 вакансии
 
 
 @pytest.mark.asyncio
-async def test_get_vacancies_by_username_not_found(async_client: AsyncTestAPIClient):
-    """Тест получения вакансий несуществующего пользователя"""
-    response = await async_client.get_vacancies_by_username("nonexistent_user")
+async def test_get_vacancies_empty_for_new_user(
+    async_client: AsyncTestAPIClient,
+    user_factory: UserFactory,
+):
+    """Тест получения вакансий для нового пользователя (должен вернуть пустой список)"""
+    # Создаем пользователя
+    user_data = user_factory.build_user_data()
+    register_response = await async_client.register_user(user_data)
+    assert_response_status(register_response, status.HTTP_200_OK)
+
+    # Получаем токен для авторизации
+    access_token = register_response.json().get("access_token")
+    async_client.set_auth_token(access_token)
+
+    # Получаем вакансии нового пользователя (должен быть пустой список)
+    response = await async_client.get_vacancies()
     assert_response_status(response, status.HTTP_200_OK)
 
-    # Должен вернуться пустой список
+    # Проверяем, что получили пустой список
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) == 0
+    assert len(data) == 0  # У нового пользователя нет вакансий
+
+
+@pytest.mark.asyncio
+async def test_get_vacancies_unauthorized(async_client: AsyncTestAPIClient):
+    """Тест получения вакансий без авторизации (должен вернуть 403 Forbidden)"""
+    # Создаем новый клиент без авторизации
+    from main import app
+
+    from tests.common.api_client import AsyncTestAPIClient
+
+    # Создаем новый клиент без авторизации
+    unauth_client = AsyncTestAPIClient.build_app_client(app)
+
+    response = await unauth_client.get_vacancies()
+    assert_response_status(response, status.HTTP_403_FORBIDDEN)
 
 
 @pytest.mark.asyncio

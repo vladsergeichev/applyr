@@ -39,6 +39,11 @@ class AsyncTestAPIClient(AsyncClient):
         """Устанавливает токен авторизации"""
         self.headers["Authorization"] = f"Bearer {access_token}"
 
+    def clear_auth_token(self):
+        """Очищает токен авторизации"""
+        if "Authorization" in self.headers:
+            del self.headers["Authorization"]
+
     def get_user_id_from_token(self, access_token: str) -> int:
         """Получает user_id из access-токена"""
         payload = verify_token(access_token)
@@ -94,9 +99,9 @@ class AsyncTestAPIClient(AsyncClient):
         """Получение конкретной вакансии"""
         return await self.get(f"/vacancy/get_vacancy/{vacancy_id}")
 
-    async def get_vacancies_by_username(self, username: str) -> Response:
-        """Получение вакансий пользователя"""
-        return await self.get(f"/vacancy/get_vacancies/{username}")
+    async def get_vacancies(self) -> Response:
+        """Получение вакансий текущего пользователя"""
+        return await self.get("/vacancy/get_vacancies")
 
     async def update_vacancy(
         self, vacancy_id: int, vacancy_data: Dict[str, Any]

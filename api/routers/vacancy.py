@@ -1,8 +1,9 @@
 import logging
 from typing import List
 
-from core.dependencies import get_vacancy_service
+from core.dependencies import get_current_user, get_vacancy_service
 from fastapi import APIRouter, Depends, Path
+from models import UserModel
 from schemas.vacancy import VacancyCreateSchema, VacancySchema, VacancyUpdateSchema
 from services.vacancy_service import VacancyService
 
@@ -28,14 +29,13 @@ async def get_vacancy(
     return await vacancy_service.get_vacancy_by_id(vacancy_id)
 
 
-@router.get("/get_vacancies/{username}", response_model=List[VacancySchema])
+@router.get("/get_vacancies", response_model=List[VacancySchema])
 async def get_vacancies(
-    username: str = Path(..., description="Username пользователя"),
+    current_user: UserModel = Depends(get_current_user),
     vacancy_service: VacancyService = Depends(get_vacancy_service),
 ):
-    """Получение вакансий пользователя по username
-    TODO: username нужно заменить на user_id, который должен определяться на основе access-токена пользователя"""
-    return await vacancy_service.get_vacancies_by_username(username)
+    """Получение вакансий текущего пользователя"""
+    return await vacancy_service.get_vacancies_by_user_id(current_user.id)
 
 
 @router.put("/update_vacancy/{vacancy_id}", response_model=VacancySchema)

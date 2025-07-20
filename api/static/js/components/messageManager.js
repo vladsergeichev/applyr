@@ -39,6 +39,11 @@ class MessageManager {
         this.show(message, 'info', duration);
     }
 
+    // Показывает сообщение о загрузке
+    showLoading(message = 'Загрузка...', duration = 0) {
+        this.show(message, 'loading', duration);
+    }
+
     // Обрабатывает очередь сообщений
     async processQueue() {
         if (this.isProcessing || this.messageQueue.length === 0) {
@@ -116,7 +121,8 @@ class MessageManager {
             success: '✅',
             error: '❌',
             warning: '⚠️',
-            info: 'ℹ️'
+            info: 'ℹ️',
+            loading: '⏳'
         };
         return icons[type] || icons.info;
     }

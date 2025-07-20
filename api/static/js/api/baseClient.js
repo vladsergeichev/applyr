@@ -17,7 +17,7 @@ class BaseClient {
         this.accessToken = null;
     }
 
-    // Обновление токена
+    // Обновляет access токен используя refresh токен
     async refreshToken() {
         if (this.isRefreshing) {
             return this.refreshPromise;
@@ -98,7 +98,44 @@ class BaseClient {
         }
     }
 
+    // Валидация параметров запроса
+    _validateParams(url, options = {}) {
+        if (!url || typeof url !== 'string') {
+            throw new Error(ERROR_MESSAGES.INVALID_URL);
+        }
+        
+        if (options && typeof options !== 'object') {
+            throw new Error(ERROR_MESSAGES.INVALID_OPTIONS);
+        }
+    }
+
+    // Обработка ошибок API
+    _handleApiError(response, errorData) {
+        const status = response.status;
+        const detail = errorData?.detail || `HTTP ${status}: ${response.statusText}`;
+        
+        switch (status) {
+            case HTTP_STATUS.BAD_REQUEST:
+                throw new Error(`Некорректный запрос: ${detail}`);
+            case HTTP_STATUS.UNAUTHORIZED:
+                throw new Error(ERROR_MESSAGES.AUTHENTICATION_REQUIRED);
+            case HTTP_STATUS.FORBIDDEN:
+                throw new Error(ERROR_MESSAGES.ACCESS_DENIED);
+            case HTTP_STATUS.NOT_FOUND:
+                throw new Error(ERROR_MESSAGES.RESOURCE_NOT_FOUND);
+            case HTTP_STATUS.UNPROCESSABLE_ENTITY:
+                throw new Error(`${ERROR_MESSAGES.VALIDATION_ERROR}: ${detail}`);
+            case HTTP_STATUS.INTERNAL_SERVER_ERROR:
+                throw new Error(ERROR_MESSAGES.SERVER_ERROR);
+            default:
+                throw new Error(detail);
+        }
+    }
+
     async request(url, options = {}) {
+        // Валидация параметров
+        this._validateParams(url, options);
+        
         const fullUrl = this.baseURL + url;
         
         const defaultOptions = {
@@ -151,7 +188,7 @@ class BaseClient {
                             }
                             
                             const errorData = await retryResponse.json().catch(() => ({}));
-                            throw new Error(errorData.detail || `HTTP ${retryResponse.status}: ${retryResponse.statusText}`);
+                            this._handleApiError(retryResponse, errorData);
                         }
                     }
                 } catch (refreshError) {
@@ -173,7 +210,7 @@ class BaseClient {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                this._handleApiError(response, errorData);
             }
 
             // Проверяем, есть ли контент для парсинга
@@ -189,6 +226,7 @@ class BaseClient {
         }
     }
 
+    // Выполняет GET запрос
     async get(url, options = {}) {
         return this.request(url, {
             method: 'GET',
@@ -196,6 +234,7 @@ class BaseClient {
         });
     }
 
+    // Выполняет POST запрос
     async post(url, data = null, options = {}) {
         return this.request(url, {
             method: 'POST',
@@ -204,6 +243,7 @@ class BaseClient {
         });
     }
 
+    // Выполняет PUT запрос
     async put(url, data = null, options = {}) {
         return this.request(url, {
             method: 'PUT',
@@ -212,6 +252,7 @@ class BaseClient {
         });
     }
 
+    // Выполняет DELETE запрос
     async delete(url, options = {}) {
         return this.request(url, {
             method: 'DELETE',

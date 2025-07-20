@@ -4,9 +4,11 @@ class App {
     constructor() {
         console.log('Инициализация приложения...');
 
-        this.authClient = new AuthClient();
-        this.vacancyClient = new VacancyClient();
-        this.stageClient = new StageClient();
+        // Используем ApiManager для централизованного управления клиентами
+        this.apiManager = new ApiManager();
+        this.authClient = this.apiManager.authClient;
+        this.vacancyClient = this.apiManager.vacancyClient;
+        this.stageClient = this.apiManager.stageClient;
 
         this.messageManager = new MessageManager();
         this.vacancyRenderer = new VacancyRenderer();
@@ -130,9 +132,8 @@ class App {
 
     checkAuthStatus() {
         if (this.accessToken) {
-            this.authClient.setAuthToken(this.accessToken);
-            this.vacancyClient.setAuthToken(this.accessToken);
-            this.stageClient.setAuthToken(this.accessToken);
+            // Используем ApiManager для установки токена всем клиентам
+            this.apiManager.setAuthToken(this.accessToken);
 
             this.getCurrentUserInfo();
         } else {
@@ -272,7 +273,7 @@ class App {
     // Обработка входа
     async handleLogin(e) {
         e.preventDefault();
-
+        
         const formData = new FormData(e.target);
         const userData = {
             username: formData.get('username'),
@@ -280,27 +281,29 @@ class App {
         };
 
         try {
+            this.messageManager.showLoading('Выполняется вход...');
             const response = await this.authClient.login(userData);
+            
             this.accessToken = response.access_token;
             localStorage.setItem('accessToken', this.accessToken);
-
-            this.authClient.setAuthToken(this.accessToken);
-            this.vacancyClient.setAuthToken(this.accessToken);
-            this.stageClient.setAuthToken(this.accessToken);
-
+            
+            // Используем ApiManager для установки токена всем клиентам
+            this.apiManager.setAuthToken(this.accessToken);
+            
             this.hideLoginModal();
+            this.messageManager.showSuccess('Вход выполнен успешно!');
+            
             await this.getCurrentUserInfo();
-            this.messageManager.showSuccess('Успешный вход в систему!');
         } catch (error) {
             console.error('Ошибка входа:', error);
-            this.messageManager.showError(error.message || 'Ошибка входа в систему');
+            this.messageManager.showError(error.message || 'Ошибка входа');
         }
     }
 
     // Обработка регистрации
     async handleRegister(e) {
         e.preventDefault();
-
+        
         const formData = new FormData(e.target);
         const userData = {
             username: formData.get('username'),
@@ -308,17 +311,19 @@ class App {
         };
 
         try {
+            this.messageManager.showLoading('Выполняется регистрация...');
             const response = await this.authClient.register(userData);
+            
             this.accessToken = response.access_token;
             localStorage.setItem('accessToken', this.accessToken);
-
-            this.authClient.setAuthToken(this.accessToken);
-            this.vacancyClient.setAuthToken(this.accessToken);
-            this.stageClient.setAuthToken(this.accessToken);
-
+            
+            // Используем ApiManager для установки токена всем клиентам
+            this.apiManager.setAuthToken(this.accessToken);
+            
             this.hideRegisterModal();
+            this.messageManager.showSuccess('Регистрация выполнена успешно!');
+            
             await this.getCurrentUserInfo();
-            this.messageManager.showSuccess('Регистрация успешна!');
         } catch (error) {
             console.error('Ошибка регистрации:', error);
             this.messageManager.showError(error.message || 'Ошибка регистрации');
@@ -354,32 +359,30 @@ class App {
     updateTokens(newAccessToken) {
         this.accessToken = newAccessToken;
         localStorage.setItem('accessToken', this.accessToken);
-
-        this.authClient.setAuthToken(this.accessToken);
-        this.vacancyClient.setAuthToken(this.accessToken);
-        this.stageClient.setAuthToken(this.accessToken);
-
-        console.log('Токены обновлены во всех клиентах');
+        
+        // Используем ApiManager для установки токена всем клиентам
+        this.apiManager.setAuthToken(this.accessToken);
     }
 
     // Выход
     async logout() {
         try {
-            await this.authClient.logout();
+            if (this.accessToken) {
+                await this.authClient.logout();
+            }
         } catch (error) {
-            console.error('Ошибка выхода:', error);
+            console.error('Ошибка при выходе:', error);
         } finally {
+            // Очищаем данные пользователя
             this.accessToken = null;
             this.currentUser = null;
             localStorage.removeItem('accessToken');
-
-            this.authClient.clearAuthToken();
-            this.vacancyClient.clearAuthToken();
-            this.stageClient.clearAuthToken();
-
+            
+            // Используем ApiManager для очистки токенов всех клиентов
+            this.apiManager.clearAuthToken();
+            
             this.showAuthButtons();
-            this.vacancyRenderer.clear();
-            this.messageManager.showInfo('Вы вышли из системы');
+            this.messageManager.showSuccess('Выход выполнен успешно');
         }
     }
 }

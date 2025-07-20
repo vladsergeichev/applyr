@@ -15,11 +15,23 @@ class AppConfig(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     # База данных
-    DB_USER: str
-    DB_PASS: str
-    DB_NAME: str
     DB_HOST: str
     DB_PORT: str
+    DB_NAME: str
+    DB_USER: str
+    DB_PASS: str
+
+    # JWT
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 10
+
+    # Network
+    HTTP_ONLY: bool = True          # True означает, что cookie не доступны через JavaScript
+    SECURE_COOKIES: bool = True     # True означает, что cookie передаются только по HTTPS
+    SAME_SITE_COOKIES: str = "lax"  # none/lax/strict
+    DOMAIN: str = "127.0.0.1"       # Домен для установки cookie, например, "example.com"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

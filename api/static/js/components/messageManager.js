@@ -65,13 +65,16 @@ class MessageManager {
         const messageElement = this.createMessageElement(messageData);
         this.container.appendChild(messageElement);
 
-        // Анимация появления
-        messageElement.style.opacity = '0';
+        // Анимация появления - сдвигаем справа
         messageElement.style.transform = 'translateX(100%)';
+        messageElement.style.opacity = '0';
+        
+        // Принудительно вызываем reflow
+        messageElement.offsetHeight;
         
         await this.animate(messageElement, {
-            opacity: '1',
-            transform: 'translateX(0)'
+            transform: 'translateX(0)',
+            opacity: '1'
         }, 300);
 
         // Автоматическое удаление
@@ -106,10 +109,10 @@ class MessageManager {
             return;
         }
 
-        // Анимация исчезновения
+        // Анимация исчезновения - сдвигаем вправо
         await this.animate(messageElement, {
-            opacity: '0',
-            transform: 'translateX(100%)'
+            transform: 'translateX(100%)',
+            opacity: '0'
         }, 300);
 
         messageElement.remove();
@@ -118,11 +121,11 @@ class MessageManager {
     // Получает иконку для типа сообщения
     getIcon(type) {
         const icons = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️',
-            info: 'ℹ️',
-            loading: '⏳'
+            success: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+            error: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+            warning: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+            loading: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>'
         };
         return icons[type] || icons.info;
     }
@@ -135,7 +138,11 @@ class MessageManager {
             
             // Получаем начальные значения
             for (const [property, value] of Object.entries(properties)) {
-                startValues[property] = parseFloat(getComputedStyle(element)[property]) || 0;
+                if (property === 'transform') {
+                    startValues[property] = element.style.transform || 'translateX(0)';
+                } else {
+                    startValues[property] = parseFloat(getComputedStyle(element)[property]) || 0;
+                }
             }
 
             const animate = (currentTime) => {
@@ -144,9 +151,13 @@ class MessageManager {
 
                 // Применяем анимацию
                 for (const [property, targetValue] of Object.entries(properties)) {
-                    const startValue = startValues[property];
-                    const currentValue = startValue + (parseFloat(targetValue) - startValue) * progress;
-                    element.style[property] = property === 'opacity' ? currentValue : `${currentValue}px`;
+                    if (property === 'transform') {
+                        element.style[property] = targetValue;
+                    } else {
+                        const startValue = startValues[property];
+                        const currentValue = startValue + (parseFloat(targetValue) - startValue) * progress;
+                        element.style[property] = property === 'opacity' ? currentValue : `${currentValue}px`;
+                    }
                 }
 
                 if (progress < 1) {

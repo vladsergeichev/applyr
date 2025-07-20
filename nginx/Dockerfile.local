@@ -1,0 +1,11 @@
+FROM nginx:alpine
+
+# Копирование конфигурации
+COPY nginx.local.conf /etc/nginx/nginx.conf
+
+# Создание директорий для SSL
+RUN mkdir -p /etc/nginx/ssl
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"] 

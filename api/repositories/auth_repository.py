@@ -93,10 +93,13 @@ class AuthRepository:
     async def get_valid_refresh_token(self, user_id: int) -> Optional[RefreshModel]:
         """Получает действительный refresh токен пользователя"""
         result = await self.db.execute(
-            select(RefreshModel).where(
+            select(RefreshModel)
+            .where(
                 RefreshModel.user_id == user_id,
                 RefreshModel.expires_at > datetime.utcnow(),
             )
+            .order_by(RefreshModel.created_at.desc())
+            .limit(1)
         )
         return result.scalar_one_or_none()
 

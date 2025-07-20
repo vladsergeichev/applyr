@@ -1,6 +1,7 @@
 import logging
 from typing import Optional, Tuple
 
+from config import app_config
 from core.security import (
     create_access_token,
     create_refresh_token,
@@ -109,7 +110,7 @@ class AuthService:
 
     async def update_telegram_username(
         self, user_id: int, telegram_username: str
-    ) -> None:
+    ) -> AuthResponseSchema:
         """Обновление Telegram username"""
         # Проверяем, не занят ли telegram_username другим пользователем
         existing_user = await self.auth_repo.get_by_telegram_username(telegram_username)
@@ -117,7 +118,22 @@ class AuthService:
             raise TelegramUsernameAlreadyExistsException()
 
         await self.auth_repo.update_telegram_username(user_id, telegram_username)
+
+        # Получаем обновленные данные пользователя
+        updated_user = await self.auth_repo.get_by_id(user_id)
+        if not updated_user:
+            raise UserNotFoundException()
+
+        # Создаем новый access токен с обновленными данными
+        access_token_data = {
+            "user_id": updated_user.id,
+            "username": updated_user.username,
+            "telegram_username": updated_user.telegram_username,
+        }
+        access_token = create_access_token(data=access_token_data)
+
         logger.info(f"Обновлен Telegram username для пользователя {user_id}")
+        return AuthResponseSchema(access_token=access_token)
 
     @staticmethod
     def _create_tokens(user: UserModel) -> Tuple[str, str]:
@@ -134,20 +150,22 @@ class AuthService:
         refresh_token = create_refresh_token(data={"user_id": user.id})
         return access_token, refresh_token
 
-    def set_refresh_cookie(
-        self, refresh_token: str, response: Optional[Response]
-    ) -> None:
+    @staticmethod
+    def set_refresh_cookie(refresh_token: str, response: Optional[Response]) -> None:
         """Устанавливает refresh токен в cookie"""
         if response:
             response.set_cookie(
                 key="refresh_token",
                 value=refresh_token,
-                httponly=True,
-                secure=False,  # True для HTTPS
-                samesite="strict",  # Защита от CSRF атак
-                max_age=10 * 24 * 60 * 60,  # 10 дней
+                httponly=app_config.HTTP_ONLY,
+                secure=app_config.SECURE_COOKIES,
+                samesite=app_config.SAME_SITE_COOKIES,
+                max_age=app_config.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+                domain=app_config.DOMAIN,
+                path="/",
             )
 
-    def delete_refresh_cookie(self, response: Response) -> None:
+    @staticmethod
+    def delete_refresh_cookie(response: Response) -> None:
         """Удаляет refresh токен из cookie"""
         response.delete_cookie(key="refresh_token")

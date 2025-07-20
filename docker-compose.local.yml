@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - applyr_network
+
+  api:
+    build: ./api
+#    ports:
+#      - "8000:8000"  # Прямой доступ к API для разработки
+    env_file:
+      - .env
+    volumes:
+      - ./api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - applyr_network
+
+  nginx:
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile.local
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    networks:
+      - applyr_network
+
+  bot:
+    build: ./bot
+    environment:
+      API_URL: ${API_URL}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL}
+    depends_on:
+      - api
+    networks:
+      - applyr_network
+
+volumes:
+  postgres_data:
+
+networks:
+  applyr_network:
+    driver: bridge 

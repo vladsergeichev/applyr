@@ -17,87 +17,6 @@ class BaseClient {
         this.accessToken = null;
     }
 
-    // Обновляет access токен используя refresh токен
-    async refreshToken() {
-        if (this.isRefreshing) {
-            return this.refreshPromise;
-        }
-
-        this.isRefreshing = true;
-        this.refreshPromise = this._performRefresh();
-
-        try {
-            const result = await this.refreshPromise;
-            this.isRefreshing = false;
-            this.refreshPromise = null;
-            return result;
-        } catch (error) {
-            this.isRefreshing = false;
-            this.refreshPromise = null;
-            throw error;
-        }
-    }
-
-    // Прямой запрос без обработки 401 (для обновления токена)
-    async _directRequest(url, options = {}) {
-        const fullUrl = this.baseURL + url;
-        
-        const defaultOptions = {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'omit', // По умолчанию не отправляем cookies
-        };
-
-        const requestOptions = {
-            ...defaultOptions,
-            ...options,
-            headers: {
-                ...defaultOptions.headers,
-                ...options.headers,
-            },
-        };
-
-        const response = await fetch(fullUrl, requestOptions);
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            return await response.json();
-        }
-        
-        return await response.text();
-    }
-
-    // Выполнение обновления токена
-    async _performRefresh() {
-        try {
-            const data = await this._directRequest('/auth/refresh', {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            this.accessToken = data.access_token;
-            
-            // Обновляем токен во всех клиентах
-            if (window.app) {
-                window.app.updateTokens(data.access_token);
-            }
-
-            return data;
-        } catch (error) {
-            // При ошибке обновления - выходим из системы
-            if (window.app) {
-                await window.app.logout();
-            }
-            throw error;
-        }
-    }
-
     // Валидация параметров запроса
     _validateParams(url, options = {}) {
         if (!url || typeof url !== 'string') {
@@ -132,7 +51,7 @@ class BaseClient {
         }
     }
 
-    async request(url, options = {}) {
+    async request(url, options = {}, skipAuth = false) {
         // Валидация параметров
         this._validateParams(url, options);
         
@@ -142,11 +61,11 @@ class BaseClient {
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'omit', // По умолчанию не отправляем cookies
+            credentials: 'include', // TODO: <-- проверить влияние на ошибку
         };
 
-        // Добавляем токен авторизации, если он есть
-        if (this.accessToken) {
+        // Добавляем токен авторизации, если он есть и не пропускаем auth
+        if (this.accessToken && !skipAuth) {
             defaultOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
         }
 
@@ -162,34 +81,45 @@ class BaseClient {
         try {
             const response = await fetch(fullUrl, requestOptions);
             
-            // Обработка 401 ошибки - попытка обновления токена
-            if (response.status === 401 && this.accessToken) {
+            // Обработка 401 ошибки - попытка обновления токена (только если не пропускаем auth)
+            if (response.status === 401 && this.accessToken && !skipAuth) {
                 try {
-                    await this.refreshToken();
-                    
-                    // Повторяем запрос с новым токеном
-                    if (this.accessToken) {
-                        requestOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
-                        const retryResponse = await fetch(fullUrl, requestOptions);
+                    // Используем AuthClient для обновления токена
+                    if (window.app && window.app.authClient) {
+                        const data = await window.app.authClient.refreshToken();
+                        this.accessToken = data.access_token;
                         
-                        if (retryResponse.ok) {
-                            const contentType = retryResponse.headers.get('content-type');
-                            if (contentType && contentType.includes('application/json')) {
-                                return await retryResponse.json();
-                            }
-                            return await retryResponse.text();
-                        } else {
-                            // Если повторный запрос тоже не удался
-                            if (retryResponse.status === 401 || retryResponse.status === 403) {
-                                if (window.app) {
-                                    await window.app.logout();
-                                }
-                                throw new Error('Требуется авторизация');
-                            }
-                            
-                            const errorData = await retryResponse.json().catch(() => ({}));
-                            this._handleApiError(retryResponse, errorData);
+                        // Обновляем токен во всех клиентах
+                        if (window.app) {
+                            window.app.updateTokens(data.access_token);
                         }
+                        
+                        // Повторяем запрос с новым токеном
+                        if (this.accessToken) {
+                            requestOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
+                            const retryResponse = await fetch(fullUrl, requestOptions);
+                            
+                            if (retryResponse.ok) {
+                                const contentType = retryResponse.headers.get('content-type');
+                                if (contentType && contentType.includes('application/json')) {
+                                    return await retryResponse.json();
+                                }
+                                return await retryResponse.text();
+                            } else {
+                                // Если повторный запрос тоже не удался
+                                if (retryResponse.status === 401 || retryResponse.status === 403) {
+                                    if (window.app) {
+                                        await window.app.logout();
+                                    }
+                                    throw new Error('Требуется авторизация');
+                                }
+                                
+                                const errorData = await retryResponse.json().catch(() => ({}));
+                                this._handleApiError(retryResponse, errorData);
+                            }
+                        }
+                    } else {
+                        throw new Error('AuthClient недоступен');
                     }
                 } catch (refreshError) {
                     // Если обновление не удалось - выходим из системы

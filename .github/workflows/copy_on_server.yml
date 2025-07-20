@@ -1,0 +1,29 @@
+name: Copy on server
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: applyr.cr.cloud.ru
+  IMAGE_NAME_BOT: applyr-bot
+  IMAGE_NAME_API: applyr-api
+  DEPLOY_HOST: "84.54.59.21"
+  DEPLOY_USER: deployer
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Load nginx files
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no nginx/nginx.conf ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/nginx/nginx.conf
+          scp -i private_key.pem -o StrictHostKeyChecking=no nginx/Dockerfile ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/nginx/Dockerfile
+          scp -i private_key.pem -o StrictHostKeyChecking=no nginx/docker-entrypoint.sh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/nginx/docker-entrypoint.sh
+          scp -i private_key.pem -o StrictHostKeyChecking=no nginx/renew-certs.sh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/nginx/renew-certs.sh
+          scp -i private_key.pem -o StrictHostKeyChecking=no nginx/init-ssl.sh ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/nginx/init-ssl.sh
+          rm .env

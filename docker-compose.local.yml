@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:15
+    container_name: postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
@@ -32,15 +33,14 @@ services:
       - applyr_network
 
   nginx:
-    build: 
-      context: ./nginx
-      dockerfile: Dockerfile.local
+    image: nginx:latest
+    container_name: nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
+      - ./nginx/ssl.local:/etc/nginx/ssl:ro
     depends_on:
       - api
     networks:
@@ -48,6 +48,7 @@ services:
 
   bot:
     build: ./bot
+    container_name: bot
     environment:
       API_URL: ${API_URL}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}

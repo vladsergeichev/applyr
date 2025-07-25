@@ -528,6 +528,38 @@ function deleteVacancy(vacancyId) {
     }
 }
 
+// Модалка подтверждения удаления вакансии
+function showDeleteVacancyModal(vacancyId) {
+    // Если уже есть модалка — не создаём новую
+    if (document.getElementById('delete-vacancy-modal')) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'delete-vacancy-modal';
+    modal.innerHTML = `
+        <div class=\"modal-content\" style=\"max-width:340px;text-align:center;\">
+            <div class=\"modal-header\"><h2>Удалить вакансию?</h2></div>
+            <div style=\"margin:1.2em 0 2em 0;\">Вы уверены, что хотите удалить вакансию?</div>
+            <div style=\"display:flex;gap:1em;justify-content:center;\">
+                <button class=\"btn btn-danger\" id=\"confirm-delete-vacancy\">Удалить</button>
+                <button class=\"btn btn-secondary\" id=\"cancel-delete-vacancy\">Отмена</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('confirm-delete-vacancy').onclick = function() {
+        deleteVacancy(vacancyId);
+        closeDeleteVacancyModal();
+    };
+    document.getElementById('cancel-delete-vacancy').onclick = closeDeleteVacancyModal;
+    modal.onclick = function(e) { if (e.target === modal) closeDeleteVacancyModal(); };
+}
+function closeDeleteVacancyModal() {
+    const modal = document.getElementById('delete-vacancy-modal');
+    if (modal) modal.remove();
+}
+
 // Инициализация приложения
 console.log('Загрузка приложения...');
 const app = new App(); 

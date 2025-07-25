@@ -449,6 +449,15 @@ body {
     gap: 0.75rem;
 }
 
+.vacancies-list-items--fullwidth {
+    width: 100%;
+    max-width: none;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
 .vacancy-item {
     display: flex;
     justify-content: space-between;
@@ -658,4 +667,143 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+} 
+
+.vacancy-card-layout {
+    display: flex;
+    align-items: center;
+    gap: 1.2em;
+    width: 100%;
+    /*margin-bottom: 0.7rem;*/
+}
+.vacancy-card-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 0.45em;
+}
+.vacancy-card-left {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: flex-start;
+    /*margin-right: 1.2em;*/
+}
+.vacancy-status-label {
+    display: inline-block;
+    min-width: 38px;
+    padding: 0.13em 0.8em;
+    border-radius: 999px;
+    background: #22c55e;
+    color: #fff;
+    font-size: 0.97em;
+    font-weight: 500;
+    text-align: center;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    vertical-align: middle;
+    margin-right: 0;
+}
+.vacancy-company {
+    display: inline;
+    font-size: 0.97em;
+    color: #94a3b8;
+    font-style: italic;
+    font-weight: 400;
+    margin: 0 0 0 0.7em;
+    vertical-align: baseline;
+}
+.vacancies-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    justify-content: flex-start;
+    /*margin-bottom: 1.2em;*/
+}
+.vacancies-count-simple {
+    color: #6b7280;
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-left: 0.5em;
+    vertical-align: middle;
+    display: inline;
+}
+.vacancy-title {
+    font-size: 1em;
+    font-weight: 400;
+    color: #222;
+    margin: 0 0 0.1em 0;
+    line-height: 1.2;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.vacancy-card-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 0.45em;
+}
+.vacancy-card-layout {
+    width: 100%;
+    /*margin-bottom: 0.7rem;*/
+}
+.vacancy-card-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 0.1em;
+}
+.vacancy-title {
+    display: block;
+    font-size: 1em;
+    font-weight: 400;
+    color: #222;
+    margin: 0 0 0.1em 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.vacancy-company {
+    display: block;
+    font-size: 0.97em;
+    color: #94a3b8;
+    font-style: normal;
+    font-weight: 400;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.vacancy-card-right {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    margin-left: 1.2em;
+}
+.vacancy-action-btn svg {
+    width: 17px;
+    height: 17px;
+}
+.vacancy-action-btn {
+    background: none;
+    border: none;
+    padding: 0.2em;
+    cursor: pointer;
+    color: #6b7280;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+}
+.vacancy-action-btn:hover {
+    color: #2563eb;
+}
+.vacancy-action-btn.delete-btn:hover {
+    color: #ef4444;
 } 

@@ -121,7 +121,7 @@ jobs:
             docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" -p "${{ secrets.REGISTRY_KEY_SECRET }}"
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest
-#            docker compose -f /applyr/docker-compose.yml up -d
+            docker compose -f /applyr/docker-compose.yml up -d
 
   # healthcheck:
   #   needs: deploy

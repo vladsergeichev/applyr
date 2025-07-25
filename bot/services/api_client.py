@@ -49,7 +49,7 @@ class APIClient:
                 }
 
                 async with session.post(
-                    f"{self.base_url}/applies/create_apply", json=apply_data
+                    f"{self.base_url}/vacancy/create_vacancy", json=apply_data
                 ) as response:
                     if response.status == 200:
                         result = await response.json()
@@ -82,3 +82,16 @@ class APIClient:
         except Exception as e:
             logger.error(f"Ошибка получения откликов: {e}")
             return []
+
+    async def get_user_by_telegram_username(self, telegram_username: str) -> int | None:
+        """Возвращает user_id пользователя по telegram_username, если найден, иначе None"""
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{self.base_url}/auth/get_by_telegram/{telegram_username}") as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        return data.get("id")
+                    return None
+        except Exception as e:
+            logger.error(f"Ошибка при проверке telegram_username: {e}")
+            return None

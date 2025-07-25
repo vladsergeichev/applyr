@@ -2,13 +2,14 @@ import logging
 
 from core.dependencies import get_auth_service, get_current_user
 from exceptions import TokenInvalidException
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Request, Response, HTTPException
 from models import UserModel
 from schemas.auth import (
     AuthLoginSchema,
     AuthRegisterSchema,
     AuthResponseSchema,
     UpdateTelegramSchema,
+    UserInfoSchema,
 )
 from services.auth_service import AuthService
 
@@ -77,3 +78,21 @@ async def update_telegram_username(
         current_user.id, telegram_data.telegram_username
     )
     return {"message": "Telegram username успешно обновлен"}
+
+
+@router.get("/get_by_telegram/{telegram_username}", response_model=UserInfoSchema)
+async def get_by_telegram_username(
+    telegram_username: str,
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    """Получить пользователя по telegram_username"""
+    logger.info("I am this!" + telegram_username)
+    user = await auth_service.auth_repo.get_by_telegram_username(telegram_username)
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+    return UserInfoSchema(
+        id=user.id,
+        username=user.username,
+        telegram_username=user.telegram_username,
+        created_at=user.created_at,
+    )

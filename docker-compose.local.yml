@@ -22,6 +22,7 @@ services:
     build: ./api
 #    ports:
 #      - "8000:8000"  # Прямой доступ к API для разработки
+    container_name: api
     env_file:
       - .env
     volumes:
@@ -63,4 +64,4 @@ volumes:
 
 networks:
   applyr_network:
-    driver: bridge 
+    driver: bridge

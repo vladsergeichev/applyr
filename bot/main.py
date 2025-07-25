@@ -18,8 +18,8 @@ dp = Dispatcher()
 
 # Регистрация роутеров
 dp.include_router(commands.router)
-dp.include_router(applies.router)
 dp.include_router(vacancy_handler.router)
+dp.include_router(applies.router)
 
 
 async def main():

@@ -8,13 +8,13 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 
-@router.message(Command("start"))
-async def cmd_start(message: Message):
-    """Обработчик команды /start"""
-    await message.answer(
-        "Привет! Я бот для управления откликами на вакансии.\n\n"
-        "Перешлите мне сообщение с описанием вакансии, и я создам отклик."
-    )
+# @router.message(Command("start"))
+# async def cmd_start(message: Message):
+#     """Обработчик команды /start"""
+#     await message.answer(
+#         "Привет! Я бот для управления откликами на вакансии.\n\n"
+#         "Перешлите мне сообщение с описанием вакансии, и я создам отклик."
+#     )
 
 
 @router.message(Command("help"))

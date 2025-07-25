@@ -13,9 +13,15 @@ api_client = APIClient()
 @router.message(Command("my_applies"))
 async def cmd_my_applies(message: Message):
     """Показывает все отклики пользователя"""
+    # Проверяем, знаем ли пользователя
+    username = message.from_user.username
+    if not username or not await api_client.get_user_by_telegram_username(username):
+        await message.answer(
+            "Вы не зарегистрированы в системе. Пожалуйста, перейдите на сайт https://applyr.vladsergeichev.ru и зарегистрируйтесь, используя ваш Telegram username. После этого вы сможете пользоваться ботом."
+        )
+        return
     try:
         # Используем username пользователя, если он есть, иначе используем user_id как строку
-        username = message.from_user.username or str(message.from_user.id)
         applies = await api_client.get_user_applies(username)
 
         if applies:

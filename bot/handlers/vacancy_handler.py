@@ -13,6 +13,15 @@ api_client = APIClient()
 @router.message()
 async def handle_message(message: Message):
     """Обработчик всех сообщений"""
+    # Проверяем, знаем ли пользователя
+    username = message.from_user.username
+    user_id = await api_client.get_user_by_telegram_username(username)
+    if not user_id:
+        await message.answer(
+            "Вы не зарегистрированы в системе. Пожалуйста, перейдите на сайт https://applyr.vladsergeichev.ru и зарегистрируйтесь. После этого вы сможете пользоваться ботом."
+        )
+        return
+
     # Проверяем, что это пересланное сообщение
     if not message.forward_from_chat:
         await message.answer(
@@ -29,14 +38,9 @@ async def handle_message(message: Message):
     vacancy_name = extract_vacancy_name(message.text)
     link = generate_link(message.forward_from_chat.id, message.forward_from_message_id)
 
-    # Создаем пользователя, если его нет
-    await api_client.create_user(
-        message.from_user.id, message.from_user.username, message.from_user.first_name
-    )
-
     # Создаем отклик
     success, result = await api_client.create_apply(
-        message.from_user.id, vacancy_name, link
+        user_id, vacancy_name, link
     )
 
     if success:

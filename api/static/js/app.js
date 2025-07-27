@@ -514,18 +514,17 @@ class App {
 
 // Глобальные функции для кнопок в карточках
 function deleteVacancy(vacancyId) {
-    if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
-        app.vacancyClient.deleteVacancy(vacancyId)
-            .then(() => {
-                app.messageManager.showSuccess('Вакансия удалена');
-                // Перезагружаем вакансии текущего пользователя
-                app.loadUserVacancies();
-            })
-            .catch(error => {
-                console.error('Ошибка удаления вакансии:', error);
-                app.messageManager.showError(error.message || 'Ошибка удаления вакансии');
-            });
-    }
+    // Удаляем confirm, удаление теперь только через кастомную модалку
+    app.vacancyClient.deleteVacancy(vacancyId)
+        .then(() => {
+            app.messageManager.showSuccess('Вакансия удалена');
+            // Перезагружаем вакансии текущего пользователя
+            app.loadUserVacancies();
+        })
+        .catch(error => {
+            console.error('Ошибка удаления вакансии:', error);
+            app.messageManager.showError(error.message || 'Ошибка удаления вакансии');
+        });
 }
 
 // Модалка подтверждения удаления вакансии

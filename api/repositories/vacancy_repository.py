@@ -34,7 +34,7 @@ class VacancyRepository:
     async def get_by_user_id(self, user_id: int) -> List[VacancyModel]:
         """Получает все вакансии пользователя"""
         result = await self.db.execute(
-            select(VacancyModel).where(VacancyModel.user_id == user_id)
+            select(VacancyModel).where(VacancyModel.user_id == user_id).order_by(VacancyModel.created_at.desc())
         )
         return result.scalars().all()
 

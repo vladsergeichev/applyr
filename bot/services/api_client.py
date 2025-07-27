@@ -49,7 +49,7 @@ class APIClient:
                 }
 
                 async with session.post(
-                    f"{self.base_url}/vacancy/create_vacancy", json=apply_data
+                    f"{self.base_url}/vacancy/create_vacancy_from_bot", json=apply_data
                 ) as response:
                     if response.status == 200:
                         result = await response.json()

@@ -93,7 +93,7 @@ class AsyncTestAPIClient(AsyncClient):
                 "company_name": self.faker.company(),
                 "description": self.faker.text(max_nb_chars=200),
             }
-        return await self.post("/vacancy/create_vacancy", json=vacancy_data)
+        return await self.post("/vacancy/create_vacancy_from_bot", json=vacancy_data)
 
     async def get_vacancy(self, vacancy_id: int) -> Response:
         """Получение конкретной вакансии"""

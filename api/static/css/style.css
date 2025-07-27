@@ -126,6 +126,10 @@ body {
     overflow-y: auto;
     transform: scale(0.95);
     transition: transform 0.2s ease;
+    padding: 2.2em 2.2em 2em 2.2em;
+    border-radius: 16px;
+    min-width: 600px;
+    max-width: 700px;
 }
 
 .modal.show .modal-content {
@@ -148,6 +152,7 @@ body {
     color: #111827;
     font-size: 1.25rem;
     font-weight: 600;
+    margin-bottom: 1.2em;
 }
 
 .close-btn {
@@ -801,11 +806,15 @@ body {
     background: none;
     border: none;
     padding: 0.2em;
-    cursor: default;
+    cursor: pointer;
     color: #6b7280;
     transition: color 0.15s;
     display: flex;
     align-items: center;
+}
+.vacancy-action-btn[disabled], .vacancy-action-btn:disabled {
+    cursor: default;
+    opacity: 0.5;
 }
 .vacancy-action-btn:hover {
     color: #2563eb;
@@ -888,4 +897,46 @@ body {
     margin-top: 0.2em;
     width: 80%;
     box-sizing: border-box;
+} 
+
+.add-vacancy-btn {
+    margin-left: auto;
+    font-size: 1em;
+    padding: 0.5em 1.2em;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.modal form .form-group {
+    margin-bottom: 1.1em;
+    text-align: left;
+}
+.modal form label {
+    display: block;
+    font-size: 0.98em;
+    font-weight: 500;
+    margin-bottom: 0.3em;
+}
+.modal form .form-control {
+    width: 100%;
+    padding: 0.45em 0.7em;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1.02em;
+    margin-bottom: 0.1em;
+    box-sizing: border-box;
+}
+.modal form textarea.form-control {
+    resize: vertical;
+    min-height: 2.2em;
+    max-height: 7em;
+}
+.modal-footer {
+    margin-top: 1.7em;
+    margin-bottom: 1.25rem;
+    gap: 1.5em;
+} 
+
+.vacancy-link-btn, .vacancy-edit-btn, .delete-btn {
+    cursor: pointer;
 } 

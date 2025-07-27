@@ -66,7 +66,9 @@ class VacancyRenderer {
         header.innerHTML = `
             <h3 style="display:inline;vertical-align:middle;">Мои вакансии</h3>
             <span class="vacancies-count-simple">${vacancies.length}</span>
+            <button class="btn btn-primary add-vacancy-btn" style="margin-left:auto;">+ Добавить вакансию</button>
         `;
+        header.querySelector('.add-vacancy-btn').onclick = () => showVacancyModal({ mode: 'add' });
         return header;
     }
 
@@ -109,23 +111,48 @@ class VacancyRenderer {
 
         // Иконки
         const linkIcon = vacancy.link ?
-            `<a href="${this.escapeHtml(vacancy.link)}" target="_blank" class="vacancy-action-btn" title="Открыть вакансию" onclick="event.stopPropagation()">
+            `<a href="${this.escapeHtml(vacancy.link)}" target="_blank" class="vacancy-action-btn vacancy-link-btn" title="Открыть вакансию">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             </a>` : '';
-        const editIcon = `<button class="vacancy-action-btn" title="Редактировать" disabled style="opacity:0.5;cursor:default" onclick="event.stopPropagation()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
-        </button>`;
-        const deleteIcon = `<button class="vacancy-action-btn delete-btn" onclick="event.stopPropagation();showDeleteVacancyModal(${vacancy.id})" title="Удалить вакансию">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
-        </button>`;
+        // Кнопка редактирования через JS
+        const editBtn = document.createElement('button');
+        editBtn.className = 'vacancy-action-btn vacancy-edit-btn';
+        editBtn.title = 'Редактировать';
+        editBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>`;
+        editBtn.onclick = (e) => {
+            e.stopPropagation();
+            console.log('Редактировать', vacancy);
+            window.showVacancyModal({mode: 'edit', vacancy});
+        };
+        // Кнопка удаления
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'vacancy-action-btn delete-btn';
+        deleteBtn.title = 'Удалить вакансию';
+        deleteBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`;
+        deleteBtn.onclick = (e) => { e.stopPropagation(); showDeleteVacancyModal(vacancy.id); };
 
         item.innerHTML = `
             <div class="vacancy-card-layout">
                 <div class="vacancy-card-left">${statusLabel}</div>
                 <div class="vacancy-card-center">${title}${company}</div>
-                <div class="vacancy-card-right">${linkIcon}${editIcon}${deleteIcon}</div>
+                <div class="vacancy-card-right"></div>
             </div>
         `;
+        const right = item.querySelector('.vacancy-card-right');
+        // Ссылка
+        if (vacancy.link) {
+            const linkA = document.createElement('a');
+            linkA.href = vacancy.link;
+            linkA.target = '_blank';
+            linkA.className = 'vacancy-action-btn vacancy-link-btn';
+            linkA.title = 'Открыть вакансию';
+            linkA.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+            right.appendChild(linkA);
+        }
+        // Кнопка редактирования
+        right.appendChild(editBtn);
+        // Кнопка удаления
+        right.appendChild(deleteBtn);
 
         // Функция для рендера этапов
         async function renderStagesBlock() {
@@ -222,6 +249,140 @@ class VacancyRenderer {
     }
 }
 
+// Базовый компонент модального окна
+class Modal {
+    constructor({ title = '', content = '', onClose = null, onSubmit = null, submitText = '', cancelText = 'Отмена', showFooter = true }) {
+        this.modal = document.createElement('div');
+        this.modal.className = 'modal show';
+        this.modal.innerHTML = `
+            <div class="modal-content modal-base-content">
+                <div class="modal-header"><h2>${title}</h2></div>
+                <form class="modal-form">${typeof content === 'string' ? content : ''}</form>
+            </div>
+        `;
+        document.body.appendChild(this.modal);
+        this.form = this.modal.querySelector('.modal-form');
+        if (typeof content !== 'string' && content instanceof HTMLElement) {
+            this.form.appendChild(content);
+        }
+        // Footer с кнопками
+        if (showFooter) {
+            const footer = document.createElement('div');
+            footer.className = 'modal-footer';
+            if (submitText) {
+                this.submitBtn = document.createElement('button');
+                this.submitBtn.type = 'submit';
+                this.submitBtn.className = 'btn btn-primary';
+                this.submitBtn.textContent = submitText;
+                footer.appendChild(this.submitBtn);
+            }
+            this.cancelBtn = document.createElement('button');
+            this.cancelBtn.type = 'button';
+            this.cancelBtn.className = 'btn btn-secondary';
+            this.cancelBtn.textContent = cancelText;
+            this.cancelBtn.onclick = () => this.close();
+            footer.appendChild(this.cancelBtn);
+            this.form.appendChild(footer);
+        }
+        // Закрытие по клику вне окна
+        this.modal.onclick = (e) => { if (e.target === this.modal) this.close(); };
+        // Закрытие по Escape
+        this.escListener = (e) => { if (e.key === 'Escape') this.close(); };
+        window.addEventListener('keydown', this.escListener);
+        // Сабмит
+        if (onSubmit) {
+            this.form.onsubmit = async (e) => {
+                e.preventDefault();
+                await onSubmit(this);
+            };
+        }
+        this.onClose = onClose;
+    }
+    close() {
+        window.removeEventListener('keydown', this.escListener);
+        this.modal.remove();
+        if (this.onClose) this.onClose();
+    }
+    setContent(htmlOrElement) {
+        this.form.innerHTML = '';
+        if (typeof htmlOrElement === 'string') {
+            this.form.innerHTML = htmlOrElement;
+        } else if (htmlOrElement instanceof HTMLElement) {
+            this.form.appendChild(htmlOrElement);
+        }
+    }
+}
+
+// Универсальная модалка для добавления/редактирования вакансии
+function showVacancyModal({ mode = 'add', vacancy = null }) {
+    console.log('showVacancyModal', mode, vacancy);
+    const isEdit = mode === 'edit';
+    const companies = ["Яндекс", "Сбер", "Авито", "Альфа Банк", "Рога и Копыта"];
+    const formHtml = `
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text" name="title" class="form-control" required maxlength="100" value="${isEdit && vacancy ? escapeHtml(vacancy.name) : ''}" />
+        </div>
+        <div class="form-group">
+            <label>Ссылка на вакансию</label>
+            <input type="url" name="link" class="form-control" maxlength="300" value="${isEdit && vacancy ? escapeHtml(vacancy.link || '') : ''}" />
+        </div>
+        <div class="form-group">
+            <label>Компания</label>
+            <select name="company" class="form-control" required>
+                ${companies.map(c => `<option value="${c}"${isEdit && vacancy && vacancy.company_name === c ? ' selected' : ''}>${c}</option>`).join('')}
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Описание или комментарий</label>
+            <textarea name="description" class="form-control" rows="2" maxlength="300">${isEdit && vacancy ? escapeHtml(vacancy.description || '') : ''}</textarea>
+        </div>
+    `;
+    const modal = new Modal({
+        title: isEdit ? 'Редактировать вакансию' : 'Добавить вакансию',
+        content: formHtml,
+        submitText: isEdit ? 'Сохранить' : 'Добавить',
+        cancelText: 'Отмена',
+        onSubmit: async (modalInstance) => {
+            const form = modalInstance.form;
+            const data = {
+                name: form.title.value.trim(),
+                link: form.link.value.trim(),
+                company_name: form.company.value,
+                description: form.description.value.trim()
+            };
+            try {
+                let newVacancy;
+                if (isEdit && vacancy) {
+                    newVacancy = await app.vacancyClient.updateVacancy(vacancy.id, data);
+                } else {
+                    newVacancy = await app.vacancyClient.createVacancy(data);
+                }
+                modalInstance.close();
+                // Обновить/добавить вакансию в DOM
+                const grid = document.querySelector('.vacancies-list-items');
+                const renderer = app.vacancyRenderer || new VacancyRenderer();
+                if (isEdit && vacancy) {
+                    // Найти и заменить карточку
+                    const card = grid.querySelector(`[data-vacancy-id="${vacancy.id}"]`);
+                    if (card) {
+                        const outer = card.closest('.vacancy-card-outer');
+                        const newItem = renderer.createVacancyItem(newVacancy);
+                        grid.replaceChild(newItem, outer);
+                    }
+                } else {
+                    // Добавить новую карточку первой
+                    const newItem = renderer.createVacancyItem(newVacancy);
+                    grid.prepend(newItem);
+                }
+                app.messageManager.showSuccess(isEdit ? 'Вакансия обновлена!' : 'Вакансия добавлена!');
+            } catch (err) {
+                app.messageManager.showError(isEdit ? 'Ошибка обновления вакансии' : 'Ошибка добавления вакансии');
+            }
+        }
+    });
+}
+
 // Модалка подтверждения удаления этапа
 function showDeleteStageModal(stageId, onSuccess) {
     if (document.getElementById('delete-stage-modal')) return;
@@ -254,4 +415,90 @@ function showDeleteStageModal(stageId, onSuccess) {
 function closeDeleteStageModal() {
     const modal = document.getElementById('delete-stage-modal');
     if (modal) modal.remove();
-} 
+}
+
+// Для экранирования html в форме
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text || '';
+    return div.innerHTML;
+}
+
+// Модалка добавления вакансии
+function showAddVacancyModal() {
+    if (document.getElementById('add-vacancy-modal')) return;
+    const modal = document.createElement('div');
+    modal.className = 'modal show';
+    modal.id = 'add-vacancy-modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width:700px;min-width:600px;">
+            <div class="modal-header"><h2>Добавить вакансию</h2></div>
+            <form id="add-vacancy-form">
+                <div class="form-group">
+                    <label>Название</label>
+                    <input type="text" name="title" class="form-control" required maxlength="100" />
+                </div>
+                <div class="form-group">
+                    <label>Ссылка на вакансию</label>
+                    <input type="url" name="link" class="form-control" maxlength="300" />
+                </div>
+                <div class="form-group">
+                    <label>Компания</label>
+                    <select name="company" class="form-control" required>
+                        <option value="Яндекс">Яндекс</option>
+                        <option value="Сбер">Сбер</option>
+                        <option value="Авито">Авито</option>
+                        <option value="Альфа Банк">Альфа Банк</option>
+                        <option value="Рога и Копыта">Рога и Копыта</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Описание или комментарий</label>
+                    <textarea name="description" class="form-control" rows="2" maxlength="300"></textarea>
+                </div>
+                <div class="modal-footer" style="display:flex;gap:1em;justify-content:center;">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-add-vacancy">Отмена</button>
+                </div>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.getElementById('cancel-add-vacancy').onclick = closeAddVacancyModal;
+    modal.onclick = function(e) { if (e.target === modal) closeAddVacancyModal(); };
+    // Escape закрывает модалку
+    const escListener = function(e) { if (e.key === 'Escape') closeAddVacancyModal(); };
+    window.addEventListener('keydown', escListener);
+    modal._escListener = escListener;
+    document.getElementById('add-vacancy-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+            name: form.title.value.trim(),
+            link: form.link.value.trim(),
+            company_name: form.company.value,
+            description: form.description.value.trim()
+        };
+        try {
+            const newVacancy = await app.vacancyClient.createVacancy(data);
+            closeAddVacancyModal();
+            const grid = document.querySelector('.vacancies-list-items');
+            if (grid) {
+                const renderer = app.vacancyRenderer || new VacancyRenderer();
+                const newItem = renderer.createVacancyItem(newVacancy);
+                grid.prepend(newItem);
+            }
+            app.messageManager.showSuccess('Вакансия добавлена!');
+        } catch (err) {
+            app.messageManager.showError('Ошибка добавления вакансии');
+        }
+    };
+}
+function closeAddVacancyModal() {
+    const modal = document.getElementById('add-vacancy-modal');
+    if (modal) {
+        if (modal._escListener) window.removeEventListener('keydown', modal._escListener);
+        modal.remove();
+    }
+}
+window.showVacancyModal = showVacancyModal; 

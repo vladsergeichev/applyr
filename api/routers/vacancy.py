@@ -4,20 +4,38 @@ from typing import List
 from core.dependencies import get_current_user, get_vacancy_service
 from fastapi import APIRouter, Depends, Path
 from models import UserModel
-from schemas.vacancy import VacancyCreateSchema, VacancySchema, VacancyUpdateSchema
+from schemas.vacancy import (
+    VacancyCreateSchema,
+    VacancySchema,
+    VacancyUpdateSchema,
+    VacancyBaseSchema,
+)
 from services.vacancy_service import VacancyService
 
 router = APIRouter(prefix="/vacancy", tags=["vacancy"])
 logger = logging.getLogger(__name__)
 
 
-@router.post("/create_vacancy", response_model=VacancySchema)
-async def create_vacancy(
+@router.post("/create_vacancy_from_bot", response_model=VacancySchema)
+async def create_vacancy_from_bot(
     vacancy_data: VacancyCreateSchema,
     vacancy_service: VacancyService = Depends(get_vacancy_service),
 ):
-    """Создание новой вакансии"""
+    """Создание новой вакансии через бот"""
     return await vacancy_service.create_vacancy(vacancy_data)
+
+@router.post("/create_vacancy", response_model=VacancySchema)
+async def create_vacancy(
+    vacancy_data: VacancyBaseSchema,
+    current_user: UserModel = Depends(get_current_user),
+    vacancy_service: VacancyService = Depends(get_vacancy_service),
+):
+    """Создание новой вакансии"""
+    data = VacancyCreateSchema(
+        user_id=current_user.id,
+        **vacancy_data.model_dump()
+    )
+    return await vacancy_service.create_vacancy(data)
 
 
 @router.get("/get_vacancy/{vacancy_id}", response_model=VacancySchema)

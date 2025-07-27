@@ -562,4 +562,5 @@ function closeDeleteVacancyModal() {
 
 // Инициализация приложения
 console.log('Загрузка приложения...');
-const app = new App(); 
+const app = new App();
+window.app = app; 

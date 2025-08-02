@@ -109,9 +109,9 @@ jobs:
 
       - name: Debug secrets
         run: |
-          echo "HOST: ${{ secrets.SERVER_HOST }}"
-          echo "USER: ${{ secrets.SERVER_USER }}"
-          echo "TARGET: ${{ secrets.TARGET_PATH }}"
+          echo "HOST: ${{ secrets.DEPLOY_HOST }}"
+          echo "USER: ${{ secrets.DEPLOY_USER }}"
+          echo "SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}"
 
       - name: Upload staticfiles
         uses: appleboy/scp-action@v1.0.0

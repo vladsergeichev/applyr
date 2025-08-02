@@ -109,15 +109,15 @@ jobs:
 
       - name: Debug secrets
         run: |
-          echo "HOST: ${{ secrets.DEPLOY_HOST }}"
-          echo "USER: ${{ secrets.DEPLOY_USER }}"
+          echo "HOST: ${{ env.DEPLOY_HOST }}"
+          echo "USER: ${{ env.DEPLOY_USER }}"
           echo "SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}"
 
       - name: Upload staticfiles
         uses: appleboy/scp-action@v1.0.0
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: static/*
           target: /applyr/static/*

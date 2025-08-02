@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Path
 from schemas.stage import StageCreateSchema, StageSchema, StageUpdateSchema
 from services.stage_service import StageService
 
-router = APIRouter(prefix="/stage", tags=["stage"])
+router = APIRouter(prefix="/stage")
 logger = logging.getLogger(__name__)
 
 

@@ -93,7 +93,7 @@ class AsyncTestAPIClient(AsyncClient):
                 "company_name": self.faker.company(),
                 "description": self.faker.text(max_nb_chars=200),
             }
-        return await self.post("/vacancy/create_vacancy_from_bot", json=vacancy_data)
+        return await self.post("/api/internal/create_vacancy", json=vacancy_data)
 
     async def get_vacancy(self, vacancy_id: int) -> Response:
         """Получение конкретной вакансии"""
@@ -101,7 +101,7 @@ class AsyncTestAPIClient(AsyncClient):
 
     async def get_vacancies(self) -> Response:
         """Получение вакансий текущего пользователя"""
-        return await self.get("/vacancy/get_vacancies")
+        return await self.get("/api/internal/get_vacancies")
 
     async def update_vacancy(
         self, vacancy_id: int, vacancy_data: Dict[str, Any]

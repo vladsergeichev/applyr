@@ -12,14 +12,6 @@ const HTTP_STATUS = {
     INTERNAL_SERVER_ERROR: 500
 };
 
-// Типы ошибок
-const ERROR_TYPES = {
-    VALIDATION: 'VALIDATION',
-    AUTHENTICATION: 'AUTHENTICATION',
-    AUTHORIZATION: 'AUTHORIZATION',
-    NOT_FOUND: 'NOT_FOUND',
-    SERVER_ERROR: 'SERVER_ERROR'
-};
 
 // Сообщения об ошибках
 const ERROR_MESSAGES = {
@@ -35,10 +27,3 @@ const ERROR_MESSAGES = {
     VALIDATION_ERROR: 'Ошибка валидации',
     SERVER_ERROR: 'Внутренняя ошибка сервера'
 };
-
-// Настройки API
-const API_CONFIG = {
-    DEFAULT_TIMEOUT: 10000,
-    RETRY_ATTEMPTS: 3,
-    RETRY_DELAY: 1000
-}; 

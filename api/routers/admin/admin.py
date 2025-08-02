@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from schemas.admin import StageResponse, TokenResponse, UserResponse, VacancyResponse
 from services.admin_service import AdminService
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+router = APIRouter()
 
 
 @router.get("/get_users", response_model=List[UserResponse])

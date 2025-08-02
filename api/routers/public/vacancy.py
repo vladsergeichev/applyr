@@ -12,17 +12,10 @@ from schemas.vacancy import (
 )
 from services.vacancy_service import VacancyService
 
-router = APIRouter(prefix="/vacancy", tags=["vacancy"])
+router = APIRouter(prefix="/vacancy")
 logger = logging.getLogger(__name__)
 
 
-@router.post("/create_vacancy_from_bot", response_model=VacancySchema)
-async def create_vacancy_from_bot(
-    vacancy_data: VacancyCreateSchema,
-    vacancy_service: VacancyService = Depends(get_vacancy_service),
-):
-    """Создание новой вакансии через бот"""
-    return await vacancy_service.create_vacancy(vacancy_data)
 
 @router.post("/create_vacancy", response_model=VacancySchema)
 async def create_vacancy(

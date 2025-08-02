@@ -12,30 +12,8 @@ class APIClient:
     def __init__(self, base_url: str = ""):
         self.base_url = base_url or app_config.API_URL
 
-    async def create_user(self, user_id: int, username: str, first_name: str) -> bool:
-        """Создает пользователя в базе данных, если его нет"""
-        try:
-            async with aiohttp.ClientSession() as session:
-                user_data = {
-                    "id": user_id,
-                    "name": f"{first_name} ({username})" if username else first_name,
-                    "username": username,
-                }
 
-                # Пытаемся создать пользователя (может уже существовать)
-                async with session.post(
-                    f"{self.base_url}/users/create_user", json=user_data
-                ) as response:
-                    if response.status not in [200, 409]:  # 409 - уже существует
-                        logger.error(f"Ошибка создания пользователя: {response.status}")
-                        return False
-                    return True
-
-        except Exception as e:
-            logger.error(f"Ошибка при создании пользователя: {e}")
-            return False
-
-    async def create_apply(
+    async def create_vacancy(
         self, user_id: int, name: str, link: str
     ) -> tuple[bool, str]:
         """Создает отклик через API"""
@@ -49,7 +27,7 @@ class APIClient:
                 }
 
                 async with session.post(
-                    f"{self.base_url}/vacancy/create_vacancy_from_bot", json=apply_data
+                    f"{self.base_url}/api/internal/create_vacancy", json=apply_data
                 ) as response:
                     if response.status == 200:
                         result = await response.json()
@@ -67,11 +45,11 @@ class APIClient:
             return False, f"Ошибка: {str(e)}"
 
     async def get_user_applies(self, username: str) -> list:
-        """Получает отклики пользователя по username"""
+        """Получает вакансии пользователя по username"""
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    f"{self.base_url}/applies/get_applies/{username}"
+                    f"{self.base_url}/api/internal/get_vacancies/{username}"
                 ) as response:
                     if response.status == 200:
                         return await response.json()
@@ -87,7 +65,7 @@ class APIClient:
         """Возвращает user_id пользователя по telegram_username, если найден, иначе None"""
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{self.base_url}/auth/get_by_telegram/{telegram_username}") as response:
+                async with session.get(f"{self.base_url}/api/internal/get_by_telegram/{telegram_username}") as response:
                     if response.status == 200:
                         data = await response.json()
                         return data.get("id")

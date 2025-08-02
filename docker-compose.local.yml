@@ -20,8 +20,6 @@ services:
 
   api:
     build: ./api
-#    ports:
-#      - "8000:8000"  # Прямой доступ к API для разработки
     container_name: api
     env_file:
       - .env
@@ -42,6 +40,7 @@ services:
     volumes:
       - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl.local:/etc/nginx/ssl:ro
+      - ./static:/etc/static
     depends_on:
       - api
     networks:

@@ -1,7 +1,8 @@
 // Базовый API клиент для HTTP запросов
 class BaseClient {
-    constructor(baseURL = '') {
-        this.baseURL = baseURL;
+    constructor(clientURL = '') {
+        const baseURL = '/api/public';
+        this.baseURL = baseURL + clientURL;
         this.accessToken = null;
         this.isRefreshing = false;
         this.refreshPromise = null;

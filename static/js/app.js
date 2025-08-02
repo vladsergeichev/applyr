@@ -358,8 +358,7 @@ class App {
             const response = await this.authClient.register(userData);
             
             this.accessToken = response.access_token;
-            // localStorage.setItem('accessToken', this.accessToken); // Удалено
-            
+
             // Используем ApiManager для установки токена всем клиентам
             this.apiManager.setAuthToken(this.accessToken);
             

@@ -38,17 +38,17 @@ async def handle_message(message: Message):
     vacancy_name = extract_vacancy_name(message.text)
     link = generate_link(message.forward_from_chat.id, message.forward_from_message_id)
 
-    # Создаем отклик
-    success, result = await api_client.create_apply(
+    # Создаем
+    success, result = await api_client.create_vacancy(
         user_id, vacancy_name, link
     )
 
     if success:
         await message.answer(
-            f"✅ <b>Отклик создан!</b>\n\n"
+            f"✅ <b>Вакансия сохранена!</b>\n\n"
             f"<b>Вакансия:</b> {vacancy_name}\n"
             f'<b>Ссылка:</b> <a href="{link}">Перейти к посту</a>\n\n'
-            f"Используйте /my_applies для просмотра всех откликов\n"
+            f"Используйте /my_vacancies для просмотра всех вакансий\n"
             f"Или заходите на сайт applyr.vladsergeichev.ru",
             parse_mode="HTML",
             disable_web_page_preview=True,

@@ -13,7 +13,7 @@ from schemas.auth import (
 )
 from services.auth_service import AuthService
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth")
 logger = logging.getLogger(__name__)
 
 
@@ -80,19 +80,3 @@ async def update_telegram_username(
     return {"message": "Telegram username успешно обновлен"}
 
 
-@router.get("/get_by_telegram/{telegram_username}", response_model=UserInfoSchema)
-async def get_by_telegram_username(
-    telegram_username: str,
-    auth_service: AuthService = Depends(get_auth_service),
-):
-    """Получить пользователя по telegram_username"""
-    logger.info("I am this!" + telegram_username)
-    user = await auth_service.auth_repo.get_by_telegram_username(telegram_username)
-    if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
-    return UserInfoSchema(
-        id=user.id,
-        username=user.username,
-        telegram_username=user.telegram_username,
-        created_at=user.created_at,
-    )

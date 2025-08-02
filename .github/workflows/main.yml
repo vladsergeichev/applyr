@@ -107,6 +107,12 @@ jobs:
           scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/.env
           rm .env
 
+      - name: Debug secrets
+        run: |
+          echo "HOST: ${{ secrets.SERVER_HOST }}"
+          echo "USER: ${{ secrets.SERVER_USER }}"
+          echo "TARGET: ${{ secrets.TARGET_PATH }}"
+
       - name: Upload staticfiles
         uses: appleboy/scp-action@v1.0.0
         with:

@@ -107,13 +107,18 @@ jobs:
           scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/.env
           rm .env
 
+      - name: List dist contents
+        run: |
+          echo "static/ contents:"
+          ls -lah static/
+
       - name: Upload staticfiles
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ env.DEPLOY_HOST }}
           username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: static/*
+          source: static/
           target: /applyr/static
 
       - name: Deploy

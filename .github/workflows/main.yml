@@ -121,6 +121,16 @@ jobs:
           source: static/
           target: /applyr
 
+      - name: Upload nginx files
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ env.DEPLOY_HOST }}
+          username: ${{ env.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: nginx/nginx.conf
+          target: /applyr/nginx
+
+
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:

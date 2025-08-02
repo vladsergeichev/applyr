@@ -12,8 +12,6 @@ env:
   IMAGE_NAME_API: applyr-api
   DEPLOY_HOST: "84.54.59.21"
   DEPLOY_USER: deployer
-  # SERVICE_1_HEALTHCHECK: http://your.server.com/service1/health
-  # SERVICE_2_HEALTHCHECK: http://your.server.com/service2/health
 
 jobs:
 #   lint:
@@ -128,7 +126,7 @@ jobs:
           username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: nginx/nginx.conf
-          target: /applyr/nginx
+          target: /applyr
 
 
       - name: Deploy
@@ -146,20 +144,3 @@ jobs:
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest
             docker compose -f /applyr/docker-compose.yml up -d
-
-  # healthcheck:
-  #   needs: deploy
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Check service 1 health
-  #       run: |
-  #         for i in {1..5}; do
-  #           curl --fail $SERVICE_1_HEALTHCHECK && break || sleep 5
-  #         done
-
-  #     - name: Check service 2 health
-  #       run: |
-  #         for i in {1..5}; do
-  #           curl --fail $SERVICE_2_HEALTHCHECK && break || sleep 5
-  #         done

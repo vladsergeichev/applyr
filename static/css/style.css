@@ -415,15 +415,11 @@ body {
     background: white;
 }
 
-.no-vacancies {
+.vacancies-list {
     padding: 3rem 1.5rem;
     text-align: center;
     color: #6b7280;
     font-size: 1rem;
-}
-
-.vacancies-list {
-    padding: 1.5rem;
 }
 
 .vacancies-header {

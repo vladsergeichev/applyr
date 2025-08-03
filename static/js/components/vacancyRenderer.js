@@ -2,20 +2,20 @@
 class VacancyRenderer {
     constructor() {
         this.vacanciesList = document.getElementById('vacancies-list');
-        this.noVacancies = document.getElementById('no-vacancies');
     }
 
     // Очищает контейнер вакансий
     clear() {
         this.vacanciesList.innerHTML = '';
         this.vacanciesList.classList.add('hidden');
-        this.noVacancies.classList.add('hidden');
     }
 
     // Показывает сообщение об отсутствии вакансий
     showNoVacancies() {
         this.clear();
-        this.noVacancies.classList.remove('hidden');
+        const header = this.createVacanciesHeader(0);
+        this.vacanciesList.appendChild(header);
+        this.vacanciesList.classList.remove('hidden');
     }
 
     // Показывает ошибку загрузки
@@ -51,7 +51,7 @@ class VacancyRenderer {
             return;
         }
 
-        const header = this.createVacanciesHeader(vacancies, username);
+        const header = this.createVacanciesHeader(vacancies.length);
         const grid = this.createVacanciesGrid(vacancies);
 
         this.vacanciesList.appendChild(header);
@@ -60,12 +60,12 @@ class VacancyRenderer {
     }
 
     // Создает заголовок списка вакансий
-    createVacanciesHeader(vacancies, username) {
+    createVacanciesHeader(vacancies_length) {
         const header = document.createElement('div');
         header.className = 'vacancies-header';
         header.innerHTML = `
             <h3 style="display:inline;vertical-align:middle;">Мои вакансии</h3>
-            <span class="vacancies-count-simple">${vacancies.length}</span>
+            <span class="vacancies-count-simple">${vacancies_length}</span>
             <button class="btn btn-primary add-vacancy-btn" style="margin-left:auto;">+ Добавить вакансию</button>
         `;
         header.querySelector('.add-vacancy-btn').onclick = () => showVacancyModal({ mode: 'add' });
@@ -209,7 +209,7 @@ class VacancyRenderer {
                     const value = input.value.trim();
                     if (value) {
                         try {
-                            await app.stageClient.createStage({ vacancy_id: vacancy.id, stage_type: "active", description: value });
+                            await app.stageClient.createStage({ vacancy_id: vacancy.id, stage_type: "HR", description: value });
                             await renderStagesBlock(); // перерисовать этапы после добавления
                         } catch (err) {
                             app.messageManager.showError('Ошибка добавления этапа');

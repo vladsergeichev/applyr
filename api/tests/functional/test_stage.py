@@ -219,7 +219,6 @@ async def test_stage_validation_errors(async_client: AsyncTestAPIClient):
         "vacancy_id": 1,
         "stage_type": "",
         "description": "Test description",
-        "occurred_at": "2024-01-01T00:00:00",
     }
     response = await async_client.create_stage(invalid_data)
     assert_response_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -228,7 +227,6 @@ async def test_stage_validation_errors(async_client: AsyncTestAPIClient):
         "vacancy_id": -1,
         "stage_type": "Отклик отправлен",
         "description": "Test description",
-        "occurred_at": "2024-01-01T00:00:00",
     }
     response = await async_client.create_stage(invalid_data)
     assert_response_status(response, status.HTTP_422_UNPROCESSABLE_ENTITY)

@@ -16,7 +16,6 @@ class StageRepository:
             vacancy_id=stage_data.vacancy_id,
             stage_type=stage_data.stage_type,
             description=stage_data.description,
-            occurred_at=stage_data.occurred_at,
         )
         self.db.add(stage)
         await self.db.commit()
@@ -55,8 +54,6 @@ class StageRepository:
             stage.stage_type = stage_data.stage_type
         if stage_data.description is not None:
             stage.description = stage_data.description
-        if stage_data.occurred_at is not None:
-            stage.occurred_at = stage_data.occurred_at
 
         await self.db.commit()
         await self.db.refresh(stage)

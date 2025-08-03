@@ -1,7 +1,10 @@
 from typing import List, Optional
 
+from sqlalchemy.orm import selectinload, joinedload
+
 from models import VacancyModel
-from schemas.vacancy import VacancyCreateSchema, VacancyUpdateSchema
+from schemas.stage import GetStageSchema
+from schemas.vacancy import VacancyCreateSchema, VacancyUpdateSchema, GetVacancySchema
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,12 +34,41 @@ class VacancyRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_user_id(self, user_id: int) -> List[VacancyModel]:
-        """Получает все вакансии пользователя"""
-        result = await self.db.execute(
-            select(VacancyModel).where(VacancyModel.user_id == user_id).order_by(VacancyModel.created_at.desc())
+    async def get_by_user_id(self, user_id: int) -> list[GetVacancySchema]:
+        """Получает все вакансии пользователя с этапами"""
+        query = (
+            select(VacancyModel)
+            .options(joinedload(VacancyModel.stages))
+            .where(VacancyModel.user_id == user_id)
         )
-        return result.scalars().all()
+        result = await self.db.execute(query)
+        vacancies = result.unique().scalars().all()  # Убираем дубли с помощью unique()
+        print(vacancies)
+
+        return [
+            GetVacancySchema(
+                id=vacancy.id,
+                user_id=vacancy.user_id,
+                name=vacancy.name,
+                link=vacancy.link,
+                company_name=vacancy.company_name,
+                description=vacancy.description,
+                created_at=vacancy.created_at,
+                updated_at=vacancy.updated_at,
+                stages=[
+                    GetStageSchema(
+                        id=stage.id,
+                        stage_type=stage.stage_type.value,
+                        title=stage.title,
+                        description=stage.description,
+                        created_at=stage.created_at,
+                        updated_at=stage.updated_at,
+                    )
+                    for stage in vacancy.stages
+                ],
+            )
+            for vacancy in vacancies
+        ]
 
     async def get_all(self) -> List[VacancyModel]:
         """Получает все вакансии"""

@@ -20,7 +20,7 @@ async def get_vacancies(admin_service: AdminService = Depends(get_admin_service)
     return await admin_service.get_all_vacancies()
 
 
-@router.get("/get_stages", response_model=List[StageResponse])
+@router.get("/get_stages")
 async def get_stages(admin_service: AdminService = Depends(get_admin_service)):
     """Получить все этапы"""
     return await admin_service.get_all_stages()

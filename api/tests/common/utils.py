@@ -63,7 +63,6 @@ def create_test_stage_data(faker: Faker, **overrides) -> Dict[str, Any]:
             ]
         ),
         "description": faker.text(max_nb_chars=200),
-        "occurred_at": faker.date_time().isoformat(),
     }
     data.update(overrides)
     return data

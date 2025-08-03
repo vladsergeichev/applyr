@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Any
 
 from repositories.auth_repository import AuthRepository
 from repositories.stage_repository import StageRepository
@@ -49,20 +49,10 @@ class AdminService:
             for vacancy in vacancies
         ]
 
-    async def get_all_stages(self) -> List[StageResponse]:
+    async def get_all_stages(self) -> Any:
         """Получает все этапы"""
         stages = await self.stage_repo.get_all()
-        return [
-            StageResponse(
-                id=stage.id,
-                name=stage.stage_type,
-                description=stage.description,
-                order_index=0,  # У StageModel нет order_index
-                vacancy_id=stage.vacancy_id,
-                created_at=stage.created_at,
-            )
-            for stage in stages
-        ]
+        return stages
 
     async def get_all_tokens(self) -> List[TokenResponse]:
         """Получает все refresh токены"""

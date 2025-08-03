@@ -29,22 +29,13 @@ class App {
     setupEventListeners() {
         console.log('Настройка обработчиков событий...');
 
-        // Кнопки аутентификации
+        // Кнопка входа
         const loginBtn = document.getElementById('login-btn');
+        loginBtn.addEventListener('click', () => this.showLoginModal());
 
-        if (loginBtn) {
-            loginBtn.addEventListener('click', () => {
-                console.log('Кнопка входа нажата');
-                this.showLoginModal();
-            });
-        } else {
-            console.error('Кнопка входа не найдена');
-        }
-
+        // Кнопка выхода
         const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.manualLogout());
-        }
+        logoutBtn.addEventListener('click', () => this.manualLogout());
 
         // Модальные окна
         const closeLoginBtn = document.getElementById('close-login');
@@ -81,15 +72,13 @@ class App {
             });
         }
 
-        // Формы
+        // --- Формы ---
+        // Форма входа
         const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+
+        // Форма регистрации
         const registerForm = document.getElementById('register-form');
-        const telegramForm = document.getElementById('telegram-form');
-
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        }
-
         if (registerForm) {
             registerForm.addEventListener('submit', (e) => this.handleRegister(e));
             
@@ -107,15 +96,13 @@ class App {
             });
         }
 
-        if (telegramForm) {
-            telegramForm.addEventListener('submit', (e) => this.handleTelegramConnect(e));
-        }
+        // Форма подключения Telegram
+        const telegramForm = document.getElementById('telegram-form');
+        telegramForm.addEventListener('submit', (e) => this.handleTelegramConnect(e));
 
         // Кнопка отмены подключения Telegram
         const cancelTelegramBtn = document.getElementById('cancel-telegram');
-        if (cancelTelegramBtn) {
-            cancelTelegramBtn.addEventListener('click', () => this.hideTelegramModal());
-        }
+        cancelTelegramBtn.addEventListener('click', () => this.hideTelegramModal());
 
         // Закрытие модальных окон по клику вне их
         document.addEventListener('click', (e) => {
@@ -223,7 +210,7 @@ class App {
         try {
             this.vacancyRenderer.showLoading();
             const vacancies = await this.vacancyClient.getVacancies();
-            this.vacancyRenderer.renderVacancies(vacancies, this.currentUser.username);
+            this.vacancyRenderer.renderVacancies(vacancies);
         } catch (error) {
             console.error('Ошибка загрузки вакансий:', error);
             this.vacancyRenderer.showError(error.message || 'Ошибка загрузки вакансий');

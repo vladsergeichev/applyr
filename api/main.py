@@ -17,6 +17,8 @@ app = FastAPI(
     title="Applyr API",
     description="API для управления вакансиями",
     version="1.0.0",
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
 )
 
 # Регистрация обработчиков исключений

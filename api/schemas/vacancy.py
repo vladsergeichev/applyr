@@ -3,7 +3,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, field_validator
-
+from schemas.stage import GetStageSchema
 
 class VacancyBaseSchema(BaseModel):
     name: str = Field(
@@ -83,3 +83,10 @@ class VacancySchema(VacancyBaseSchema):
 
     class Config:
         from_attributes = True
+
+class GetVacancySchema(VacancyBaseSchema):
+    id: int
+    user_id: int
+    created_at: datetime
+    updated_at: datetime
+    stages: list[GetStageSchema]

@@ -125,7 +125,6 @@ class AsyncTestAPIClient(AsyncClient):
                 "vacancy_id": 1,
                 "stage_type": "Отклик отправлен",
                 "description": self.faker.text(max_nb_chars=200),
-                "occurred_at": self.faker.date_time().isoformat(),
             }
         return await self.post("/stage/create_stage", json=stage_data)
 

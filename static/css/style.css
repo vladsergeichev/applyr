@@ -416,10 +416,10 @@ body {
 }
 
 .vacancies-list {
-    padding: 1.5rem 1.5rem;
-    text-align: center;
-    color: #6b7280;
-    font-size: 1rem;
+    padding: 1.5rem;
+    /*text-align: center;*/
+    /*color: #6b7280;*/
+    /*font-size: 1rem;*/
 }
 
 .vacancies-header {
@@ -697,7 +697,7 @@ body {
 }
 .vacancy-status-label {
     display: inline-block;
-    min-width: 38px;
+    width: 100px;
     padding: 0.13em 0.8em;
     border-radius: 999px;
     background: #22c55e;

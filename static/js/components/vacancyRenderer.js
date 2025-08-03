@@ -10,14 +10,6 @@ class VacancyRenderer {
         this.vacanciesList.classList.add('hidden');
     }
 
-    // Показывает сообщение об отсутствии вакансий
-    showNoVacancies() {
-        this.clear();
-        const header = this.createVacanciesHeader(0);
-        this.vacanciesList.appendChild(header);
-        this.vacanciesList.classList.remove('hidden');
-    }
-
     // Показывает ошибку загрузки
     showError(message) {
         this.clear();
@@ -43,13 +35,8 @@ class VacancyRenderer {
     }
 
     // Рендерит список вакансий
-    renderVacancies(vacancies, username) {
+    renderVacancies(vacancies) {
         this.clear();
-
-        if (!vacancies || vacancies.length === 0) {
-            this.showNoVacancies();
-            return;
-        }
 
         const header = this.createVacanciesHeader(vacancies.length);
         const grid = this.createVacanciesGrid(vacancies);
@@ -72,7 +59,7 @@ class VacancyRenderer {
         return header;
     }
 
-    // Создает сетку вакансий (без внешнего контейнера с рамкой)
+    // Создает сетку вакансий
     createVacanciesGrid(vacancies) {
         const grid = document.createElement('div');
         grid.className = 'vacancies-list-items vacancies-list-items--fullwidth';
@@ -95,14 +82,16 @@ class VacancyRenderer {
 
         // Цвета для статусов
         const statusColors = {
-            active: '#22c55e',
-            closed: '#ef4444',
-            draft: '#a3a3a3',
-            interview: '#3b82f6',
-            offer: '#f59e42',
+            new: '#b8bdea',
+            hr: '#8183b3',
+            tech: '#f47dc4',
+            business: '#8ea189',
+            rejected: '#856151',
+            offer: '#abf38b',
         };
-        const status = vacancy.status || 'active';
-        const statusColor = statusColors[status] || '#a3a3a3';
+        const lastStage = Array.isArray(vacancy.stages) && vacancy.stages.length > 0 ? vacancy.stages[vacancy.stages.length - 1] : null;
+        const status = lastStage && lastStage.stage_type ? lastStage.stage_type : 'new';
+        const statusColor = statusColors[status];
         const statusLabel = `<span class="vacancy-status-label" style="background:${statusColor}">${this.escapeHtml(status)}</span>`;
 
         // Название и компания
@@ -315,9 +304,7 @@ class Modal {
 
 // Универсальная модалка для добавления/редактирования вакансии
 function showVacancyModal({ mode = 'add', vacancy = null }) {
-    console.log('showVacancyModal', mode, vacancy);
     const isEdit = mode === 'edit';
-    const companies = ["Яндекс", "Сбер", "Авито", "Альфа Банк", "Рога и Копыта"];
     const formHtml = `
         <div class="form-group">
             <label>Название</label>
@@ -329,9 +316,8 @@ function showVacancyModal({ mode = 'add', vacancy = null }) {
         </div>
         <div class="form-group">
             <label>Компания</label>
-            <select name="company" class="form-control" required>
-                ${companies.map(c => `<option value="${c}"${isEdit && vacancy && vacancy.company_name === c ? ' selected' : ''}>${c}</option>`).join('')}
-            </select>
+            <input type="text" name="company" class="form-control" maxlength="300" value="${isEdit && vacancy ? escapeHtml(vacancy.company_name || '') : ''}" />
+
         </div>
         <div class="form-group">
             <label>Описание или комментарий</label>
@@ -424,81 +410,5 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Модалка добавления вакансии
-function showAddVacancyModal() {
-    if (document.getElementById('add-vacancy-modal')) return;
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.id = 'add-vacancy-modal';
-    modal.innerHTML = `
-        <div class="modal-content" style="max-width:700px;min-width:600px;">
-            <div class="modal-header"><h2>Добавить вакансию</h2></div>
-            <form id="add-vacancy-form">
-                <div class="form-group">
-                    <label>Название</label>
-                    <input type="text" name="title" class="form-control" required maxlength="100" />
-                </div>
-                <div class="form-group">
-                    <label>Ссылка на вакансию</label>
-                    <input type="url" name="link" class="form-control" maxlength="300" />
-                </div>
-                <div class="form-group">
-                    <label>Компания</label>
-                    <select name="company" class="form-control" required>
-                        <option value="Яндекс">Яндекс</option>
-                        <option value="Сбер">Сбер</option>
-                        <option value="Авито">Авито</option>
-                        <option value="Альфа Банк">Альфа Банк</option>
-                        <option value="Рога и Копыта">Рога и Копыта</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Описание или комментарий</label>
-                    <textarea name="description" class="form-control" rows="2" maxlength="300"></textarea>
-                </div>
-                <div class="modal-footer" style="display:flex;gap:1em;justify-content:center;">
-                    <button type="submit" class="btn btn-primary">Добавить</button>
-                    <button type="button" class="btn btn-secondary" id="cancel-add-vacancy">Отмена</button>
-                </div>
-            </form>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('cancel-add-vacancy').onclick = closeAddVacancyModal;
-    modal.onclick = function(e) { if (e.target === modal) closeAddVacancyModal(); };
-    // Escape закрывает модалку
-    const escListener = function(e) { if (e.key === 'Escape') closeAddVacancyModal(); };
-    window.addEventListener('keydown', escListener);
-    modal._escListener = escListener;
-    document.getElementById('add-vacancy-form').onsubmit = async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const data = {
-            name: form.title.value.trim(),
-            link: form.link.value.trim(),
-            company_name: form.company.value,
-            description: form.description.value.trim()
-        };
-        try {
-            const newVacancy = await app.vacancyClient.createVacancy(data);
-            closeAddVacancyModal();
-            const grid = document.querySelector('.vacancies-list-items');
-            if (grid) {
-                const renderer = app.vacancyRenderer || new VacancyRenderer();
-                const newItem = renderer.createVacancyItem(newVacancy);
-                grid.prepend(newItem);
-            }
-            app.messageManager.showSuccess('Вакансия добавлена!');
-        } catch (err) {
-            app.messageManager.showError('Ошибка добавления вакансии');
-        }
-    };
-}
-function closeAddVacancyModal() {
-    const modal = document.getElementById('add-vacancy-modal');
-    if (modal) {
-        if (modal._escListener) window.removeEventListener('keydown', modal._escListener);
-        modal.remove();
-    }
-}
-window.showVacancyModal = showVacancyModal; 
+
+window.showVacancyModal = showVacancyModal;

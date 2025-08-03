@@ -132,7 +132,6 @@ class StageFactory(BaseModelFactory):
                 ]
             ),
             "description": cls.__faker__.text(max_nb_chars=200),
-            "occurred_at": cls.__faker__.date_time().isoformat(),
         }
         data.update(overrides)
         return data
@@ -153,7 +152,6 @@ class StageFactory(BaseModelFactory):
                 ]
             ),
             "description": cls.__faker__.text(max_nb_chars=200),
-            "occurred_at": cls.__faker__.date_time().isoformat(),
         }
         data.update(overrides)
         return data

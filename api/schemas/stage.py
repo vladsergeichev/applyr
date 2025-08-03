@@ -10,7 +10,6 @@ class StageBaseSchema(BaseModel):
     description: Optional[str] = Field(
         None, max_length=1000, description="Описание этапа"
     )
-    occurred_at: Optional[datetime] = Field(None, description="Дата наступления этапа")
 
 
 class StageCreateSchema(StageBaseSchema):
@@ -24,7 +23,6 @@ class StageUpdateSchema(BaseModel):
     description: Optional[str] = Field(
         None, max_length=1000, description="Описание этапа"
     )
-    occurred_at: Optional[datetime] = Field(None, description="Дата наступления этапа")
 
 
 class StageSchema(StageBaseSchema):
@@ -34,3 +32,11 @@ class StageSchema(StageBaseSchema):
 
     class Config:
         from_attributes = True
+
+class GetStageSchema(BaseModel):
+    id: int
+    stage_type: str
+    title: str | None = None
+    description: str | None = None
+    created_at: datetime
+    updated_at: datetime

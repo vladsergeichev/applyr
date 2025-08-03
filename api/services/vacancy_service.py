@@ -4,7 +4,12 @@ from typing import List
 from exceptions import UserNotFoundException, VacancyNotFoundException
 from repositories.auth_repository import AuthRepository
 from repositories.vacancy_repository import VacancyRepository
-from schemas.vacancy import VacancyCreateSchema, VacancySchema, VacancyUpdateSchema
+from schemas.vacancy import (
+    VacancyCreateSchema,
+    VacancySchema,
+    VacancyUpdateSchema,
+    GetVacancySchema,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +41,7 @@ class VacancyService:
         logger.info(f"Получена вакансия {vacancy_id}")
         return vacancy
 
-    async def get_vacancies_by_user_id(self, user_id: int) -> List[VacancySchema]:
+    async def get_vacancies_by_user_id(self, user_id: int) -> List[GetVacancySchema]:
         """Получает вакансии пользователя по username"""
         vacancies = await self.vacancy_repo.get_by_user_id(user_id)
         logger.info(f"Получено {len(vacancies)} вакансий для пользователя {user_id}")

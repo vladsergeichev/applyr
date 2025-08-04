@@ -40,10 +40,10 @@ class VacancyRepository:
             select(VacancyModel)
             .options(joinedload(VacancyModel.stages))
             .where(VacancyModel.user_id == user_id)
+            .order_by(VacancyModel.created_at.desc())
         )
         result = await self.db.execute(query)
         vacancies = result.unique().scalars().all()  # Убираем дубли с помощью unique()
-        print(vacancies)
 
         return [
             GetVacancySchema(

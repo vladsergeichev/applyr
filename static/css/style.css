@@ -935,4 +935,119 @@ body {
 
 .vacancy-link-btn, .vacancy-edit-btn, .delete-btn {
     cursor: pointer;
+}
+
+/* Новые стили для этапов */
+.vacancy-stages-block {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.stage-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+
+.stage-date {
+    min-width: 80px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.stage-type {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    min-width: 60px;
+    text-align: center;
+    color: white;
+}
+
+.stage-title {
+    flex: 1;
+    font-weight: 500;
+    color: #111827;
+}
+
+.stage-description {
+    flex: 2;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.stage-delete-btn {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.stage-delete-btn:hover {
+    opacity: 1;
+}
+
+.stage-add-btn {
+    color: #3b82f6;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.stage-add-btn:hover {
+    color: #2563eb;
+}
+
+/* Цвета для типов этапов */
+.stage-type-new {
+    background: #b8bdea;
+}
+
+.stage-type-hr {
+    background: #8183b3;
+}
+
+.stage-type-tech {
+    background: #f47dc4;
+}
+
+.stage-type-business {
+    background: #8ea189;
+}
+
+.stage-type-rejected {
+    background: #856151;
+}
+
+.stage-type-offer {
+    background: #abf38b;
+}
+
+/* Стили для подсказок */
+.suggestion-btn {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.suggestion-btn:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
 } 

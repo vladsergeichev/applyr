@@ -148,22 +148,10 @@ class VacancyRenderer {
             (stages || []).forEach(stage => {
                 const stageDiv = document.createElement('div');
                 stageDiv.className = 'stage-item';
-                stageDiv.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    padding: 8px 12px;
-                    border-bottom: 1px solid #e5e7eb;
-                    font-size: 14px;
-                `;
                 
                 // Дата
                 const dateDiv = document.createElement('div');
-                dateDiv.style.cssText = `
-                    min-width: 80px;
-                    color: #6b7280;
-                    font-size: 12px;
-                `;
+                dateDiv.className = 'stage-date';
                 const stageDate = new Date(stage.created_at);
                 dateDiv.textContent = stageDate.toLocaleDateString('ru-RU', {
                     day: '2-digit',
@@ -173,56 +161,24 @@ class VacancyRenderer {
                 
                 // Тип этапа (цветной лейбл)
                 const typeDiv = document.createElement('div');
-                console.log('stage')
-                console.log(stage)
-                const statusColor = STATUS_COLORS[stage.stage_type] || '#9ca3af';
-                typeDiv.style.cssText = `
-                    background: ${statusColor};
-                    color: white;
-                    padding: 2px 8px;
-                    border-radius: 12px;
-                    font-size: 11px;
-                    font-weight: 500;
-                    min-width: 60px;
-                    text-align: center;
-                `;
+                typeDiv.className = `stage-type stage-type-${stage.stage_type.toLowerCase()}`;
                 typeDiv.textContent = stage.stage_type.toLowerCase();
                 
                 // Заголовок этапа
                 const titleDiv = document.createElement('div');
-                titleDiv.style.cssText = `
-                    flex: 1;
-                    font-weight: 500;
-                    color: #111827;
-                `;
+                titleDiv.className = 'stage-title';
                 titleDiv.textContent = stage.title || 'Без названия';
                 
                 // Описание (если есть)
                 const descDiv = document.createElement('div');
-                descDiv.style.cssText = `
-                    flex: 2;
-                    color: #6b7280;
-                    font-size: 13px;
-                `;
+                descDiv.className = 'stage-description';
                 descDiv.textContent = stage.description || '';
                 
                 // Кнопка удаления
                 const delBtn = document.createElement('button');
                 delBtn.className = 'stage-delete-btn';
                 delBtn.title = 'Удалить этап';
-                delBtn.style.cssText = `
-                    background: none;
-                    border: none;
-                    color: #ef4444;
-                    cursor: pointer;
-                    padding: 4px;
-                    border-radius: 4px;
-                    opacity: 0.7;
-                    transition: opacity 0.2s;
-                `;
                 delBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`;
-                delBtn.onmouseover = () => delBtn.style.opacity = '1';
-                delBtn.onmouseout = () => delBtn.style.opacity = '0.7';
                 delBtn.onclick = function(e) {
                     e.stopPropagation();
                     showDeleteStageModal(stage.id, renderStagesBlock);
@@ -242,15 +198,6 @@ class VacancyRenderer {
             const addBtn = document.createElement('span');
             addBtn.className = 'stage-add-btn';
             addBtn.textContent = '+ Добавить этап';
-            addBtn.style.cssText = `
-                color: #3b82f6;
-                cursor: pointer;
-                font-weight: 500;
-                font-size: 14px;
-                transition: color 0.2s;
-            `;
-            addBtn.onmouseover = () => addBtn.style.color = '#2563eb';
-            addBtn.onmouseout = () => addBtn.style.color = '#3b82f6';
             addRow.appendChild(addBtn);
             stagesBlock.appendChild(addRow);
             // Логика добавления этапа
@@ -537,7 +484,7 @@ function showAddStageModal(vacancy, onSuccess) {
     
     // Функция для обновления подсказок
     function updateSuggestions() {
-        const selectedStageType = stageTypeSelect.value;
+        const selectedStageType = stageTypeSelect.value.toUpperCase();
         const suggestions = STAGE_TITLE_SUGGESTIONS[selectedStageType] || [];
         
         suggestionsList.innerHTML = '';
@@ -546,24 +493,6 @@ function showAddStageModal(vacancy, onSuccess) {
             suggestionBtn.type = 'button';
             suggestionBtn.className = 'suggestion-btn';
             suggestionBtn.textContent = suggestion;
-            suggestionBtn.style.cssText = `
-                background: #f3f4f6;
-                border: 1px solid #d1d5db;
-                border-radius: 4px;
-                padding: 4px 8px;
-                font-size: 12px;
-                color: #374151;
-                cursor: pointer;
-                transition: all 0.2s;
-            `;
-            suggestionBtn.onmouseover = () => {
-                suggestionBtn.style.background = '#e5e7eb';
-                suggestionBtn.style.borderColor = '#9ca3af';
-            };
-            suggestionBtn.onmouseout = () => {
-                suggestionBtn.style.background = '#f3f4f6';
-                suggestionBtn.style.borderColor = '#d1d5db';
-            };
             suggestionBtn.onclick = () => {
                 titleInput.value = suggestion;
                 titleInput.focus();

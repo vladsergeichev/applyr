@@ -15,8 +15,14 @@ class StageRepository:
         stage = StageModel(
             vacancy_id=stage_data.vacancy_id,
             stage_type=stage_data.stage_type,
+            title=stage_data.title,
             description=stage_data.description,
         )
+        
+        # Если передана дата создания, устанавливаем её
+        if stage_data.created_at:
+            stage.created_at = stage_data.created_at
+            
         self.db.add(stage)
         await self.db.commit()
         await self.db.refresh(stage)
@@ -52,6 +58,8 @@ class StageRepository:
         # Обновляем только переданные поля
         if stage_data.stage_type is not None:
             stage.stage_type = stage_data.stage_type
+        if stage_data.title is not None:
+            stage.title = stage_data.title
         if stage_data.description is not None:
             stage.description = stage_data.description
 

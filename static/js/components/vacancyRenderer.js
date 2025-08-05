@@ -80,18 +80,9 @@ class VacancyRenderer {
         item.className = 'vacancy-item';
         item.dataset.vacancyId = vacancy.id;
 
-        // Цвета для статусов
-        const statusColors = {
-            new: '#b8bdea',
-            hr: '#8183b3',
-            tech: '#f47dc4',
-            business: '#8ea189',
-            rejected: '#856151',
-            offer: '#abf38b',
-        };
         const lastStage = Array.isArray(vacancy.stages) && vacancy.stages.length > 0 ? vacancy.stages[vacancy.stages.length - 1] : null;
         const status = lastStage && lastStage.stage_type ? lastStage.stage_type : 'new';
-        const statusColor = statusColors[status];
+        const statusColor = STATUS_COLORS[status];
         const statusLabel = `<span class="vacancy-status-label" style="background:${statusColor}">${this.escapeHtml(status)}</span>`;
 
         // Название и компания
@@ -157,16 +148,91 @@ class VacancyRenderer {
             (stages || []).forEach(stage => {
                 const stageDiv = document.createElement('div');
                 stageDiv.className = 'stage-item';
-                stageDiv.textContent = stage.description;
+                stageDiv.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 8px 12px;
+                    border-bottom: 1px solid #e5e7eb;
+                    font-size: 14px;
+                `;
+                
+                // Дата
+                const dateDiv = document.createElement('div');
+                dateDiv.style.cssText = `
+                    min-width: 80px;
+                    color: #6b7280;
+                    font-size: 12px;
+                `;
+                const stageDate = new Date(stage.created_at);
+                dateDiv.textContent = stageDate.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: '2-digit'
+                });
+                
+                // Тип этапа (цветной лейбл)
+                const typeDiv = document.createElement('div');
+                console.log('stage')
+                console.log(stage)
+                const statusColor = STATUS_COLORS[stage.stage_type] || '#9ca3af';
+                typeDiv.style.cssText = `
+                    background: ${statusColor};
+                    color: white;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: 500;
+                    min-width: 60px;
+                    text-align: center;
+                `;
+                typeDiv.textContent = stage.stage_type.toLowerCase();
+                
+                // Заголовок этапа
+                const titleDiv = document.createElement('div');
+                titleDiv.style.cssText = `
+                    flex: 1;
+                    font-weight: 500;
+                    color: #111827;
+                `;
+                titleDiv.textContent = stage.title || 'Без названия';
+                
+                // Описание (если есть)
+                const descDiv = document.createElement('div');
+                descDiv.style.cssText = `
+                    flex: 2;
+                    color: #6b7280;
+                    font-size: 13px;
+                `;
+                descDiv.textContent = stage.description || '';
+                
                 // Кнопка удаления
                 const delBtn = document.createElement('button');
                 delBtn.className = 'stage-delete-btn';
                 delBtn.title = 'Удалить этап';
-                delBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`;
+                delBtn.style.cssText = `
+                    background: none;
+                    border: none;
+                    color: #ef4444;
+                    cursor: pointer;
+                    padding: 4px;
+                    border-radius: 4px;
+                    opacity: 0.7;
+                    transition: opacity 0.2s;
+                `;
+                delBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`;
+                delBtn.onmouseover = () => delBtn.style.opacity = '1';
+                delBtn.onmouseout = () => delBtn.style.opacity = '0.7';
                 delBtn.onclick = function(e) {
                     e.stopPropagation();
                     showDeleteStageModal(stage.id, renderStagesBlock);
                 };
+                
+                // Собираем элементы
+                stageDiv.appendChild(dateDiv);
+                stageDiv.appendChild(typeDiv);
+                stageDiv.appendChild(titleDiv);
+                stageDiv.appendChild(descDiv);
                 stageDiv.appendChild(delBtn);
                 stagesBlock.appendChild(stageDiv);
             });
@@ -175,44 +241,21 @@ class VacancyRenderer {
             addRow.className = 'stage-add-row';
             const addBtn = document.createElement('span');
             addBtn.className = 'stage-add-btn';
-            addBtn.textContent = '+ Добавить';
+            addBtn.textContent = '+ Добавить этап';
+            addBtn.style.cssText = `
+                color: #3b82f6;
+                cursor: pointer;
+                font-weight: 500;
+                font-size: 14px;
+                transition: color 0.2s;
+            `;
+            addBtn.onmouseover = () => addBtn.style.color = '#2563eb';
+            addBtn.onmouseout = () => addBtn.style.color = '#3b82f6';
             addRow.appendChild(addBtn);
             stagesBlock.appendChild(addRow);
             // Логика добавления этапа
             addBtn.addEventListener('click', function() {
-                if (stagesBlock.querySelector('.stage-add-input')) return;
-                addBtn.style.display = 'none';
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'stage-add-input';
-                input.placeholder = 'Название этапа';
-                input.autofocus = true;
-                addBtn.parentNode.appendChild(input);
-                input.focus();
-                let finished = false;
-                async function finishAdd() {
-                    if (finished) return;
-                    finished = true;
-                    input.removeEventListener('blur', finishAdd);
-                    input.removeEventListener('keydown', onKeyDown);
-                    const value = input.value.trim();
-                    if (value) {
-                        try {
-                            await app.stageClient.createStage({ vacancy_id: vacancy.id, stage_type: "HR", description: value });
-                            await renderStagesBlock(); // перерисовать этапы после добавления
-                        } catch (err) {
-                            app.messageManager.showError('Ошибка добавления этапа');
-                        }
-                    }
-                    input.remove();
-                    addBtn.style.display = '';
-                }
-                function onKeyDown(e) {
-                    if (e.key === 'Enter') finishAdd();
-                    if (e.key === 'Escape') { input.remove(); addBtn.style.display = ''; }
-                }
-                input.addEventListener('keydown', onKeyDown);
-                input.addEventListener('blur', finishAdd);
+                showAddStageModal(vacancy, renderStagesBlock);
             });
             // Удаляем старый блок и добавляем новый
             document.querySelectorAll('.vacancy-stages-block').forEach(el => el.remove());
@@ -410,5 +453,132 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Модальное окно для добавления этапа
+function showAddStageModal(vacancy, onSuccess) {
+    // Определяем предзаполненный тип этапа
+    const lastStage = Array.isArray(vacancy.stages) && vacancy.stages.length > 0 ? vacancy.stages[vacancy.stages.length - 1] : null;
+    const currentStageType = lastStage && lastStage.stage_type ? lastStage.stage_type : 'new';
+    const defaultStageType = currentStageType === 'new' ? 'hr' : currentStageType;
+    
+    // Текущая дата в формате YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
+    
+    const formHtml = `
+        <div class="form-group">
+            <label>Тип этапа</label>
+            <select name="stage_type" class="form-control" required>
+                <option value="new" ${defaultStageType === 'new' ? 'selected' : ''}>Новая вакансия</option>
+                <option value="hr" ${defaultStageType === 'hr' ? 'selected' : ''}>Этап HR</option>
+                <option value="tech" ${defaultStageType === 'tech' ? 'selected' : ''}>Технический этап</option>
+                <option value="business" ${defaultStageType === 'business' ? 'selected' : ''}>Бизнес этап</option>
+                <option value="rejected" ${defaultStageType === 'rejected' ? 'selected' : ''}>Отказ</option>
+                <option value="offer" ${defaultStageType === 'offer' ? 'selected' : ''}>Оффер</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Дата этапа</label>
+            <input type="date" name="date" class="form-control" value="${today}" required>
+        </div>
+        <div class="form-group">
+            <label>Название этапа</label>
+            <input type="text" name="title" class="form-control" maxlength="255" placeholder="Название этапа">
+            <div class="suggestions-container" style="margin-top: 8px;">
+                <div class="suggestions-list" style="display: flex; flex-wrap: wrap; gap: 4px;">
+                    <!-- Подсказки будут добавлены динамически -->
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Описание</label>
+            <textarea name="description" class="form-control" rows="3" maxlength="1000" placeholder="Описание этапа"></textarea>
+        </div>
+    `;
+    
+    const modal = new Modal({
+        title: 'Добавить этап',
+        content: formHtml,
+        submitText: 'Добавить',
+        cancelText: 'Отмена',
+        onSubmit: async (modalInstance) => {
+            const form = modalInstance.form;
+            const data = {
+                vacancy_id: vacancy.id,
+                stage_type: form.stage_type.value.toUpperCase(),
+                title: form.title.value.trim(),
+                description: form.description.value.trim()
+            };
+            
+            // Если выбрана дата, добавляем её в формате ISO без timezone
+            if (form.date.value) {
+                const selectedDate = new Date(form.date.value);
+                // Форматируем дату без timezone информации
+                const year = selectedDate.getFullYear();
+                const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                const day = String(selectedDate.getDate()).padStart(2, '0');
+                data.created_at = `${year}-${month}-${day}T00:00:00`;
+            }
+            
+            try {
+                await app.stageClient.createStage(data);
+                modalInstance.close();
+                if (onSuccess) await onSuccess();
+                app.messageManager.showSuccess('Этап добавлен!');
+            } catch (err) {
+                app.messageManager.showError('Ошибка добавления этапа');
+            }
+        }
+    });
+    
+    // Добавляем логику для подсказок
+    const form = modal.modal.querySelector('form');
+    const stageTypeSelect = form.querySelector('select[name="stage_type"]');
+    const titleInput = form.querySelector('input[name="title"]');
+    const suggestionsList = form.querySelector('.suggestions-list');
+    
+    // Функция для обновления подсказок
+    function updateSuggestions() {
+        const selectedStageType = stageTypeSelect.value;
+        const suggestions = STAGE_TITLE_SUGGESTIONS[selectedStageType] || [];
+        
+        suggestionsList.innerHTML = '';
+        suggestions.forEach(suggestion => {
+            const suggestionBtn = document.createElement('button');
+            suggestionBtn.type = 'button';
+            suggestionBtn.className = 'suggestion-btn';
+            suggestionBtn.textContent = suggestion;
+            suggestionBtn.style.cssText = `
+                background: #f3f4f6;
+                border: 1px solid #d1d5db;
+                border-radius: 4px;
+                padding: 4px 8px;
+                font-size: 12px;
+                color: #374151;
+                cursor: pointer;
+                transition: all 0.2s;
+            `;
+            suggestionBtn.onmouseover = () => {
+                suggestionBtn.style.background = '#e5e7eb';
+                suggestionBtn.style.borderColor = '#9ca3af';
+            };
+            suggestionBtn.onmouseout = () => {
+                suggestionBtn.style.background = '#f3f4f6';
+                suggestionBtn.style.borderColor = '#d1d5db';
+            };
+            suggestionBtn.onclick = () => {
+                titleInput.value = suggestion;
+                titleInput.focus();
+            };
+            suggestionsList.appendChild(suggestionBtn);
+        });
+    }
+    
+    // Инициализируем подсказки
+    updateSuggestions();
+    
+    // Обновляем подсказки при изменении типа этапа
+    stageTypeSelect.addEventListener('change', updateSuggestions);
+}
+
 
 window.showVacancyModal = showVacancyModal;
+window.showAddStageModal = showAddStageModal;

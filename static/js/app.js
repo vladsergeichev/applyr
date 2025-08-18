@@ -2,7 +2,6 @@
 // Основное приложение
 class App {
     constructor() {
-        console.log('Инициализация приложения...');
 
         // Используем ApiManager для централизованного управления клиентами
         this.apiManager = new ApiManager();
@@ -20,15 +19,11 @@ class App {
     }
 
     initializeApp() {
-        console.log('Настройка приложения...');
         this.setupEventListeners();
         this.checkAuthStatus();
-        console.log('Приложение инициализировано');
     }
 
     setupEventListeners() {
-        console.log('Настройка обработчиков событий...');
-
         // Кнопка входа
         const loginBtn = document.getElementById('login-btn');
         loginBtn.addEventListener('click', () => this.showLoginModal());
@@ -110,8 +105,6 @@ class App {
                 this.hideAllModals();
             }
         });
-
-        console.log('Обработчики событий настроены');
     }
 
     checkAuthStatus() {
@@ -122,7 +115,6 @@ class App {
     // Попытка обновления токена при загрузке страницы
     async tryRefreshToken() {
         try {
-            console.log('Попытка обновления токена...');
             const response = await this.authClient.refreshToken();
             
             // Если успешно получили новый токен
@@ -133,8 +125,6 @@ class App {
             await this.getCurrentUserInfo(false);
             
         } catch (error) {
-            // Тихая обработка ошибки - это нормально при первом входе
-            console.log('Refresh токен недоступен или истек');
             // Показываем кнопку входа если refresh не удался
             this.showAuthButtons();
         }
@@ -231,7 +221,6 @@ class App {
 
     // Модальные окна
     showLoginModal() {
-        console.log('Показ модального окна входа');
         const modal = document.getElementById('login-modal');
         if (modal) {
             modal.classList.add('show');
@@ -241,7 +230,6 @@ class App {
     }
 
     hideLoginModal() {
-        console.log('Скрытие модального окна входа');
         const modal = document.getElementById('login-modal');
         if (modal) {
             modal.classList.remove('show');
@@ -250,7 +238,6 @@ class App {
     }
 
     showRegisterModal() {
-        console.log('Показ модального окна регистрации');
         const modal = document.getElementById('register-modal');
         if (modal) {
             modal.classList.add('show');
@@ -260,7 +247,6 @@ class App {
     }
 
     hideRegisterModal() {
-        console.log('Скрытие модального окна регистрации');
         const modal = document.getElementById('register-modal');
         if (modal) {
             modal.classList.remove('show');
@@ -269,7 +255,6 @@ class App {
     }
 
     showTelegramModal() {
-        console.log('Показ модального окна подключения Telegram');
         const modal = document.getElementById('telegram-modal');
         if (modal) {
             modal.classList.add('show');
@@ -279,7 +264,6 @@ class App {
     }
 
     hideTelegramModal() {
-        console.log('Скрытие модального окна подключения Telegram');
         const modal = document.getElementById('telegram-modal');
         if (modal) {
             modal.classList.remove('show');
@@ -306,11 +290,9 @@ class App {
         try {
             this.messageManager.showLoading('Выполняется вход...');
             const response = await this.authClient.login(userData);
-            console.log(response[""])
-            
+
             this.accessToken = response.access_token;
-            // localStorage.setItem('accessToken', this.accessToken); // Удалено
-            
+
             // Используем ApiManager для установки токена всем клиентам
             this.apiManager.setAuthToken(this.accessToken);
             
@@ -525,6 +507,5 @@ function showDeleteVacancyModal(vacancyId) {
 }
 
 // Инициализация приложения
-console.log('Загрузка приложения...');
 const app = new App();
 window.app = app; 

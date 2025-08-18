@@ -63,24 +63,21 @@ class MessageManager {
     // Отображает сообщение
     async displayMessage(messageData) {
         const messageElement = this.createMessageElement(messageData);
+        messageElement.classList.add('message-slide-in');
         this.container.appendChild(messageElement);
 
-        // Анимация появления - сдвигаем справа
-        messageElement.style.transform = 'translateX(100%)';
-        messageElement.style.opacity = '0';
-        
         // Принудительно вызываем reflow
         messageElement.offsetHeight;
         
-        await this.animate(messageElement, {
-            transform: 'translateX(0)',
-            opacity: '1'
-        }, 300);
+        // Запускаем анимацию появления
+        messageElement.classList.add('show');
 
         // Автоматическое удаление
-        setTimeout(() => {
-            this.removeMessage(messageElement);
-        }, messageData.duration);
+        if (messageData.duration > 0) {
+            setTimeout(() => {
+                this.removeMessage(messageElement);
+            }, messageData.duration);
+        }
     }
 
     // Создает элемент сообщения
@@ -110,12 +107,12 @@ class MessageManager {
         }
 
         // Анимация исчезновения - сдвигаем вправо
-        await this.animate(messageElement, {
-            transform: 'translateX(100%)',
-            opacity: '0'
+        messageElement.classList.add('message-slide-out');
+        
+        // Ждем завершения анимации
+        setTimeout(() => {
+            messageElement.remove();
         }, 300);
-
-        messageElement.remove();
     }
 
     // Получает иконку для типа сообщения
@@ -130,46 +127,7 @@ class MessageManager {
         return icons[type] || icons.info;
     }
 
-    // Анимация CSS свойств
-    animate(element, properties, duration = 300) {
-        return new Promise(resolve => {
-            const startTime = performance.now();
-            const startValues = {};
-            
-            // Получаем начальные значения
-            for (const [property, value] of Object.entries(properties)) {
-                if (property === 'transform') {
-                    startValues[property] = element.style.transform || 'translateX(0)';
-                } else {
-                    startValues[property] = parseFloat(getComputedStyle(element)[property]) || 0;
-                }
-            }
 
-            const animate = (currentTime) => {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-
-                // Применяем анимацию
-                for (const [property, targetValue] of Object.entries(properties)) {
-                    if (property === 'transform') {
-                        element.style[property] = targetValue;
-                    } else {
-                        const startValue = startValues[property];
-                        const currentValue = startValue + (parseFloat(targetValue) - startValue) * progress;
-                        element.style[property] = property === 'opacity' ? currentValue : `${currentValue}px`;
-                    }
-                }
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                } else {
-                    resolve();
-                }
-            };
-
-            requestAnimationFrame(animate);
-        });
-    }
 
     // Очищает все сообщения
     clear() {

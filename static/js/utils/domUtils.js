@@ -125,12 +125,11 @@ class DomUtils {
         const el = typeof element === 'string' ? document.querySelector(element) : element;
         if (!el) return;
 
-        el.style.opacity = '0';
-        el.style.transition = `opacity ${duration}ms ease`;
+        el.classList.add('fade-in-animation');
         this.show(el);
 
         await new Promise(resolve => setTimeout(resolve, 10));
-        el.style.opacity = '1';
+        el.classList.add('show');
 
         return new Promise(resolve => {
             setTimeout(resolve, duration);
@@ -142,12 +141,13 @@ class DomUtils {
         const el = typeof element === 'string' ? document.querySelector(element) : element;
         if (!el) return;
 
-        el.style.transition = `opacity ${duration}ms ease`;
-        el.style.opacity = '0';
+        el.classList.add('fade-out-animation');
+        el.classList.add('hide');
 
         return new Promise(resolve => {
             setTimeout(() => {
                 this.hide(el);
+                el.classList.remove('fade-out-animation', 'hide');
                 resolve();
             }, duration);
         });

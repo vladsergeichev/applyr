@@ -1,16 +1,47 @@
+// Используем константы из отдельного файла
+
+// Утилиты
+const Utils = {
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    },
+
+    formatDate(date) {
+        return new Date(date).toLocaleDateString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit'
+        });
+    },
+
+    getLastStage(vacancy) {
+        return Array.isArray(vacancy.stages) && vacancy.stages.length > 0 
+            ? vacancy.stages[vacancy.stages.length - 1] 
+            : null;
+    }
+};
+
+// Иконки SVG
+const Icons = {
+    edit: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>`,
+    delete: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`,
+    link: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+    deleteSmall: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`
+};
+
 // Рендерер для отображения вакансий
 class VacancyRenderer {
     constructor() {
         this.vacanciesList = document.getElementById('vacancies-list');
     }
 
-    // Очищает контейнер вакансий
     clear() {
         this.vacanciesList.innerHTML = '';
         this.vacanciesList.classList.add('hidden');
     }
 
-    // Показывает ошибку загрузки
     showError(message) {
         this.clear();
         this.vacanciesList.innerHTML = `
@@ -22,7 +53,6 @@ class VacancyRenderer {
         this.vacanciesList.classList.remove('hidden');
     }
 
-    // Показывает индикатор загрузки
     showLoading() {
         this.clear();
         this.vacanciesList.innerHTML = `
@@ -34,32 +64,27 @@ class VacancyRenderer {
         this.vacanciesList.classList.remove('hidden');
     }
 
-    // Рендерит список вакансий
     renderVacancies(vacancies) {
         this.clear();
-
         const header = this.createVacanciesHeader(vacancies.length);
         const grid = this.createVacanciesGrid(vacancies);
-
         this.vacanciesList.appendChild(header);
         this.vacanciesList.appendChild(grid);
         this.vacanciesList.classList.remove('hidden');
     }
 
-    // Создает заголовок списка вакансий
-    createVacanciesHeader(vacancies_length) {
+    createVacanciesHeader(vacanciesLength) {
         const header = document.createElement('div');
         header.className = 'vacancies-header';
         header.innerHTML = `
-            <h3 style="display:inline;vertical-align:middle;">Мои вакансии</h3>
-            <span class="vacancies-count-simple">${vacancies_length}</span>
-            <button class="btn btn-primary add-vacancy-btn" style="margin-left:auto;">+ Добавить вакансию</button>
+            <h3>Мои вакансии</h3>
+            <span class="vacancies-count-simple">${vacanciesLength}</span>
+            <button class="btn btn-primary add-vacancy-btn">+ Добавить вакансию</button>
         `;
         header.querySelector('.add-vacancy-btn').onclick = () => showVacancyModal({ mode: 'add' });
         return header;
     }
 
-    // Создает сетку вакансий
     createVacanciesGrid(vacancies) {
         const grid = document.createElement('div');
         grid.className = 'vacancies-list-items vacancies-list-items--fullwidth';
@@ -70,9 +95,7 @@ class VacancyRenderer {
         return grid;
     }
 
-    // Создает элемент вакансии в виде списка
     createVacancyItem(vacancy) {
-        // Внешний контейнер
         const outer = document.createElement('div');
         outer.className = 'vacancy-card-outer';
 
@@ -80,36 +103,17 @@ class VacancyRenderer {
         item.className = 'vacancy-item';
         item.dataset.vacancyId = vacancy.id;
 
-        const lastStage = Array.isArray(vacancy.stages) && vacancy.stages.length > 0 ? vacancy.stages[vacancy.stages.length - 1] : null;
-        const status = lastStage && lastStage.stage_type ? lastStage.stage_type : 'new';
-        const statusColor = STATUS_COLORS[status];
-        const statusLabel = `<span class="vacancy-status-label" style="background:${statusColor}">${this.escapeHtml(status)}</span>`;
+        // Создаем статус
+        const lastStage = Utils.getLastStage(vacancy);
+        const status = lastStage?.stage_type || 'new';
+        const statusLabel = `<span class="vacancy-status-label vacancy-status-${status}">${Utils.escapeHtml(status)}</span>`;
 
-        // Название и компания
-        const title = `<span class="vacancy-title">${this.escapeHtml(vacancy.name)}</span>`;
-        const company = `<span class="vacancy-company">${this.escapeHtml(vacancy.company_name || '<название компании>')}</span>`;
+        // Создаем контент
+        const title = `<span class="vacancy-title">${Utils.escapeHtml(vacancy.name)}</span>`;
+        const company = `<span class="vacancy-company">${Utils.escapeHtml(vacancy.company_name || '<название компании>')}</span>`;
 
-        // Иконки
-        const linkIcon = vacancy.link ?
-            `<a href="${this.escapeHtml(vacancy.link)}" target="_blank" class="vacancy-action-btn vacancy-link-btn" title="Открыть вакансию">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            </a>` : '';
-        // Кнопка редактирования через JS
-        const editBtn = document.createElement('button');
-        editBtn.className = 'vacancy-action-btn vacancy-edit-btn';
-        editBtn.title = 'Редактировать';
-        editBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>`;
-        editBtn.onclick = (e) => {
-            e.stopPropagation();
-            console.log('Редактировать', vacancy);
-            window.showVacancyModal({mode: 'edit', vacancy});
-        };
-        // Кнопка удаления
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'vacancy-action-btn delete-btn';
-        deleteBtn.title = 'Удалить вакансию';
-        deleteBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`;
-        deleteBtn.onclick = (e) => { e.stopPropagation(); showDeleteVacancyModal(vacancy.id); };
+        // Создаем кнопки действий
+        const actionButtons = this.createActionButtons(vacancy);
 
         item.innerHTML = `
             <div class="vacancy-card-layout">
@@ -118,113 +122,150 @@ class VacancyRenderer {
                 <div class="vacancy-card-right"></div>
             </div>
         `;
-        const right = item.querySelector('.vacancy-card-right');
-        // Ссылка
-        if (vacancy.link) {
-            const linkA = document.createElement('a');
-            linkA.href = vacancy.link;
-            linkA.target = '_blank';
-            linkA.className = 'vacancy-action-btn vacancy-link-btn';
-            linkA.title = 'Открыть вакансию';
-            linkA.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
-            right.appendChild(linkA);
-        }
-        // Кнопка редактирования
-        right.appendChild(editBtn);
-        // Кнопка удаления
-        right.appendChild(deleteBtn);
 
-        // Функция для рендера этапов
-        async function renderStagesBlock() {
+        const right = item.querySelector('.vacancy-card-right');
+        actionButtons.forEach(btn => right.appendChild(btn));
+
+        // Добавляем функциональность этапов
+        this.addStagesFunctionality(item, outer, vacancy);
+
+        outer.appendChild(item);
+        return outer;
+    }
+
+    createActionButtons(vacancy) {
+        const buttons = [];
+
+        // Кнопка ссылки
+        if (vacancy.link) {
+            const linkBtn = document.createElement('a');
+            linkBtn.href = vacancy.link;
+            linkBtn.target = '_blank';
+            linkBtn.className = 'vacancy-action-btn vacancy-link-btn';
+            linkBtn.title = 'Открыть вакансию';
+            linkBtn.innerHTML = Icons.link;
+            buttons.push(linkBtn);
+        }
+
+        // Кнопка редактирования
+        const editBtn = document.createElement('button');
+        editBtn.className = 'vacancy-action-btn vacancy-edit-btn';
+        editBtn.title = 'Редактировать';
+        editBtn.innerHTML = Icons.edit;
+        editBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.showVacancyModal({mode: 'edit', vacancy});
+        };
+        buttons.push(editBtn);
+
+        // Кнопка удаления
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'vacancy-action-btn delete-btn';
+        deleteBtn.title = 'Удалить вакансию';
+        deleteBtn.innerHTML = Icons.delete;
+        deleteBtn.onclick = (e) => { 
+            e.stopPropagation(); 
+            showDeleteVacancyModal(vacancy.id); 
+        };
+        buttons.push(deleteBtn);
+
+        return buttons;
+    }
+
+    addStagesFunctionality(item, outer, vacancy) {
+        const renderStagesBlock = async () => {
             document.querySelectorAll('.vacancy-stages-block').forEach(el => el.remove());
+            
             let stages = [];
             try {
                 stages = await app.stageClient.getStages(vacancy.id);
             } catch (err) {
                 app.messageManager.showError('Ошибка загрузки этапов');
             }
-            const stagesBlock = document.createElement('div');
-            stagesBlock.className = 'vacancy-stages-block';
-            (stages || []).forEach(stage => {
-                const stageDiv = document.createElement('div');
-                stageDiv.className = 'stage-item';
-                
-                // Дата
-                const dateDiv = document.createElement('div');
-                dateDiv.className = 'stage-date';
-                const stageDate = new Date(stage.created_at);
-                dateDiv.textContent = stageDate.toLocaleDateString('ru-RU', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: '2-digit'
-                });
-                
-                // Тип этапа (цветной лейбл)
-                const typeDiv = document.createElement('div');
-                typeDiv.className = `stage-type stage-type-${stage.stage_type.toLowerCase()}`;
-                typeDiv.textContent = stage.stage_type.toLowerCase();
-                
-                // Заголовок этапа
-                const titleDiv = document.createElement('div');
-                titleDiv.className = 'stage-title';
-                titleDiv.textContent = stage.title || 'Без названия';
-                
-                // Описание (если есть)
-                const descDiv = document.createElement('div');
-                descDiv.className = 'stage-description';
-                descDiv.textContent = stage.description || '';
-                
-                // Кнопка удаления
-                const delBtn = document.createElement('button');
-                delBtn.className = 'stage-delete-btn';
-                delBtn.title = 'Удалить этап';
-                delBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`;
-                delBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    showDeleteStageModal(stage.id, renderStagesBlock);
-                };
-                
-                // Собираем элементы
-                stageDiv.appendChild(dateDiv);
-                stageDiv.appendChild(typeDiv);
-                stageDiv.appendChild(titleDiv);
-                stageDiv.appendChild(descDiv);
-                stageDiv.appendChild(delBtn);
-                stagesBlock.appendChild(stageDiv);
-            });
-            // + Добавить
-            const addRow = document.createElement('div');
-            addRow.className = 'stage-add-row';
-            const addBtn = document.createElement('span');
-            addBtn.className = 'stage-add-btn';
-            addBtn.textContent = '+ Добавить этап';
-            addRow.appendChild(addBtn);
-            stagesBlock.appendChild(addRow);
-            // Логика добавления этапа
-            addBtn.addEventListener('click', function() {
-                showAddStageModal(vacancy, renderStagesBlock);
-            });
-            // Удаляем старый блок и добавляем новый
-            document.querySelectorAll('.vacancy-stages-block').forEach(el => el.remove());
+
+            const stagesBlock = this.createStagesBlock(stages, vacancy, renderStagesBlock);
             outer.appendChild(stagesBlock);
-        }
+        };
 
         item.addEventListener('click', function(e) {
             if (e.target.closest('.vacancy-action-btn')) return;
             const next = outer.querySelector('.vacancy-stages-block');
-            if (next) { next.remove(); return; }
+            if (next) { 
+                next.remove(); 
+                return; 
+            }
             renderStagesBlock();
         });
-
-        outer.appendChild(item);
-        return outer;
     }
 
-    // Экранирует HTML для безопасности
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    createStagesBlock(stages, vacancy, onSuccess) {
+        const stagesBlock = document.createElement('div');
+        stagesBlock.className = 'vacancy-stages-block';
+
+        // Создаем этапы
+        (stages || []).forEach(stage => {
+            const stageDiv = this.createStageItem(stage, onSuccess);
+            stagesBlock.appendChild(stageDiv);
+        });
+
+        // Добавляем кнопку добавления
+        const addRow = this.createAddStageRow(vacancy, onSuccess);
+        stagesBlock.appendChild(addRow);
+
+        return stagesBlock;
+    }
+
+    createStageItem(stage, onSuccess) {
+        const stageDiv = document.createElement('div');
+        stageDiv.className = 'stage-item';
+        
+        // Дата
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'stage-date';
+        dateDiv.textContent = Utils.formatDate(stage.created_at);
+        
+        // Тип этапа
+        const typeDiv = document.createElement('div');
+        typeDiv.className = `stage-type stage-type-${stage.stage_type.toLowerCase()}`;
+        typeDiv.textContent = stage.stage_type.toLowerCase();
+        
+        // Заголовок
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'stage-title';
+        titleDiv.textContent = stage.title || 'Без названия';
+        
+        // Описание
+        const descDiv = document.createElement('div');
+        descDiv.className = 'stage-description';
+        descDiv.textContent = stage.description || '';
+        
+        // Кнопка удаления
+        const delBtn = document.createElement('button');
+        delBtn.className = 'stage-delete-btn';
+        delBtn.title = 'Удалить этап';
+        delBtn.innerHTML = Icons.deleteSmall;
+        delBtn.onclick = (e) => {
+            e.stopPropagation();
+            showDeleteStageModal(stage.id, onSuccess);
+        };
+        
+        // Собираем элементы
+        [dateDiv, typeDiv, titleDiv, descDiv, delBtn].forEach(el => stageDiv.appendChild(el));
+        
+        return stageDiv;
+    }
+
+    createAddStageRow(vacancy, onSuccess) {
+        const addRow = document.createElement('div');
+        addRow.className = 'stage-add-row';
+        
+        const addBtn = document.createElement('span');
+        addBtn.className = 'stage-add-btn';
+        addBtn.textContent = '+ Добавить этап';
+        addBtn.addEventListener('click', () => showAddStageModal(vacancy, onSuccess));
+        
+        addRow.appendChild(addBtn);
+        return addRow;
     }
 }
 
@@ -239,49 +280,69 @@ class Modal {
                 <form class="modal-form">${typeof content === 'string' ? content : ''}</form>
             </div>
         `;
+        
         document.body.appendChild(this.modal);
         this.form = this.modal.querySelector('.modal-form');
+        
         if (typeof content !== 'string' && content instanceof HTMLElement) {
             this.form.appendChild(content);
         }
-        // Footer с кнопками
-        if (showFooter) {
-            const footer = document.createElement('div');
-            footer.className = 'modal-footer';
-            if (submitText) {
-                this.submitBtn = document.createElement('button');
-                this.submitBtn.type = 'submit';
-                this.submitBtn.className = 'btn btn-primary';
-                this.submitBtn.textContent = submitText;
-                footer.appendChild(this.submitBtn);
-            }
-            this.cancelBtn = document.createElement('button');
-            this.cancelBtn.type = 'button';
-            this.cancelBtn.className = 'btn btn-secondary';
-            this.cancelBtn.textContent = cancelText;
-            this.cancelBtn.onclick = () => this.close();
-            footer.appendChild(this.cancelBtn);
-            this.form.appendChild(footer);
+
+        this.onSubmit = onSubmit;
+        this.onClose = onClose;
+
+        this.setupFooter(showFooter, submitText, cancelText, onSubmit);
+        this.setupEventListeners(onClose);
+    }
+
+    setupFooter(showFooter, submitText, cancelText, onSubmit) {
+        if (!showFooter) return;
+
+        const footer = document.createElement('div');
+        footer.className = 'modal-footer';
+        
+        if (submitText) {
+            this.submitBtn = document.createElement('button');
+            this.submitBtn.type = 'submit';
+            this.submitBtn.className = 'btn btn-primary';
+            this.submitBtn.textContent = submitText;
+            footer.appendChild(this.submitBtn);
         }
-        // Закрытие по клику вне окна
-        this.modal.onclick = (e) => { if (e.target === this.modal) this.close(); };
-        // Закрытие по Escape
-        this.escListener = (e) => { if (e.key === 'Escape') this.close(); };
+        
+        this.cancelBtn = document.createElement('button');
+        this.cancelBtn.type = 'button';
+        this.cancelBtn.className = 'btn btn-secondary';
+        this.cancelBtn.textContent = cancelText;
+        this.cancelBtn.onclick = () => this.close();
+        footer.appendChild(this.cancelBtn);
+        
+        this.form.appendChild(footer);
+    }
+
+    setupEventListeners(onClose) {
+        this.modal.onclick = (e) => { 
+            if (e.target === this.modal) this.close(); 
+        };
+        
+        this.escListener = (e) => { 
+            if (e.key === 'Escape') this.close(); 
+        };
         window.addEventListener('keydown', this.escListener);
-        // Сабмит
-        if (onSubmit) {
+        
+        if (this.onSubmit) {
             this.form.onsubmit = async (e) => {
                 e.preventDefault();
-                await onSubmit(this);
+                await this.onSubmit(this);
             };
         }
-        this.onClose = onClose;
     }
+
     close() {
         window.removeEventListener('keydown', this.escListener);
         this.modal.remove();
         if (this.onClose) this.onClose();
     }
+
     setContent(htmlOrElement) {
         this.form.innerHTML = '';
         if (typeof htmlOrElement === 'string') {
@@ -292,28 +353,28 @@ class Modal {
     }
 }
 
-// Универсальная модалка для добавления/редактирования вакансии
+// Модальные окна
 function showVacancyModal({ mode = 'add', vacancy = null }) {
     const isEdit = mode === 'edit';
     const formHtml = `
         <div class="form-group">
             <label>Название</label>
-            <input type="text" name="title" class="form-control" required maxlength="100" value="${isEdit && vacancy ? escapeHtml(vacancy.name) : ''}" />
+            <input type="text" name="title" class="form-control" required maxlength="100" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.name) : ''}" />
         </div>
         <div class="form-group">
             <label>Ссылка на вакансию</label>
-            <input type="url" name="link" class="form-control" maxlength="300" value="${isEdit && vacancy ? escapeHtml(vacancy.link || '') : ''}" />
+            <input type="url" name="link" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.link || '') : ''}" />
         </div>
         <div class="form-group">
             <label>Компания</label>
-            <input type="text" name="company" class="form-control" maxlength="300" value="${isEdit && vacancy ? escapeHtml(vacancy.company_name || '') : ''}" />
-
+            <input type="text" name="company" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.company_name || '') : ''}" />
         </div>
         <div class="form-group">
             <label>Описание или комментарий</label>
-            <textarea name="description" class="form-control" rows="2" maxlength="300">${isEdit && vacancy ? escapeHtml(vacancy.description || '') : ''}</textarea>
+            <textarea name="description" class="form-control" rows="2" maxlength="300">${isEdit && vacancy ? Utils.escapeHtml(vacancy.description || '') : ''}</textarea>
         </div>
     `;
+
     const modal = new Modal({
         title: isEdit ? 'Редактировать вакансию' : 'Добавить вакансию',
         content: formHtml,
@@ -327,87 +388,63 @@ function showVacancyModal({ mode = 'add', vacancy = null }) {
                 company_name: form.company.value,
                 description: form.description.value.trim()
             };
+
             try {
                 let newVacancy;
                 if (isEdit && vacancy) {
-                    newVacancy = await app.vacancyClient.updateVacancy(vacancy.id, data);
+                    newVacancy = await window.app.vacancyClient.updateVacancy(vacancy.id, data);
                 } else {
-                    newVacancy = await app.vacancyClient.createVacancy(data);
+                    newVacancy = await window.app.vacancyClient.createVacancy(data);
                 }
+                
                 modalInstance.close();
-                // Обновить/добавить вакансию в DOM
-                const grid = document.querySelector('.vacancies-list-items');
-                const renderer = app.vacancyRenderer || new VacancyRenderer();
-                if (isEdit && vacancy) {
-                    // Найти и заменить карточку
-                    const card = grid.querySelector(`[data-vacancy-id="${vacancy.id}"]`);
-                    if (card) {
-                        const outer = card.closest('.vacancy-card-outer');
-                        const newItem = renderer.createVacancyItem(newVacancy);
-                        grid.replaceChild(newItem, outer);
-                    }
-                } else {
-                    // Добавить новую карточку первой
-                    const newItem = renderer.createVacancyItem(newVacancy);
-                    grid.prepend(newItem);
-                }
-                app.messageManager.showSuccess(isEdit ? 'Вакансия обновлена!' : 'Вакансия добавлена!');
+                updateVacancyInDOM(isEdit, vacancy, newVacancy);
+                window.app.messageManager.showSuccess(isEdit ? 'Вакансия обновлена!' : 'Вакансия добавлена!');
             } catch (err) {
-                app.messageManager.showError(isEdit ? 'Ошибка обновления вакансии' : 'Ошибка добавления вакансии');
+                window.app.messageManager.showError(isEdit ? 'Ошибка обновления вакансии' : 'Ошибка добавления вакансии');
             }
         }
     });
 }
 
-// Модалка подтверждения удаления этапа
-function showDeleteStageModal(stageId, onSuccess) {
-    if (document.getElementById('delete-stage-modal')) return;
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.id = 'delete-stage-modal';
-    modal.innerHTML = `
-        <div class=\"modal-content\" style=\"max-width:340px;text-align:center;\">
-            <div class=\"modal-header\"><h2>Удалить этап?</h2></div>
-            <div class=\"modal-body\" style=\"margin:1.2em 0 2em 0;\">Вы уверены, что хотите удалить этап?</div>
-            <div class=\"modal-footer\" style=\"display:flex;gap:1em;justify-content:center;\">
-                <button class=\"btn btn-danger\" id=\"confirm-delete-stage\">Удалить</button>
-                <button class=\"btn btn-secondary\" id=\"cancel-delete-stage\">Отмена</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('confirm-delete-stage').onclick = async function() {
-        try {
-            await app.stageClient.deleteStage(stageId);
-            if (onSuccess) await onSuccess();
-        } catch (err) {
-            app.messageManager.showError('Ошибка удаления этапа');
-        }
-        closeDeleteStageModal();
-    };
-    document.getElementById('cancel-delete-stage').onclick = closeDeleteStageModal;
-    modal.onclick = function(e) { if (e.target === modal) closeDeleteStageModal(); };
-}
-function closeDeleteStageModal() {
-    const modal = document.getElementById('delete-stage-modal');
-    if (modal) modal.remove();
-}
-
-// Для экранирования html в форме
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text || '';
-    return div.innerHTML;
-}
-
-// Модальное окно для добавления этапа
-function showAddStageModal(vacancy, onSuccess) {
-    // Определяем предзаполненный тип этапа
-    const lastStage = Array.isArray(vacancy.stages) && vacancy.stages.length > 0 ? vacancy.stages[vacancy.stages.length - 1] : null;
-    const currentStageType = lastStage && lastStage.stage_type ? lastStage.stage_type : 'new';
-    const defaultStageType = currentStageType === 'new' ? 'hr' : currentStageType;
+function updateVacancyInDOM(isEdit, oldVacancy, newVacancy) {
+    const grid = document.querySelector('.vacancies-list-items');
+    const renderer = window.app.vacancyRenderer || new VacancyRenderer();
     
-    // Текущая дата в формате YYYY-MM-DD
+    if (isEdit && oldVacancy) {
+        const card = grid.querySelector(`[data-vacancy-id="${oldVacancy.id}"]`);
+        if (card) {
+            const outer = card.closest('.vacancy-card-outer');
+            const newItem = renderer.createVacancyItem(newVacancy);
+            grid.replaceChild(newItem, outer);
+        }
+    } else {
+        const newItem = renderer.createVacancyItem(newVacancy);
+        grid.prepend(newItem);
+    }
+}
+
+function showDeleteStageModal(stageId, onSuccess) {
+    window.modalManager.createConfirmModal({
+        title: 'Удалить этап?',
+        message: 'Вы уверены, что хотите удалить этап?',
+        confirmText: 'Удалить',
+        cancelText: 'Отмена',
+        onConfirm: async () => {
+            try {
+                await app.stageClient.deleteStage(stageId);
+                if (onSuccess) await onSuccess();
+            } catch (err) {
+                app.messageManager.showError('Ошибка удаления этапа');
+            }
+        }
+    });
+}
+
+function showAddStageModal(vacancy, onSuccess) {
+    const lastStage = Utils.getLastStage(vacancy);
+    const currentStageType = lastStage?.stage_type || 'new';
+    const defaultStageType = currentStageType === 'new' ? 'hr' : currentStageType;
     const today = new Date().toISOString().split('T')[0];
     
     const formHtml = `
@@ -429,8 +466,8 @@ function showAddStageModal(vacancy, onSuccess) {
         <div class="form-group">
             <label>Название этапа</label>
             <input type="text" name="title" class="form-control" maxlength="255" placeholder="Название этапа">
-            <div class="suggestions-container" style="margin-top: 8px;">
-                <div class="suggestions-list" style="display: flex; flex-wrap: wrap; gap: 4px;">
+            <div class="suggestions-container">
+                <div class="suggestions-list">
                     <!-- Подсказки будут добавлены динамически -->
                 </div>
             </div>
@@ -455,10 +492,8 @@ function showAddStageModal(vacancy, onSuccess) {
                 description: form.description.value.trim()
             };
             
-            // Если выбрана дата, добавляем её в формате ISO без timezone
             if (form.date.value) {
                 const selectedDate = new Date(form.date.value);
-                // Форматируем дату без timezone информации
                 const year = selectedDate.getFullYear();
                 const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
                 const day = String(selectedDate.getDate()).padStart(2, '0');
@@ -476,13 +511,15 @@ function showAddStageModal(vacancy, onSuccess) {
         }
     });
     
-    // Добавляем логику для подсказок
+    setupStageSuggestions(modal);
+}
+
+function setupStageSuggestions(modal) {
     const form = modal.modal.querySelector('form');
     const stageTypeSelect = form.querySelector('select[name="stage_type"]');
     const titleInput = form.querySelector('input[name="title"]');
     const suggestionsList = form.querySelector('.suggestions-list');
     
-    // Функция для обновления подсказок
     function updateSuggestions() {
         const selectedStageType = stageTypeSelect.value.toUpperCase();
         const suggestions = STAGE_TITLE_SUGGESTIONS[selectedStageType] || [];
@@ -501,13 +538,10 @@ function showAddStageModal(vacancy, onSuccess) {
         });
     }
     
-    // Инициализируем подсказки
     updateSuggestions();
-    
-    // Обновляем подсказки при изменении типа этапа
     stageTypeSelect.addEventListener('change', updateSuggestions);
 }
 
-
+// Экспорт в глобальную область
 window.showVacancyModal = showVacancyModal;
 window.showAddStageModal = showAddStageModal;

@@ -1,8 +1,8 @@
 import pytest
 from fastapi import status
-from models import UserModel
 from sqlalchemy import delete
 
+from app.models import UserModel
 from tests.common.api_client import AsyncTestAPIClient
 from tests.common.utils import (
     assert_response_contains,
@@ -15,7 +15,7 @@ from tests.factories.base_factories import UserFactory
 @pytest.fixture(autouse=True)
 async def clear_users(async_client: AsyncTestAPIClient):
     # Очищаем пользователей между тестами
-    from database import get_async_db
+    from app.database import get_async_db
 
     async for db in get_async_db():
         await db.execute(delete(UserModel))
@@ -240,7 +240,7 @@ async def test_access_token_contains_telegram_username(
     assert access_token is not None
 
     # Декодируем токен и проверяем содержимое
-    from core.security import verify_token
+    from app.core import verify_token
 
     payload = verify_token(access_token)
 

@@ -29,7 +29,7 @@ def event_loop():
 @pytest.fixture(scope="session")
 async def lifespanned_app(event_loop) -> AsyncIterator[FastAPI]:
     """Фикстура для управления жизненным циклом FastAPI приложения"""
-    from main import app
+    from app.main import app
 
     async with LifespanManager(app):
         yield app

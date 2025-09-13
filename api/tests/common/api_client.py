@@ -1,10 +1,11 @@
 import uuid
 from typing import Any, Dict, Optional, Self
 
-from core.security import verify_token
 from faker import Faker
 from fastapi import FastAPI, status
 from httpx import ASGITransport, AsyncClient, Response
+
+from app.core import verify_token
 
 
 class AsyncTestAPIClient(AsyncClient):

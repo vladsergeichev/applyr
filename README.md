@@ -106,7 +106,7 @@ applyr/
 
 #### Локальная разработка с HTTPS:
 ```bash
-docker-compose -f docker-compose.local.yml up -d --build
+docker-compose -f compose.local.yml up -d --build
 ```
 - **API Docs**: `https://localhost/docs`
 - **Health Check**: `https://localhost/health`

@@ -151,8 +151,7 @@ async def test_get_vacancies_empty_for_new_user(
 async def test_get_vacancies_unauthorized(async_client: AsyncTestAPIClient):
     """Тест получения вакансий без авторизации (должен вернуть 403 Forbidden)"""
     # Создаем новый клиент без авторизации
-    from main import app
-
+    from app.main import app
     from tests.common.api_client import AsyncTestAPIClient
 
     # Создаем новый клиент без авторизации

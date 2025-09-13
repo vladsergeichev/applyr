@@ -1,10 +1,13 @@
 FROM python:3.12-slim
 
-WORKDIR /app
+ENV PYTHONPATH=.
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /opt/applyr_bot
 
-COPY . .
+RUN pip install poetry==2.0.0
+COPY pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-cache --no-ansi
 
-CMD ["python", "main.py"] 
+COPY ./app /opt/applyr_bot/app
+
+CMD ["python", "-m", "app.main"]

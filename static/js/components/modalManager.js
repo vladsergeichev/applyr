@@ -62,7 +62,7 @@ class ModalManager {
                 <div class="modal-header">
                     <h2>${title}</h2>
                 </div>
-                <form id="form-${modalId}" class="auth-form">
+                <form id="form-${modalId}">
                     ${formContent}
                 </form>
             </div>

@@ -23,7 +23,7 @@ class BaseClient {
         if (!url || typeof url !== 'string') {
             throw new Error(ERROR_MESSAGES.INVALID_URL);
         }
-        
+
         if (options && typeof options !== 'object') {
             throw new Error(ERROR_MESSAGES.INVALID_OPTIONS);
         }
@@ -33,7 +33,7 @@ class BaseClient {
     _handleApiError(response, errorData) {
         const status = response.status;
         const detail = errorData?.detail || `HTTP ${status}: ${response.statusText}`;
-        
+
         switch (status) {
             case HTTP_STATUS.BAD_REQUEST:
                 throw new Error(`Некорректный запрос: ${detail}`);
@@ -55,14 +55,14 @@ class BaseClient {
     async request(url, options = {}, skipAuth = false) {
         // Валидация параметров
         this._validateParams(url, options);
-        
+
         const fullUrl = this.baseURL + url;
-        
+
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'include', // TODO: <-- проверить влияние на ошибку
+            credentials: 'include',
         };
 
         // Добавляем токен авторизации, если он есть и не пропускаем auth
@@ -81,7 +81,7 @@ class BaseClient {
 
         try {
             const response = await fetch(fullUrl, requestOptions);
-            
+
             // Обработка 401 ошибки - попытка обновления токена (только если не пропускаем auth)
             if (response.status === 401 && this.accessToken && !skipAuth) {
                 try {
@@ -89,17 +89,17 @@ class BaseClient {
                     if (window.app && window.app.authClient) {
                         const data = await window.app.authClient.refreshToken();
                         this.accessToken = data.access_token;
-                        
+
                         // Обновляем токен во всех клиентах
                         if (window.app) {
                             window.app.updateTokens(data.access_token);
                         }
-                        
+
                         // Повторяем запрос с новым токеном
                         if (this.accessToken) {
                             requestOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
                             const retryResponse = await fetch(fullUrl, requestOptions);
-                            
+
                             if (retryResponse.ok) {
                                 const contentType = retryResponse.headers.get('content-type');
                                 if (contentType && contentType.includes('application/json')) {
@@ -114,7 +114,7 @@ class BaseClient {
                                     }
                                     throw new Error('Требуется авторизация');
                                 }
-                                
+
                                 const errorData = await retryResponse.json().catch(() => ({}));
                                 this._handleApiError(retryResponse, errorData);
                             }
@@ -149,7 +149,7 @@ class BaseClient {
             if (contentType && contentType.includes('application/json')) {
                 return await response.json();
             }
-            
+
             return await response.text();
         } catch (error) {
             console.error('API Request Error:', error);

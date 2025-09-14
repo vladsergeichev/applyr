@@ -7,55 +7,127 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <div class="header-left">
-            <h1>Applyr</h1>
-        </div>
-        <div class="header-right">
-            <div class="auth-buttons">
-                <button id="login-btn" class="btn btn-primary hidden">Войти</button>
-                <div id="user-info" class="user-info hidden">
-                    <div class="user-profile">
-                        <button id="profile-btn" class="btn btn-secondary">
-                            <span id="current-user-info"></span>
-                            <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M6 9l6 6 6-6"/>
-                            </svg>
-                        </button>
-                        <div id="profile-dropdown" class="profile-dropdown">
-<!--                            <div class="profile-dropdown-item" id="telegram-status"></div>-->
-                            <a href="#" class="profile-dropdown-item">Профиль</a>
-                            <a href="#" class="profile-dropdown-item clr-red" id="logout-btn">Выход</a>
-                        </div>
+<header class="header">
+    <div class="header-left">
+        <h1>Applyr</h1>
+    </div>
+    <div class="header-right">
+        <div class="auth-buttons">
+            <button id="login-btn" class="btn btn-primary hidden">Войти</button>
+            <div id="user-info" class="user-info hidden">
+                <div class="user-profile">
+                    <button id="profile-btn" class="btn btn-secondary">
+                        <span id="current-user-info"></span>
+                        <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div id="profile-dropdown" class="profile-dropdown">
+                        <!--                            <div class="profile-dropdown-item" id="telegram-status"></div>-->
+                        <a href="#" class="profile-dropdown-item">Профиль</a>
+                        <a href="#" class="profile-dropdown-item clr-red" id="logout-btn">Выход</a>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
 
-    <!-- Основной контент -->
-    <div id="main-content" class="main-content">
-        <div class="content-header-outer">
-            <h3>Мои вакансии</h3>
-            <span id="vacancies-count" class="vacancies-count-simple"></span>
-            <button class="btn add-vacancy-btn" onclick="showVacancyModal({ mode: 'add' })">+ Добавить</button>
+<!-- Список вакансий -->
+<div id="vacancies-container" class="container hidden">
+    <div class="content-header-outer">
+        <h3>Мои вакансии</h3>
+        <span id="vacancies-count" class="vacancies-count-simple"></span>
+        <button class="btn add-vacancy-btn" onclick="showVacancyModal({ mode: 'add' })">+ Добавить</button>
+    </div>
+
+    <div class="content-grid">
+        <div class="left-content" id="vacancies-list"></div>
+        <div class="right-content white-box">
+            <div class="content-header-inner">Фильтры</div>
+            <button type="button" class="btn btn-secondary">активные</button>
         </div>
+    </div>
 
-        <div class="content-grid">
-            <div class="left-content" id="vacancies-list" ></div>
-            <div class="right-content">
-                <div class="content-header-inner">Фильтры</div>
-                <button type="button" class="btn btn-secondary">активные</button>
+</div>
+
+<!-- Карточка вакансии -->
+<div id="vacancy-container" class="container hidden">
+    <div class="content-header-outer">
+        <a class="text-link" onclick="window.app.router.navigate('/')">Мои вакансии</a> -> Название вакансии
+    </div>
+
+    <div class="content-grid">
+        <div class="left-content">
+            <div class="white-box">
+                <div>
+                    <h2 id="vacancy-data-name">Разработчик Python</h2>
+                </div>
+
+                <div>
+                    <span id="vacancy-data-salary">до 340.000 руб.</span>
+                </div>
+                <div>
+                    Опыт работы:
+                    <span id="vacancy-data-experience">3-5 лет</span>
+                </div>
+                <div>
+                    Локация:
+                    <span id="vacancy-data-location">Удаленно</span>
+                </div>
+                <div>
+                    Занятость:
+                    <span id="vacancy-data-employment">Полная</span>
+                </div>
             </div>
+
+            <div class="white-box">
+                <div class="content-header-inner">Описание</div>
+                <div id="vacancy-data-description">Ищем middle+ / senior backend developer (Python/ Go) для работы над
+                    высоконагруженными сервисами и внутренними системами для российских сетей аптек. <br><br>
+
+                    Основная задача — разработка и поддержка backend-сервисов с нуля, интеграции с внешними системами,
+                    оптимизация производительности.
+                </div>
+            </div>
+
+            <div class="white-box">
+                <div class="content-header-inner">Требования</div>
+                <div id="vacancy-data-requirements">Вы идеальный кандидат, если владеете:<br>
+                    • Python;<br>
+                    • Go;<br>
+                    • REST/gRPC;<br>
+                    • PostgreSQL, Redis;<br>
+                    • Docker, Docker Compose;<br>
+                    • Linux;<br>
+                    • Архитектурными паттернами (Clean Architecture, микросервисы);<br>
+                    • Тестированием (unit/integration).<br><br>
+                    Будет плюсом:<br>
+                    • Опыт работы с Kubernetes;<br>
+                    • Kafka или RabbitMQ;<br>
+                    • Оптимизация производительности БД;<br>
+                    • CI/CD (GitLab CI, GitHub Actions).
+                </div>
+            </div>
+
+            <div class="white-box">
+                <div class="content-header-inner">Условия</div>
+                <div id="vacancy-data-conditions">Большое описание</div>
+            </div>
+
+        </div>
+        <div class="right-content white-box">
+            <h3 id="vacancy-data-company">Компания</h3>
+            <button type="button" class="btn btn-secondary">Откликнуться</button>
         </div>
 
     </div>
-
-    <!-- Контейнер сообщений -->
-    <div id="message-container"></div>
 </div>
+
+<!-- Контейнер сообщений -->
+<div id="message-container"></div>
 
 <!-- API Clients -->
 <script src="/js/api/constants.js"></script>
@@ -68,12 +140,14 @@
 <!-- Utils -->
 <script src="/js/utils/domUtils.js"></script>
 <script src="/js/utils/formValidator.js"></script>
+<script src="/js/utils/router.js"></script>
 
 <!-- Components -->
 <script src="/js/components/constants.js"></script>
 <script src="/js/components/messageManager.js"></script>
 <script src="/js/components/modalManager.js"></script>
 <script src="/js/components/vacancyRenderer.js"></script>
+<script src="/js/components/vacancyDetailsRenderer.js"></script>
 
 <!-- Main App -->
 <script src="/js/app.js"></script>

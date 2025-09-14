@@ -49,14 +49,11 @@ body {
     color: var(--gray-dark);
     background: var(--gray-light);
     min-height: 100vh;
-}
-
-/* ===== LAYOUT ===== */
-.container {
     max-width: 1200px;
     margin: 0 auto;
 }
 
+/* ===== LAYOUT ===== */
 .header {
     display: flex;
     justify-content: space-between;
@@ -167,7 +164,7 @@ body {
 
 .modal-content {
     background: var(--white);
-    border-radius: calc(var(--radius) * 2.5);
+    border-radius: var(--radius);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     width: 100%;
     max-width: 600px;
@@ -190,7 +187,6 @@ body {
 }
 
 .modal-header h2 {
-    margin: 0;
     color: var(--gray-darker);
     font-size: 1.25rem;
     font-weight: 600;
@@ -241,10 +237,6 @@ body {
 }
 
 /* ===== ФОРМЫ ===== */
-.auth-form {
-    /*padding: calc(var(--space) * 1.5);*/
-}
-
 .form-group {
     margin-bottom: calc(var(--space) * 1.25);
 }
@@ -262,6 +254,7 @@ body {
     width: 100%;
     padding: calc(var(--space) * 0.625) calc(var(--space) * 0.75);
     border: 1px solid #d1d5db;
+    /*border-radius: calc(var(--radius) * 0.5);*/
     border-radius: var(--radius);
     font-size: 0.875rem;
     transition: all var(--transition);
@@ -330,12 +323,13 @@ body {
 
 .modal form textarea.form-control {
     resize: vertical;
-    min-height: calc(var(--space) * 2.2);
-    max-height: calc(var(--space) * 7);
+    font-family: inherit;
+    min-height: calc(var(--space) * 10);
+    max-height: calc(var(--space) * 70);
 }
 
 /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
-.main-content {
+.container {
     overflow: hidden;
 }
 
@@ -343,7 +337,7 @@ body {
     overflow: hidden;
     display: grid;
     grid-template-columns: 1fr 300px;
-    gap: calc(var(--space) * 2);
+    gap: var(--space);
     padding-bottom: var(--space);
 }
 
@@ -364,12 +358,15 @@ body {
 }
 
 .right-content {
+}
+.white-box {
     background: var(--white);
-    border-radius: calc(var(--radius) + 2px);
+    border-radius: var(--radius);
     box-shadow: var(--shadow);
     height: fit-content;
     position: sticky;
     padding: var(--space);
+    margin-bottom: var(--space);
 }
 
 .user-info {
@@ -513,62 +510,31 @@ body {
 }
 
 .vacancy-item {
+    background: var(--white);
+    border-radius: var(--radius);
+    position: relative;
+    margin: 0;
+    animation: fadeIn 0.2s ease;
+    box-shadow: var(--shadow);
+
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: var(--space) calc(var(--space) * 1.25);
-    background: var(--white);
-    border-radius: var(--radius);
-    transition: all var(--transition);
-    position: relative;
+    color: inherit;
+    text-decoration: none !important;
     cursor: pointer;
-    margin: 0;
-    animation: fadeIn 0.2s ease;
-    box-shadow: var(--shadow);
+    transition: all var(--transition);
+    width: 100%;
+    gap: calc(var(--space) * 1.2);
+}
+.vacancy-item:hover * {
+    text-decoration: none !important;
 }
 
 .vacancy-item:hover {
     background: #f3f4f6;
     border-color: #d1d5db;
-}
-
-.vacancy-content {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--space) * 0.75);
-    flex: 1;
-}
-
-.vacancy-icon {
-    width: 16px;
-    height: 16px;
-    color: var(--gray-medium);
-    flex-shrink: 0;
-}
-
-.vacancy-actions {
-    display: flex;
-    gap: calc(var(--space) * 0.5);
-}
-
-.vacancy-card-layout {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--space) * 1.2);
-    width: 100%;
-}
-
-.vacancy-card-row {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: calc(var(--space) * 0.45);
-}
-
-.vacancy-card-left {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: flex-start;
 }
 
 .vacancy-card-center {
@@ -603,9 +569,6 @@ body {
     transition: color var(--transition);
 }
 
-.vacancy-title:hover {
-    color: var(--primary);
-}
 
 .vacancy-company {
     display: block;
@@ -618,25 +581,8 @@ body {
     text-overflow: ellipsis;
 }
 
-/* Статусы вакансий */
-.vacancy-status-label {
-    display: inline-block;
-    width: 100px;
-    padding: calc(var(--space) * 0.13) calc(var(--space) * 0.8);
-    border-radius: 999px;
-    color: var(--white);
-    font-size: 0.97em;
-    font-weight: 500;
-    text-align: center;
-    text-transform: none;
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-    vertical-align: middle;
-    margin-right: 0;
-}
-
 /* Кнопки действий */
-.vacancy-action-btn {
+.action-btn {
     background: none;
     border: none;
     padding: calc(var(--space) * 0.2);
@@ -647,46 +593,19 @@ body {
     align-items: center;
 }
 
-.vacancy-action-btn svg {
+.action-btn svg {
     width: 17px;
     height: 17px;
 }
 
-.vacancy-action-btn[disabled],
-.vacancy-action-btn:disabled {
+.action-btn[disabled],
+.action-btn:disabled {
     cursor: default;
     opacity: 0.5;
 }
 
-.vacancy-action-btn:hover {
+.action-btn:hover {
     color: var(--primary-hover);
-}
-
-.vacancy-action-btn.delete-btn:hover {
-    color: var(--danger);
-}
-
-.delete-btn {
-    background: var(--danger);
-    color: var(--white);
-    border: none;
-    padding: calc(var(--space) * 0.375) calc(var(--space) * 0.75);
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.75rem;
-    font-weight: 500;
-    transition: all var(--transition);
-}
-
-.delete-btn:hover {
-    background: var(--danger-hover);
-    transform: scale(1.05);
-}
-
-.vacancy-link-btn,
-.vacancy-edit-btn,
-.delete-btn {
-    cursor: pointer;
 }
 
 .add-vacancy-btn {
@@ -696,115 +615,6 @@ body {
     border-radius: var(--radius);
     font-weight: 500;
     cursor: pointer;
-}
-
-/* ===== ЭТАПЫ ВАКАНСИЙ ===== */
-.vacancy-stages-block {
-    background: #f3f4f6;
-    border-radius: 0 0 calc(var(--radius) + 2px) calc(var(--radius) + 2px);
-    margin: 0;
-    margin-top: 0;
-    padding: var(--space) calc(var(--space) * 1.5) var(--space) calc(var(--space) * 1.5);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--space) * 0.5);
-    width: 100%;
-    border-top: 1px solid var(--border);
-}
-
-.stage-item {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--space) * 0.75);
-    padding: calc(var(--space) * 0.5) calc(var(--space) * 0.75);
-    color: #64748b;
-    font-size: 0.875rem;
-    border-left: 3px solid #a5b4fc;
-    border-radius: 4px;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-}
-
-.stage-date {
-    min-width: 80px;
-    color: var(--gray-medium);
-    font-size: 0.75rem;
-}
-
-.stage-type {
-    padding: 2px 8px;
-    border-radius: calc(var(--radius) * 2);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    min-width: 60px;
-    text-align: center;
-    color: var(--white);
-}
-
-.stage-title {
-    flex: 1;
-    font-weight: 500;
-    color: var(--gray-darker);
-}
-
-.stage-description {
-    flex: 2;
-    color: var(--gray-medium);
-    font-size: 0.8125rem;
-}
-
-.stage-delete-btn {
-    background: none;
-    border: none;
-    color: #b0b0b0;
-    margin-left: calc(var(--space) * 0.7);
-    padding: calc(var(--space) * 0.1) calc(var(--space) * 0.2);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: color var(--transition), background var(--transition);
-    display: flex;
-    align-items: center;
-    opacity: 0.7;
-}
-
-.stage-delete-btn:hover {
-    color: var(--danger);
-    background: #fbe9e9;
-    opacity: 1;
-}
-
-.stage-add-row {
-    margin-top: calc(var(--space) * 0.3);
-}
-
-.stage-add-btn {
-    color: var(--primary-hover);
-    font-size: 1em;
-    font-weight: 500;
-    cursor: pointer;
-    padding: calc(var(--space) * 0.15) calc(var(--space) * 0.5);
-    border-radius: var(--radius);
-    transition: background var(--transition), color var(--transition);
-    user-select: none;
-    display: inline-block;
-}
-
-.stage-add-btn:hover {
-    background: #e0e7ef;
-    color: #1d4ed8;
-}
-
-.stage-add-input {
-    font-size: 1em;
-    padding: calc(var(--space) * 0.15) calc(var(--space) * 0.5);
-    border: 1px solid #cbd5e1;
-    border-radius: var(--radius);
-    outline: none;
-    margin-left: 0;
-    margin-top: calc(var(--space) * 0.2);
-    width: 80%;
-    box-sizing: border-box;
 }
 
 /* ===== СООБЩЕНИЯ ===== */
@@ -973,6 +783,13 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+
+/* ===== ТЕКСТ ===== */
+.text-link {
+    cursor: pointer;
+
 }
 
 

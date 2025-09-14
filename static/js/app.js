@@ -1,6 +1,8 @@
 // Основное приложение
 class App {
     constructor() {
+        // Сначала создаем window.app для доступа из других компонентов
+        window.app = this;
 
         // Используем ApiManager для централизованного управления клиентами
         this.apiManager = new ApiManager();
@@ -10,16 +12,25 @@ class App {
 
         this.messageManager = new MessageManager();
         this.vacancyRenderer = new VacancyRenderer();
+        this.vacancyDetailsRenderer = new VacancyDetailsRenderer();
+        this.router = new Router();
 
         this.currentUser = null;
         this.accessToken = null;
 
-        this.initializeApp();
+        // Инициализируем приложение асинхронно
+        (async () => {
+            try {
+                await this.initializeApp();
+            } catch (error) {
+                console.error('Error initializing app:', error);
+            }
+        })();
     }
 
-    initializeApp() {
+    async initializeApp() {
         this.setupEventListeners();
-        this.checkAuthStatus();
+        await this.checkAuthStatus();
     }
 
     setupEventListeners() {
@@ -65,9 +76,9 @@ class App {
         });
     }
 
-    checkAuthStatus() {
+    async checkAuthStatus() {
         // Пытаемся получить access_token через refresh_token
-        this.tryRefreshToken();
+        await this.tryRefreshToken();
     }
 
     // Попытка обновления токена при загрузке страницы
@@ -85,6 +96,9 @@ class App {
         } catch (error) {
             // Показываем кнопку входа если refresh не удался
             this.showAuthButtons();
+            // Инициализируем роутер даже при ошибке авторизации
+            this.setupRouter();
+            await this.router.handleRoute();
         }
     }
 
@@ -100,15 +114,18 @@ class App {
         try {
             const userInfo = await this.getUserInfoFromJWT();
             this.currentUser = userInfo;
-            this.showMainContent();
+            this.showVacanciesContainer();
             this.updateUserInfo();
 
             if (showWelcomeMessage) {
                 this.messageManager.showSuccess(`Добро пожаловать, ${userInfo.username}!`);
             }
 
-            // Автоматически загружаем вакансии текущего пользователя
-            await this.loadUserVacancies();
+            // Настраиваем роутер после успешной авторизации
+            this.setupRouter();
+
+            // Обрабатываем текущий URL
+            await this.router.handleRoute();
         } catch (error) {
             console.error('Ошибка получения информации о пользователе:', error);
             // При ошибке - выходим из системы
@@ -150,13 +167,41 @@ class App {
     }
 
     // Загрузка вакансий текущего пользователя
+    setupRouter() {
+        // Главная страница
+        this.router.addRoute('/', async () => {
+            document.getElementById('vacancy-container').classList.add('hidden');
+            if (this.currentUser) {
+                this.showVacanciesContainer();
+                await this.loadUserVacancies();
+            } else {
+                this.showAuthButtons();
+            }
+        });
+
+        // Детальная страница вакансии
+        this.router.addRoute('/vacancy/:id', async (params) => {
+            if (this.currentUser) {
+                await this.vacancyDetailsRenderer.render(params.id);
+                document.getElementById('vacancy-container').classList.remove('hidden');
+            } else {
+                this.showAuthButtons();
+                this.router.navigate('/', true); // Редирект на главную если не авторизован
+            }
+        });
+    }
+
     async loadUserVacancies() {
         if (!this.currentUser) {
             return;
         }
 
         try {
+            // Обновляем ссылку на список вакансий после пересоздания DOM
+            this.vacancyRenderer.updateVacanciesList();
+
             const vacancies = await this.vacancyClient.getVacancies();
+            console.log('Loaded vacancies:', vacancies); // Для отладки
             this.vacancyRenderer.renderVacancies(vacancies);
         } catch (error) {
             console.error('Ошибка загрузки вакансий:', error);
@@ -167,13 +212,13 @@ class App {
     showAuthButtons() {
         document.getElementById('login-btn').classList.remove('hidden');
         document.getElementById('user-info').classList.add('hidden');
-        document.getElementById('main-content').classList.add('hidden');
+        document.getElementById('vacancies-container').classList.add('hidden');
     }
 
-    showMainContent() {
+    showVacanciesContainer() {
         document.getElementById('login-btn').classList.add('hidden');
         document.getElementById('user-info').classList.remove('hidden');
-        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('vacancies-container').classList.remove('hidden');
     }
 
     // Модальные окна

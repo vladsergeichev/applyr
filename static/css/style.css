@@ -242,7 +242,7 @@ body {
 
 /* ===== ФОРМЫ ===== */
 .auth-form {
-    padding: calc(var(--space) * 1.5);
+    /*padding: calc(var(--space) * 1.5);*/
 }
 
 .form-group {

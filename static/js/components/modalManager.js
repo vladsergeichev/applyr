@@ -49,6 +49,44 @@ class ModalManager {
         return modalId;
     }
 
+    // Создание модального окна с формой
+    createFormModal({ title, formContent, onSubmit, onCancel }) {
+        const modalId = `modal-${Date.now()}`;
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal show';
+        modal.id = modalId;
+        
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>${title}</h2>
+                </div>
+                <form id="form-${modalId}" class="auth-form">
+                    ${formContent}
+                </form>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        this.activeModals.add(modalId);
+
+        const form = document.getElementById(`form-${modalId}`);
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            onSubmit(e, modalId);
+        });
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                if (onCancel) onCancel();
+                this.closeModal(modalId);
+            }
+        };
+
+        return modalId;
+    }
+
     // Закрытие модального окна
     closeModal(modalId) {
         const modal = document.getElementById(modalId);

@@ -30,80 +30,6 @@ class App {
         // Кнопка выхода
         const logoutBtn = document.getElementById('logout-btn');
         logoutBtn.addEventListener('click', () => this.manualLogout());
-
-        // Модальные окна
-        const closeLoginBtn = document.getElementById('close-login');
-        const closeRegisterBtn = document.getElementById('close-register');
-        const closeTelegramBtn = document.getElementById('close-telegram');
-
-        if (closeLoginBtn) {
-            closeLoginBtn.addEventListener('click', () => this.hideLoginModal());
-        }
-
-        if (closeRegisterBtn) {
-            closeRegisterBtn.addEventListener('click', () => this.hideRegisterModal());
-        }
-
-        if (closeTelegramBtn) {
-            closeTelegramBtn.addEventListener('click', () => this.hideTelegramModal());
-        }
-
-        // Переключение между модальными окнами
-        const switchToRegisterBtn = document.getElementById('switch-to-register');
-        const switchToLoginBtn = document.getElementById('switch-to-login');
-
-        if (switchToRegisterBtn) {
-            switchToRegisterBtn.addEventListener('click', () => {
-                this.hideLoginModal();
-                this.showRegisterModal();
-            });
-        }
-
-        if (switchToLoginBtn) {
-            switchToLoginBtn.addEventListener('click', () => {
-                this.hideRegisterModal();
-                this.showLoginModal();
-            });
-        }
-
-        // --- Формы ---
-        // Форма входа
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-
-        // Форма регистрации
-        const registerForm = document.getElementById('register-form');
-        if (registerForm) {
-            registerForm.addEventListener('submit', (e) => this.handleRegister(e));
-
-            // Очистка ошибок при вводе
-            const registerInputs = registerForm.querySelectorAll('input');
-            registerInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    input.classList.remove('error');
-                    const errorId = input.id.replace('register-', '') + '-error';
-                    const errorElement = document.getElementById(errorId);
-                    if (errorElement) {
-                        errorElement.classList.remove('show');
-                    }
-                });
-            });
-        }
-
-        // Форма подключения Telegram
-        const telegramForm = document.getElementById('telegram-form');
-        telegramForm.addEventListener('submit', (e) => this.handleTelegramConnect(e));
-
-        // Кнопка отмены подключения Telegram
-        const cancelTelegramBtn = document.getElementById('cancel-telegram');
-        cancelTelegramBtn.addEventListener('click', () => this.hideTelegramModal());
-
-        // Закрытие модальных окон по клику вне их
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                this.hideAllModals();
-            }
-        });
     }
 
     checkAuthStatus() {
@@ -219,60 +145,130 @@ class App {
 
     // Модальные окна
     showLoginModal() {
-        const modal = document.getElementById('login-modal');
-        if (modal) {
-            modal.classList.add('show');
-        } else {
-            console.error('Модальное окно входа не найдено');
-        }
-    }
+        const formContent = `
+            <div class="form-group">
+                <label for="login-username">Username:</label>
+                <input type="text" id="login-username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Пароль:</label>
+                <input type="password" id="login-password" name="password" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <button type="button" class="btn btn-secondary" id="switch-to-register">Регистрация</button>
+            </div>
+        `;
 
-    hideLoginModal() {
-        const modal = document.getElementById('login-modal');
-        if (modal) {
-            modal.classList.remove('show');
-            document.getElementById('login-form').reset();
-        }
+        const modalId = modalManager.createFormModal({
+            title: 'Вход в систему',
+            formContent,
+            onSubmit: (e, modalId) => {
+                this.handleLogin(e);
+                modalManager.closeModal(modalId);
+            },
+            onCancel: () => {
+                modalManager.closeModal(modalId);
+            }
+        });
+
+        // Добавляем обработчик для кнопки переключения на регистрацию
+        document.getElementById('switch-to-register').addEventListener('click', () => {
+            modalManager.closeModal(modalId);
+            this.showRegisterModal();
+        });
     }
 
     showRegisterModal() {
-        const modal = document.getElementById('register-modal');
-        if (modal) {
-            modal.classList.add('show');
-        } else {
-            console.error('Модальное окно регистрации не найдено');
-        }
-    }
+        const formContent = `
+            <div class="form-group">
+                <label for="register-username">Username:</label>
+                <input type="text" id="register-username" name="username" required>
+                <div class="error-message" id="username-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Пароль:</label>
+                <input type="password" id="register-password" name="password" required>
+                <div class="error-message" id="password-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="register-password-confirm">Подтвердите пароль:</label>
+                <input type="password" id="register-password-confirm" name="password_confirm" required>
+                <div class="error-message" id="password-confirm-error"></div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                <button type="button" class="btn btn-secondary" id="switch-to-login">Войти</button>
+            </div>
+        `;
 
-    hideRegisterModal() {
-        const modal = document.getElementById('register-modal');
-        if (modal) {
-            modal.classList.remove('show');
-            document.getElementById('register-form').reset();
-        }
+        const modalId = modalManager.createFormModal({
+            title: 'Регистрация',
+            formContent,
+            onSubmit: (e, modalId) => {
+                if (this.validateRegisterForm(new FormData(e.target))) {
+                    this.handleRegister(e);
+                    modalManager.closeModal(modalId);
+                }
+            },
+            onCancel: () => {
+                modalManager.closeModal(modalId);
+            }
+        });
+
+        // Добавляем обработчик для кнопки переключения на вход
+        document.getElementById('switch-to-login').addEventListener('click', () => {
+            modalManager.closeModal(modalId);
+            this.showLoginModal();
+        });
+
+        // Добавляем обработчики для очистки ошибок при вводе
+        const registerInputs = document.querySelectorAll('#form-' + modalId + ' input');
+        registerInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                input.classList.remove('error');
+                const errorId = input.id.replace('register-', '') + '-error';
+                const errorElement = document.getElementById(errorId);
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+            });
+        });
     }
 
     showTelegramModal() {
-        const modal = document.getElementById('telegram-modal');
-        if (modal) {
-            modal.classList.add('show');
-        } else {
-            console.error('Модальное окно Telegram не найдено');
-        }
-    }
+        const formContent = `
+            <div class="form-group">
+                <label for="telegram-username">Telegram Username:</label>
+                <input type="text" id="telegram-username" name="telegram_username" placeholder="@username" required>
+                <small>Введите ваш Telegram username без символа @</small>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Подключить</button>
+                <button type="button" class="btn btn-secondary" id="cancel-telegram">Отмена</button>
+            </div>
+        `;
 
-    hideTelegramModal() {
-        const modal = document.getElementById('telegram-modal');
-        if (modal) {
-            modal.classList.remove('show');
-            document.getElementById('telegram-form').reset();
-        }
+        const modalId = modalManager.createFormModal({
+            title: 'Подключение Telegram',
+            formContent,
+            onSubmit: (e, modalId) => {
+                this.handleTelegramConnect(e);
+                modalManager.closeModal(modalId);
+            },
+            onCancel: () => {
+                modalManager.closeModal(modalId);
+            }
+        });
+
+        // Добавляем обработчик для кнопки отмены
+        document.getElementById('cancel-telegram').addEventListener('click', () => {
+            modalManager.closeModal(modalId);
+        });
     }
 
     hideAllModals() {
-        this.hideLoginModal();
-        this.hideRegisterModal();
-        this.hideTelegramModal();
+        modalManager.closeAllModals();
     }
 
     // Обработка входа
@@ -286,16 +282,12 @@ class App {
         };
 
         try {
-            this.messageManager.showLoading('Выполняется вход...');
             const response = await this.authClient.login(userData);
 
             this.accessToken = response.access_token;
 
             // Используем ApiManager для установки токена всем клиентам
             this.apiManager.setAuthToken(this.accessToken);
-
-            this.hideLoginModal();
-            this.messageManager.showSuccess('Вход выполнен успешно!');
 
             await this.getCurrentUserInfo();
         } catch (error) {
@@ -329,7 +321,7 @@ class App {
             // Используем ApiManager для установки токена всем клиентам
             this.apiManager.setAuthToken(this.accessToken);
 
-            this.hideRegisterModal();
+            modalManager.closeAllModals();
             this.messageManager.showSuccess('Регистрация выполнена успешно!');
 
             await this.getCurrentUserInfo();
@@ -361,7 +353,7 @@ class App {
             // Обновляем токены во всех клиентах
             this.apiManager.setAuthToken(this.accessToken);
 
-            this.hideTelegramModal();
+            modalManager.closeAllModals();
 
             // Обновляем информацию о пользователе
             await this.getCurrentUserInfo();

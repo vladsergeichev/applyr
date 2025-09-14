@@ -27,9 +27,42 @@ class App {
         const loginBtn = document.getElementById('login-btn');
         loginBtn.addEventListener('click', () => this.showLoginModal());
 
+        // Кнопка профиля и выпадающее меню
+        const profileBtn = document.getElementById('profile-btn');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const dropdownIcon = profileBtn?.querySelector('.dropdown-icon');
+
+        if (profileBtn && profileDropdown && dropdownIcon) {
+            profileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show');
+                dropdownIcon.classList.toggle('open');
+            });
+
+            // Закрытие меню при клике вне его
+            document.addEventListener('click', (e) => {
+                if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+                    profileDropdown.classList.remove('show');
+                    dropdownIcon.classList.remove('open');
+                }
+            });
+
+            // Закрытие меню при нажатии Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    profileDropdown.classList.remove('show');
+                    dropdownIcon.classList.remove('open');
+                }
+            });
+        }
+
         // Кнопка выхода
         const logoutBtn = document.getElementById('logout-btn');
-        logoutBtn.addEventListener('click', () => this.manualLogout());
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.manualLogout();
+        });
     }
 
     checkAuthStatus() {

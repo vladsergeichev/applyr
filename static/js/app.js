@@ -1,4 +1,3 @@
-// Главное приложение Applyr Dashboard
 // Основное приложение
 class App {
     constructor() {
@@ -13,7 +12,7 @@ class App {
         this.vacancyRenderer = new VacancyRenderer();
 
         this.currentUser = null;
-        this.accessToken = null; // Убираем localStorage
+        this.accessToken = null;
 
         this.initializeApp();
     }
@@ -76,7 +75,7 @@ class App {
         const registerForm = document.getElementById('register-form');
         if (registerForm) {
             registerForm.addEventListener('submit', (e) => this.handleRegister(e));
-            
+
             // Очистка ошибок при вводе
             const registerInputs = registerForm.querySelectorAll('input');
             registerInputs.forEach(input => {
@@ -116,14 +115,14 @@ class App {
     async tryRefreshToken() {
         try {
             const response = await this.authClient.refreshToken();
-            
+
             // Если успешно получили новый токен
             this.accessToken = response.access_token;
             this.apiManager.setAuthToken(this.accessToken);
-            
+
             // Получаем информацию о пользователе без приветственного сообщения
             await this.getCurrentUserInfo(false);
-            
+
         } catch (error) {
             // Показываем кнопку входа если refresh не удался
             this.showAuthButtons();
@@ -144,7 +143,7 @@ class App {
             this.currentUser = userInfo;
             this.showMainContent();
             this.updateUserInfo();
-            
+
             if (showWelcomeMessage) {
                 this.messageManager.showSuccess(`Добро пожаловать, ${userInfo.username}!`);
             }
@@ -161,11 +160,11 @@ class App {
     updateUserInfo() {
         const userInfoElement = document.getElementById('current-user-info');
         const telegramStatusElement = document.getElementById('telegram-status');
-        
+
         if (userInfoElement && this.currentUser) {
             userInfoElement.textContent = this.currentUser.username;
         }
-        
+
         if (telegramStatusElement && this.currentUser) {
             if (this.currentUser.telegram_username) {
                 // Показываем синюю галочку если Telegram подключен
@@ -181,7 +180,7 @@ class App {
                 telegramStatusElement.innerHTML = `
                     <button id="connect-telegram-btn" class="btn btn-secondary">Подключить Telegram</button>
                 `;
-                
+
                 // Добавляем обработчик для новой кнопки
                 const connectBtn = document.getElementById('connect-telegram-btn');
                 if (connectBtn) {
@@ -198,7 +197,6 @@ class App {
         }
 
         try {
-            this.vacancyRenderer.showLoading();
             const vacancies = await this.vacancyClient.getVacancies();
             this.vacancyRenderer.renderVacancies(vacancies);
         } catch (error) {
@@ -280,7 +278,7 @@ class App {
     // Обработка входа
     async handleLogin(e) {
         e.preventDefault();
-        
+
         const formData = new FormData(e.target);
         const userData = {
             username: formData.get('username'),
@@ -295,10 +293,10 @@ class App {
 
             // Используем ApiManager для установки токена всем клиентам
             this.apiManager.setAuthToken(this.accessToken);
-            
+
             this.hideLoginModal();
             this.messageManager.showSuccess('Вход выполнен успешно!');
-            
+
             await this.getCurrentUserInfo();
         } catch (error) {
             console.error('Ошибка входа:', error);
@@ -309,14 +307,14 @@ class App {
     // Обработка регистрации
     async handleRegister(e) {
         e.preventDefault();
-        
+
         const formData = new FormData(e.target);
         const userData = {
             username: formData.get('username'),
             password: formData.get('password'),
             password_confirm: formData.get('password_confirm')
         };
-        
+
         // Проверяем валидацию формы
         if (!this.validateRegisterForm(userData)) {
             return;
@@ -325,15 +323,15 @@ class App {
         try {
             this.messageManager.showLoading('Выполняется регистрация...');
             const response = await this.authClient.register(userData);
-            
+
             this.accessToken = response.access_token;
 
             // Используем ApiManager для установки токена всем клиентам
             this.apiManager.setAuthToken(this.accessToken);
-            
+
             this.hideRegisterModal();
             this.messageManager.showSuccess('Регистрация выполнена успешно!');
-            
+
             await this.getCurrentUserInfo();
         } catch (error) {
             console.error('Ошибка регистрации:', error);
@@ -356,13 +354,13 @@ class App {
         try {
             this.messageManager.showLoading('Подключение Telegram...');
             const response = await this.authClient.updateTelegramUsername({telegram_username: telegramUsername});
-            
+
             // Получаем новый access_token с обновленными данными
             this.accessToken = response.access_token;
-            
+
             // Обновляем токены во всех клиентах
             this.apiManager.setAuthToken(this.accessToken);
-            
+
             this.hideTelegramModal();
 
             // Обновляем информацию о пользователе
@@ -378,7 +376,7 @@ class App {
     updateTokens(newAccessToken) {
         this.accessToken = newAccessToken;
         // localStorage.setItem('accessToken', this.accessToken); // Удалено
-        
+
         // Используем ApiManager для установки токена всем клиентам
         this.apiManager.setAuthToken(this.accessToken);
     }
@@ -401,10 +399,10 @@ class App {
             // Очищаем данные пользователя
             this.accessToken = null;
             this.currentUser = null;
-            
+
             // Используем ApiManager для очистки токенов всех клиентов
             this.apiManager.clearAuthToken();
-            
+
             this.showAuthButtons();
             // Не показываем сообщение об успешном выходе при автоматическом logout
         }
@@ -413,10 +411,10 @@ class App {
     // Валидация формы регистрации
     validateRegisterForm(userData) {
         let isValid = true;
-        
+
         // Очищаем предыдущие ошибки
         this.clearRegisterErrors();
-        
+
         // Валидация username
         const username = userData.username;
         if (!username || username.length < 3) {
@@ -428,7 +426,7 @@ class App {
             this.highlightField('register-username');
             isValid = false;
         }
-        
+
         // Валидация пароля
         const password = userData.password;
         if (!password || password.length < 6) {
@@ -436,7 +434,7 @@ class App {
             this.highlightField('register-password');
             isValid = false;
         }
-        
+
         // Валидация подтверждения пароля
         const passwordConfirm = userData.password_confirm;
         if (password !== passwordConfirm) {
@@ -444,10 +442,10 @@ class App {
             this.highlightField('register-password-confirm');
             isValid = false;
         }
-        
+
         return isValid;
     }
-    
+
     // Показать ошибку валидации
     showRegisterError(errorId, message) {
         const errorElement = document.getElementById(errorId);
@@ -456,7 +454,7 @@ class App {
             errorElement.classList.add('show');
         }
     }
-    
+
     // Подсветить поле с ошибкой
     highlightField(fieldId) {
         const field = document.getElementById(fieldId);
@@ -464,7 +462,7 @@ class App {
             field.classList.add('error');
         }
     }
-    
+
     // Очистить ошибки валидации
     clearRegisterErrors() {
         const errorElements = document.querySelectorAll('.error-message');
@@ -472,7 +470,7 @@ class App {
             element.classList.remove('show');
             element.textContent = '';
         });
-        
+
         const fields = document.querySelectorAll('#register-form input');
         fields.forEach(field => {
             field.classList.remove('error');

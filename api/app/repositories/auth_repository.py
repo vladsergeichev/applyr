@@ -38,10 +38,24 @@ class AuthRepository:
         result = await self.db.execute(select(UserModel))
         return result.scalars().all()
 
-    async def create(self, username: str, password: str) -> UserModel:
+    async def create(
+        self,
+        username: str,
+        password: str,
+        first_name: str,
+        second_name: str,
+        email: str,
+    ) -> UserModel:
         """Создает нового пользователя"""
+
         password_hash = get_password_hash(password)
-        user = UserModel(username=username, password_hash=password_hash)
+        user = UserModel(
+            username=username,
+            password_hash=password_hash,
+            first_name=first_name,
+            second_name=second_name,
+            email=email,
+        )
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)

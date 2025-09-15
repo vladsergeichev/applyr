@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -31,15 +30,14 @@ class VacancyBaseSchema(BaseModel):
     @field_validator("link")
     def validate_link(cls, v):
         if v is not None:
-            if not v.strip():
+            link = v.strip()
+            if not link:
                 raise ValueError("Ссылка не может быть пустой")
-            try:
-                result = urlparse(v)
-                if not all([result.scheme, result.netloc]):
-                    raise ValueError("Неверный формат ссылки")
-            except Exception:
+            if "." not in link:
                 raise ValueError("Неверный формат ссылки")
-            return v.strip()
+            if not link.startswith(("http://", "https://")):
+                link = "https://" + link
+            return link
         return v
 
 

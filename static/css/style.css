@@ -436,6 +436,7 @@ body {
 }
 
 .profile-dropdown-item:hover {
+    border-radius: var(--radius);
     background: var(--gray-light);
     /*color: var(--primary);*/
 }
@@ -826,4 +827,8 @@ body {
 
 .mr-2 {
     margin-right: calc(var(--space) * 1.0);
+}
+
+.mb-2 {
+    margin-bottom: calc(var(--space) * 1.0);
 }

@@ -118,7 +118,7 @@ class App {
             this.updateUserInfo();
 
             if (showWelcomeMessage) {
-                this.messageManager.showSuccess(`Добро пожаловать, ${userInfo.username}!`);
+                this.messageManager.showSuccess(`Добро пожаловать, ${userInfo.alias}!`);
             }
 
             // Настраиваем роутер после успешной авторизации
@@ -138,7 +138,7 @@ class App {
         const telegramStatusElement = document.getElementById('telegram-status');
 
         if (userInfoElement && this.currentUser) {
-            userInfoElement.textContent = this.currentUser.username;
+            userInfoElement.textContent = this.currentUser.alias;
         }
 
         if (telegramStatusElement && this.currentUser) {
@@ -266,6 +266,21 @@ class App {
                 <div class="error-message" id="username-error"></div>
             </div>
             <div class="form-group">
+                <label for="register-first-name">Имя:</label>
+                <input type="text" id="register-first-name" name="first_name" required>
+                <div class="error-message" id="first-name-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="register-second-name">Фамилия:</label>
+                <input type="text" id="register-second-name" name="second_name" required>
+                <div class="error-message" id="second-name-error"></div>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email:</label>
+                <input type="email" id="register-email" name="email" required>
+                <div class="error-message" id="email-error"></div>
+            </div>
+            <div class="form-group">
                 <label for="register-password">Пароль:</label>
                 <input type="password" id="register-password" name="password" required>
                 <div class="error-message" id="password-error"></div>
@@ -379,6 +394,9 @@ class App {
         const formData = new FormData(e.target);
         const userData = {
             username: formData.get('username'),
+            first_name: formData.get('first_name'),
+            second_name: formData.get('second_name'),
+            email: formData.get('email'),
             password: formData.get('password'),
             password_confirm: formData.get('password_confirm')
         };
@@ -489,6 +507,30 @@ class App {
             console.log('Username validation failed: invalid characters');
             this.showRegisterError('username-error', 'Только буквы, цифры и подчеркивания');
             this.highlightField('register-username');
+            isValid = false;
+        }
+
+        // Валидация имени
+        const firstName = userData.first_name;
+        if (!firstName || firstName.length < 2) {
+            this.showRegisterError('first-name-error', 'Минимум 2 символа');
+            this.highlightField('register-first-name');
+            isValid = false;
+        }
+
+        // Валидация фамилии
+        const secondName = userData.second_name;
+        if (!secondName || secondName.length < 2) {
+            this.showRegisterError('second-name-error', 'Минимум 2 символа');
+            this.highlightField('register-second-name');
+            isValid = false;
+        }
+
+        // Валидация email
+        const email = userData.email;
+        if (!email || !/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(email)) {
+            this.showRegisterError('email-error', 'Некорректный формат email');
+            this.highlightField('register-email');
             isValid = false;
         }
 

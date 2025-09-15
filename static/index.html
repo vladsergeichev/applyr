@@ -25,7 +25,7 @@
                     </button>
                     <div id="profile-dropdown" class="profile-dropdown">
                         <!--                            <div class="profile-dropdown-item" id="telegram-status"></div>-->
-                        <a href="#" class="profile-dropdown-item">Профиль</a>
+                        <!--                        <a href="#" class="profile-dropdown-item">Профиль</a>-->
                         <a href="#" class="profile-dropdown-item clr-red" id="logout-btn">Выход</a>
                     </div>
                 </div>
@@ -56,7 +56,9 @@
 <!-- Карточка вакансии -->
 <div id="vacancy-container" class="container hidden">
     <div class="content-header-outer">
-        <a class="text-link" onclick="window.app.router.navigate('/')">Мои вакансии</a> -> Название вакансии
+        <a class="text-link" onclick="window.app.router.navigate('/')">Мои вакансии</a>
+        &nbsp;/&nbsp;
+        <span id="vacancy-data-title"></span>
     </div>
 
     <div class="content-grid">
@@ -66,37 +68,38 @@
                 <div><span id="vacancy-data-salary"></span></div>
                 <div>
                     Опыт работы:
-                    <span id="vacancy-data-experience"></span>
+                    <span id="vacancy-data-experience">–</span>
                 </div>
                 <div>
                     Локация:
-                    <span id="vacancy-data-location"></span>
+                    <span id="vacancy-data-location">–</span>
                 </div>
                 <div>
                     Занятость:
-                    <span id="vacancy-data-employment"></span>
+                    <span id="vacancy-data-employment">–</span>
                 </div>
             </div>
 
             <div class="white-box">
                 <div class="content-header-inner">Описание</div>
-                <div id="vacancy-data-description"></div>
+                <div id="vacancy-data-description">–</div>
             </div>
 
             <div class="white-box">
                 <div class="content-header-inner">Требования</div>
-                <div id="vacancy-data-requirements"></div>
+                <div id="vacancy-data-requirements">–</div>
             </div>
 
             <div class="white-box">
                 <div class="content-header-inner">Условия</div>
-                <div id="vacancy-data-conditions"></div>
+                <div id="vacancy-data-conditions">–</div>
             </div>
 
         </div>
         <div class="right-content white-box">
-            <h3 id="vacancy-data-company"></h3>
-            <button id="vacancy-data-link" type="button" class="btn btn-secondary">Откликнуться</button>
+            Компания
+            <h3 id="vacancy-data-company" class="mb-2">–</h3>
+            <a id="vacancy-data-link" class="btn btn-secondary">Откликнуться</a>
         </div>
 
     </div>

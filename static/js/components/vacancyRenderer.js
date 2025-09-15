@@ -104,7 +104,7 @@ class VacancyRenderer {
         item.innerHTML = `
                 <div class="vacancy-card-center">
                     <span class="vacancy-title">${Utils.escapeHtml(vacancy.name)}</span>
-                    <span class="vacancy-company">${Utils.escapeHtml(vacancy.company_name || '<название компании>')}</span>
+                    <span class="vacancy-company">${Utils.escapeHtml(vacancy.company_name || 'unknown')}</span>
                     ${vacancy.salary ? `<span class="vacancy-salary">${Utils.escapeHtml(vacancy.salary)}</span>` : ''}
                     <div class="vacancy-details">
                         ${vacancy.location ? `<span class="vacancy-location">${Utils.escapeHtml(vacancy.location)}</span>` : ''}
@@ -246,7 +246,7 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
         </div>
         <div class="form-group">
             <label>Ссылка на вакансию</label>
-            <input type="url" name="link" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.link || '') : ''}" />
+            <input type="text" name="link" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.link || '') : ''}" />
         </div>
         <div class="form-group">
             <label>Компания</label>

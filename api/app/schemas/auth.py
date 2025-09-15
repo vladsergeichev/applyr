@@ -11,6 +11,13 @@ class AuthRegisterSchema(BaseModel):
     password: str = Field(
         ..., min_length=6, max_length=100, description="Пароль пользователя"
     )
+    first_name: str = Field(
+        ..., min_length=2, max_length=50, description="Имя пользователя"
+    )
+    second_name: str = Field(
+        ..., min_length=2, max_length=50, description="Фамилия пользователя"
+    )
+    email: str = Field(..., max_length=255, description="Email пользователя")
 
     @field_validator("username")
     def validate_username(cls, v):
@@ -24,6 +31,12 @@ class AuthRegisterSchema(BaseModel):
     def validate_password(cls, v):
         if len(v) < 6:
             raise ValueError("Пароль должен содержать минимум 6 символов")
+        return v
+
+    @field_validator("email")
+    def validate_email(cls, v):
+        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", v):
+            raise ValueError("Некорректный формат email")
         return v
 
 

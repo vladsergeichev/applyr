@@ -37,7 +37,13 @@ class AuthService:
             raise UserAlreadyExistsException()
 
         # Создаем нового пользователя через репозиторий
-        db_user = await self.auth_repo.create(user_data.username, user_data.password)
+        db_user = await self.auth_repo.create(
+            username=user_data.username,
+            password=user_data.password,
+            first_name=user_data.first_name,
+            second_name=user_data.second_name,
+            email=user_data.email,
+        )
 
         # Создаем токены
         access_token, refresh_token = AuthService._create_tokens(db_user)
@@ -90,6 +96,9 @@ class AuthService:
         access_token_data = {
             "user_id": user.id,
             "username": user.username,
+            "first_name": user.first_name,
+            "second_name": user.second_name,
+            "alias": f"{user.first_name} {user.second_name[0]}.",
             "telegram_username": user.telegram_username,
         }
         access_token = create_access_token(data=access_token_data)
@@ -128,6 +137,9 @@ class AuthService:
         access_token_data = {
             "user_id": updated_user.id,
             "username": updated_user.username,
+            "first_name": updated_user.first_name,
+            "second_name": updated_user.second_name,
+            "alias": f"{updated_user.first_name} {updated_user.second_name[0]}.",
             "telegram_username": updated_user.telegram_username,
         }
         access_token = create_access_token(data=access_token_data)
@@ -142,6 +154,9 @@ class AuthService:
         access_token_data = {
             "user_id": user.id,
             "username": user.username,
+            "first_name": user.first_name,
+            "second_name": user.second_name,
+            "alias": f"{user.first_name} {user.second_name[0]}.",
             "telegram_username": user.telegram_username,
         }
         access_token = create_access_token(data=access_token_data)

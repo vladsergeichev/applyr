@@ -105,6 +105,12 @@ class VacancyRenderer {
                 <div class="vacancy-card-center">
                     <span class="vacancy-title">${Utils.escapeHtml(vacancy.name)}</span>
                     <span class="vacancy-company">${Utils.escapeHtml(vacancy.company_name || '<название компании>')}</span>
+                    ${vacancy.salary ? `<span class="vacancy-salary">${Utils.escapeHtml(vacancy.salary)}</span>` : ''}
+                    <div class="vacancy-details">
+                        ${vacancy.location ? `<span class="vacancy-location">${Utils.escapeHtml(vacancy.location)}</span>` : ''}
+                        ${vacancy.employment ? `<span class="vacancy-employment">${Utils.escapeHtml(vacancy.employment)}</span>` : ''}
+                        ${vacancy.experience ? `<span class="vacancy-experience">${Utils.escapeHtml(vacancy.experience)}</span>` : ''}
+                    </div>
                 </div>
                 <div class="vacancy-card-right"></div>
         `;
@@ -247,8 +253,32 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
             <input type="text" name="company" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.company_name || '') : ''}" />
         </div>
         <div class="form-group">
+            <label>Уровень дохода</label>
+            <input type="text" name="salary" class="form-control" maxlength="100" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.salary || '') : ''}" />
+        </div>
+        <div class="form-group">
+            <label>Опыт работы</label>
+            <input type="text" name="experience" class="form-control" maxlength="100" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.experience || '') : ''}" />
+        </div>
+        <div class="form-group">
+            <label>Локация</label>
+            <input type="text" name="location" class="form-control" maxlength="200" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.location || '') : ''}" />
+        </div>
+        <div class="form-group">
+            <label>Тип занятости</label>
+            <input type="text" name="employment" class="form-control" maxlength="100" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.employment || '') : ''}" />
+        </div>
+        <div class="form-group">
             <label>Описание</label>
-            <textarea name="description" class="form-control" rows="2" maxlength="300">${isEdit && vacancy ? Utils.escapeHtml(vacancy.description || '') : ''}</textarea>
+            <textarea name="description" class="form-control" rows="2">${isEdit && vacancy ? Utils.escapeHtml(vacancy.description || '') : ''}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Требования</label>
+            <textarea name="requirements" class="form-control" rows="3">${isEdit && vacancy ? Utils.escapeHtml(vacancy.requirements || '') : ''}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Условия</label>
+            <textarea name="conditions" class="form-control" rows="3">${isEdit && vacancy ? Utils.escapeHtml(vacancy.conditions || '') : ''}</textarea>
         </div>
     `;
 
@@ -263,7 +293,13 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
                 name: form.title.value.trim(),
                 link: form.link.value.trim(),
                 company_name: form.company.value,
-                description: form.description.value.trim()
+                description: form.description.value,
+                salary: form.salary.value,
+                experience: form.experience.value,
+                location: form.location.value,
+                employment: form.employment.value,
+                requirements: form.requirements.value,
+                conditions: form.conditions.value
             };
 
             try {

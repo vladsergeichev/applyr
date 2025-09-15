@@ -1,16 +1,20 @@
-"""fixed_stage_type
+"""database create
 
-Revision ID: 6e3172213a46
-Revises: 1c4f38febb16
-Create Date: 2025-08-03 16:19:32.900338
+Revision ID: 60ac7a31afbf
+Revises: 
+Create Date: 2025-09-15 17:01:01.407995
 
 """
 
 from typing import Sequence, Union
 
+import sqlalchemy as sa
+from alembic import op
+
+
 # revision identifiers, used by Alembic.
-revision: str = "6e3172213a46"
-down_revision: Union[str, None] = "1c4f38febb16"
+revision: str = '60ac7a31afbf'
+down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

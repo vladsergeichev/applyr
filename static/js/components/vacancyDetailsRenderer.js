@@ -22,7 +22,14 @@ class VacancyDetailsRenderer {
     renderVacancyDetails(vacancy) {
         document.getElementById('vacancy-data-name').innerHTML = vacancy.name;
         document.getElementById('vacancy-data-company').innerHTML = vacancy.company_name;
+        document.getElementById('vacancy-data-salary').innerHTML = vacancy.salary;
+        document.getElementById('vacancy-data-experience').innerHTML = vacancy.experience;
+        document.getElementById('vacancy-data-location').innerHTML = vacancy.location;
+        document.getElementById('vacancy-data-employment').innerHTML = vacancy.employment;
         document.getElementById('vacancy-data-description').innerHTML = vacancy.description.replace(/\n/g, '<br>');
+        document.getElementById('vacancy-data-requirements').innerHTML = vacancy.requirements.replace(/\n/g, '<br>');
+        document.getElementById('vacancy-data-conditions').innerHTML = vacancy.conditions.replace(/\n/g, '<br>');
+        document.getElementById('vacancy-data-link').href = vacancy.link;
     }
 
     // Отображение ошибки

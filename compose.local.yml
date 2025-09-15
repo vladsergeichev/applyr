@@ -30,7 +30,7 @@ services:
       DB__PASSWORD: ${DB__PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
     volumes:
-      - ./api:/app
+      - ./api:/opt/applyr_api
     depends_on:
       postgres:
         condition: service_healthy

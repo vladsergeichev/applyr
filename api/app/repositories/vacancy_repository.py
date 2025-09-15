@@ -10,6 +10,7 @@ from app.schemas.vacancy import (
     GetVacancySchema,
     VacancyCreateSchema,
     VacancyUpdateSchema,
+    VacancyBaseSchema,
 )
 
 
@@ -17,15 +18,9 @@ class VacancyRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create(self, vacancy_data: VacancyCreateSchema) -> VacancyModel:
+    async def create(self, vacancy_data: VacancyBaseSchema) -> VacancyModel:
         """Создает новую вакансию"""
-        vacancy = VacancyModel(
-            user_id=vacancy_data.user_id,
-            name=vacancy_data.name,
-            link=vacancy_data.link,
-            company_name=vacancy_data.company_name,
-            description=vacancy_data.description,
-        )
+        vacancy = VacancyModel(**vacancy_data.model_dump())
         self.db.add(vacancy)
         await self.db.commit()
         await self.db.refresh(vacancy)
@@ -57,6 +52,12 @@ class VacancyRepository:
                 link=vacancy.link,
                 company_name=vacancy.company_name,
                 description=vacancy.description,
+                salary=vacancy.salary,
+                experience=vacancy.experience,
+                location=vacancy.location,
+                employment=vacancy.employment,
+                requirements=vacancy.requirements,
+                conditions=vacancy.conditions,
                 created_at=vacancy.created_at,
                 updated_at=vacancy.updated_at,
                 stages=[

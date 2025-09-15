@@ -15,7 +15,13 @@ class VacancyModel(Base):
     name = Column(String(500), nullable=False)
     link = Column(Text, nullable=False)
     company_name = Column(Text)
+    salary = Column(Text)
+    experience = Column(String(100))
+    location = Column(String(200))
+    employment = Column(String(100))
     description = Column(Text)
+    requirements = Column(Text)
+    conditions = Column(Text)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

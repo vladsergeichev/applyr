@@ -201,7 +201,6 @@ class App {
             this.vacancyRenderer.updateVacanciesList();
 
             const vacancies = await this.vacancyClient.getVacancies();
-            console.log('Loaded vacancies:', vacancies); // Для отладки
             this.vacancyRenderer.renderVacancies(vacancies);
         } catch (error) {
             console.error('Ошибка загрузки вакансий:', error);
@@ -487,6 +486,7 @@ class App {
 
         // Валидация username
         const username = userData.username;
+        console.log(username)
         if (!username || username.length < 3) {
             this.showRegisterError('username-error', 'Минимум 3 символа');
             this.highlightField('register-username');

@@ -581,6 +581,32 @@ body {
     text-overflow: ellipsis;
 }
 
+.vacancy-salary {
+    display: block;
+    font-size: 0.95em;
+    color: var(--success);
+    font-weight: 500;
+    margin-top: calc(var(--space) * 0.2);
+}
+
+.vacancy-details {
+    display: flex;
+    gap: calc(var(--space) * 0.75);
+    margin-top: calc(var(--space) * 0.4);
+    flex-wrap: wrap;
+}
+
+.vacancy-location,
+.vacancy-employment,
+.vacancy-experience {
+    font-size: 0.85em;
+    color: var(--gray-medium);
+    background: var(--gray-light);
+    padding: calc(var(--space) * 0.2) calc(var(--space) * 0.4);
+    border-radius: calc(var(--radius) * 0.5);
+    white-space: nowrap;
+}
+
 /* Кнопки действий */
 .action-btn {
     background: none;

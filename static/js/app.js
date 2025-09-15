@@ -72,7 +72,7 @@ class App {
         const logoutBtn = document.getElementById('logout-btn');
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            this.manualLogout();
+            this.logout();
         });
     }
 
@@ -212,6 +212,7 @@ class App {
         document.getElementById('login-btn').classList.remove('hidden');
         document.getElementById('user-info').classList.add('hidden');
         document.getElementById('vacancies-container').classList.add('hidden');
+        document.getElementById('vacancy-container').classList.add('hidden');
     }
 
     showVacanciesContainer() {
@@ -257,6 +258,7 @@ class App {
     }
 
     showRegisterModal() {
+        console.log('Opening register modal');
         const formContent = `
             <div class="form-group">
                 <label for="register-username">Username:</label>
@@ -282,11 +284,8 @@ class App {
         const modalId = modalManager.createFormModal({
             title: 'Регистрация',
             formContent,
-            onSubmit: (e, modalId) => {
-                if (this.validateRegisterForm(new FormData(e.target))) {
-                    this.handleRegister(e);
-                    modalManager.closeModal(modalId);
-                }
+            onSubmit: (e) => {
+                this.handleRegister(e);
             },
             onCancel: () => {
                 modalManager.closeModal(modalId);
@@ -390,7 +389,6 @@ class App {
         }
 
         try {
-            this.messageManager.showLoading('Выполняется регистрация...');
             const response = await this.authClient.register(userData);
 
             this.accessToken = response.access_token;
@@ -399,7 +397,6 @@ class App {
             this.apiManager.setAuthToken(this.accessToken);
 
             modalManager.closeAllModals();
-            this.messageManager.showSuccess('Регистрация выполнена успешно!');
 
             await this.getCurrentUserInfo();
         } catch (error) {
@@ -450,11 +447,6 @@ class App {
         this.apiManager.setAuthToken(this.accessToken);
     }
 
-    // Ручной выход пользователя (по кнопке)
-    async manualLogout() {
-        await this.logout();
-        this.messageManager.showSuccess('Выход выполнен успешно');
-    }
 
     // Выход
     async logout() {
@@ -481,17 +473,20 @@ class App {
     validateRegisterForm(userData) {
         let isValid = true;
 
+        console.log('Starting validation for:', userData);
         // Очищаем предыдущие ошибки
         this.clearRegisterErrors();
 
         // Валидация username
         const username = userData.username;
-        console.log(username)
+        console.log('Validating username:', username);
         if (!username || username.length < 3) {
+            console.log('Username validation failed: too short');
             this.showRegisterError('username-error', 'Минимум 3 символа');
             this.highlightField('register-username');
             isValid = false;
         } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            console.log('Username validation failed: invalid characters');
             this.showRegisterError('username-error', 'Только буквы, цифры и подчеркивания');
             this.highlightField('register-username');
             isValid = false;

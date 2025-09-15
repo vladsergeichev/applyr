@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any
 
 from app.repositories.auth_repository import AuthRepository
 from app.repositories.stage_repository import StageRepository
@@ -20,7 +20,7 @@ class AdminService:
         self.vacancy_repo = vacancy_repo
         self.stage_repo = stage_repo
 
-    async def get_all_users(self) -> List[UserResponse]:
+    async def get_all_users(self) -> list[UserResponse]:
         """Получает всех пользователей"""
         users = await self.auth_repo.get_all_users()
         return [
@@ -33,7 +33,7 @@ class AdminService:
             for user in users
         ]
 
-    async def get_all_vacancies(self) -> List[VacancyResponse]:
+    async def get_all_vacancies(self) -> list[VacancyResponse]:
         """Получает все вакансии"""
         vacancies = await self.vacancy_repo.get_all()
         return [
@@ -54,7 +54,7 @@ class AdminService:
         stages = await self.stage_repo.get_all()
         return stages
 
-    async def get_all_tokens(self) -> List[TokenResponse]:
+    async def get_all_tokens(self) -> list[TokenResponse]:
         """Получает все refresh токены"""
         tokens = await self.auth_repo.get_all_refresh_tokens()
         return [

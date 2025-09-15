@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,12 +12,12 @@ class AuthRepository:
         self.db = db
 
     # Методы для работы с пользователями
-    async def get_by_id(self, user_id: int) -> Optional[UserModel]:
+    async def get_by_id(self, user_id: int) -> UserModel | None:
         """Получает пользователя по ID"""
         result = await self.db.execute(select(UserModel).where(UserModel.id == user_id))
         return result.scalar_one_or_none()
 
-    async def get_by_username(self, username: str) -> Optional[UserModel]:
+    async def get_by_username(self, username: str) -> UserModel | None:
         """Получает пользователя по username"""
         result = await self.db.execute(
             select(UserModel).where(UserModel.username == username)
@@ -27,14 +26,14 @@ class AuthRepository:
 
     async def get_by_telegram_username(
         self, telegram_username: str
-    ) -> Optional[UserModel]:
+    ) -> UserModel | None:
         """Получает пользователя по Telegram username"""
         result = await self.db.execute(
             select(UserModel).where(UserModel.telegram_username == telegram_username)
         )
         return result.scalar_one_or_none()
 
-    async def get_all_users(self) -> List[UserModel]:
+    async def get_all_users(self) -> list[UserModel]:
         """Получает всех пользователей"""
         result = await self.db.execute(select(UserModel))
         return result.scalars().all()
@@ -50,7 +49,7 @@ class AuthRepository:
 
     async def get_user_with_password_check(
         self, username: str, password: str
-    ) -> Optional[UserModel]:
+    ) -> UserModel | None:
         """Получает пользователя с проверкой пароля"""
         user = await self.get_by_username(username)
         if not user or not user.password_hash:
@@ -91,7 +90,7 @@ class AuthRepository:
         await self.db.refresh(refresh_token_model)
         return refresh_token_model
 
-    async def get_valid_refresh_token(self, user_id: int) -> Optional[RefreshModel]:
+    async def get_valid_refresh_token(self, user_id: int) -> RefreshModel | None:
         """Получает действительный refresh токен пользователя"""
         result = await self.db.execute(
             select(RefreshModel)
@@ -126,7 +125,7 @@ class AuthRepository:
         await self.db.commit()
         return len(expired_tokens)
 
-    async def get_all_refresh_tokens(self) -> List[RefreshModel]:
+    async def get_all_refresh_tokens(self) -> list[RefreshModel]:
         """Получает все refresh токены"""
         result = await self.db.execute(select(RefreshModel))
         return result.scalars().all()

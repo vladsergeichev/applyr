@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from app.exceptions import UserNotFoundException, VacancyNotFoundException
 from app.repositories.auth_repository import AuthRepository
@@ -41,7 +40,7 @@ class VacancyService:
         logger.info(f"Получена вакансия {vacancy_id}")
         return vacancy
 
-    async def get_vacancies_by_user_id(self, user_id: int) -> List[GetVacancySchema]:
+    async def get_vacancies_by_user_id(self, user_id: int) -> list[GetVacancySchema]:
         """Получает вакансии пользователя по username"""
         vacancies = await self.vacancy_repo.get_by_user_id(user_id)
         logger.info(f"Получено {len(vacancies)} вакансий для пользователя {user_id}")

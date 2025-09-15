@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, Dict
+from typing import Any
 
 from faker import Faker
 
@@ -24,7 +24,7 @@ def generate_test_telegram_username(faker: Faker) -> str:
     return f"@{faker.user_name()}"
 
 
-def create_test_user_data(faker: Faker, **overrides) -> Dict[str, Any]:
+def create_test_user_data(faker: Faker, **overrides) -> dict[str, Any]:
     """Создает тестовые данные пользователя"""
     data = {
         "username": generate_test_username(faker),
@@ -34,7 +34,7 @@ def create_test_user_data(faker: Faker, **overrides) -> Dict[str, Any]:
     return data
 
 
-def create_test_vacancy_data(faker: Faker, **overrides) -> Dict[str, Any]:
+def create_test_vacancy_data(faker: Faker, **overrides) -> dict[str, Any]:
     """Создает тестовые данные вакансии"""
     data = {
         "name": faker.job(),
@@ -47,7 +47,7 @@ def create_test_vacancy_data(faker: Faker, **overrides) -> Dict[str, Any]:
     return data
 
 
-def create_test_stage_data(faker: Faker, **overrides) -> Dict[str, Any]:
+def create_test_stage_data(faker: Faker, **overrides) -> dict[str, Any]:
     """Создает тестовые данные этапа"""
     data = {
         "vacancy_id": 1,

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, field_validator
@@ -12,16 +11,16 @@ class VacancyBaseSchema(BaseModel):
         ..., min_length=1, max_length=500, description="Название вакансии"
     )
     link: str = Field(..., min_length=1, description="Ссылка на вакансию")
-    company_name: Optional[str] = Field(
+    company_name: str | None = Field(
         None, max_length=255, description="Название компании"
     )
-    description: Optional[str] = Field(None, max_length=1000, description="Описание")
-    salary: Optional[str] = Field(None, description="Уровень дохода")
-    experience: Optional[str] = Field(None, max_length=100, description="Опыт работы")
-    location: Optional[str] = Field(None, max_length=200, description="Локация")
-    employment: Optional[str] = Field(None, max_length=100, description="Тип занятости")
-    requirements: Optional[str] = Field(None, description="Требования к кандидату")
-    conditions: Optional[str] = Field(None, description="Условия работы")
+    description: str | None = Field(None, max_length=1000, description="Описание")
+    salary: str | None = Field(None, description="Уровень дохода")
+    experience: str | None = Field(None, max_length=100, description="Опыт работы")
+    location: str | None = Field(None, max_length=200, description="Локация")
+    employment: str | None = Field(None, max_length=100, description="Тип занятости")
+    requirements: str | None = Field(None, description="Требования к кандидату")
+    conditions: str | None = Field(None, description="Условия работы")
 
     @field_validator("name")
     def validate_name(cls, v):
@@ -56,6 +55,7 @@ class VacancyCreateSchema(VacancyBaseSchema):
 
 class VacancyUpdateSchema(VacancyBaseSchema):
     pass
+
 
 class VacancySchema(VacancyBaseSchema):
     id: int

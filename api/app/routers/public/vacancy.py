@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from fastapi import APIRouter, Depends, Path
 
@@ -38,7 +37,7 @@ async def get_vacancy(
     return await vacancy_service.get_vacancy_by_id(vacancy_id)
 
 
-@router.get("/get_vacancies", response_model=List[GetVacancySchema])
+@router.get("/get_vacancies", response_model=list[GetVacancySchema])
 async def get_vacancies(
     current_user: UserModel = Depends(get_current_user),
     vacancy_service: VacancyService = Depends(get_vacancy_service),

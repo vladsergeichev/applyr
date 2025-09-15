@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, Tuple
 
 from fastapi import Response
 
@@ -30,7 +29,7 @@ class AuthService:
 
     async def register_user(
         self, user_data: AuthRegisterSchema
-    ) -> Tuple[AuthResponseSchema, str]:
+    ) -> tuple[AuthResponseSchema, str]:
         """Регистрация нового пользователя"""
         # Проверяем, существует ли пользователь с таким username
         existing_user = await self.auth_repo.get_by_username(user_data.username)
@@ -49,7 +48,7 @@ class AuthService:
 
     async def login_user(
         self, user_data: AuthLoginSchema
-    ) -> Tuple[AuthResponseSchema, str]:
+    ) -> tuple[AuthResponseSchema, str]:
         """Вход пользователя"""
         # Получаем пользователя с проверкой пароля через репозиторий
         user = await self.auth_repo.get_user_with_password_check(
@@ -98,7 +97,7 @@ class AuthService:
         logger.info(f"Обновлен токен для пользователя: {user.username}")
         return AuthResponseSchema(access_token=access_token)
 
-    async def logout_user(self, refresh_token: Optional[str]) -> None:
+    async def logout_user(self, refresh_token: str | None) -> None:
         """Выход пользователя"""
         if refresh_token:
             # Проверяем токен
@@ -137,7 +136,7 @@ class AuthService:
         return AuthResponseSchema(access_token=access_token)
 
     @staticmethod
-    def _create_tokens(user: UserModel) -> Tuple[str, str]:
+    def _create_tokens(user: UserModel) -> tuple[str, str]:
         """Создает access и refresh токены для пользователя"""
         # Access токен содержит полную информацию о пользователе
         access_token_data = {
@@ -152,7 +151,7 @@ class AuthService:
         return access_token, refresh_token
 
     @staticmethod
-    def set_refresh_cookie(refresh_token: str, response: Optional[Response]) -> None:
+    def set_refresh_cookie(refresh_token: str, response: Response | None) -> None:
         """Устанавливает refresh токен в cookie"""
         if response:
             response.set_cookie(

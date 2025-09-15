@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -7,16 +6,16 @@ from pydantic import BaseModel
 class UserResponse(BaseModel):
     id: int
     username: str
-    telegram_username: Optional[str] = None
+    telegram_username: str | None = None
     created_at: datetime
 
 
 class VacancyResponse(BaseModel):
     id: int
     name: str
-    description: Optional[str] = None
-    link: Optional[str] = None
-    company_name: Optional[str] = None
+    description: str | None = None
+    link: str | None = None
+    company_name: str | None = None
     user_id: int
     created_at: datetime
 
@@ -24,7 +23,7 @@ class VacancyResponse(BaseModel):
 class StageResponse(BaseModel):
     id: int
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     order_index: int
     vacancy_id: int
     created_at: datetime

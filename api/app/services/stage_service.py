@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from app.exceptions import StageNotFoundException, VacancyNotFoundException
 from app.repositories.stage_repository import StageRepository
@@ -34,7 +33,7 @@ class StageService:
         logger.info(f"Получен этап {stage_id}")
         return stage
 
-    async def get_stages_by_vacancy_id(self, vacancy_id: int) -> List[StageSchema]:
+    async def get_stages_by_vacancy_id(self, vacancy_id: int) -> list[StageSchema]:
         """Получает этапы вакансии"""
         # Проверяем, существует ли вакансия
         vacancy = await self.vacancy_repo.get_by_id(vacancy_id)

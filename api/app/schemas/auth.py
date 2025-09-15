@@ -1,6 +1,5 @@
 import re
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -57,7 +56,7 @@ class UpdateTelegramSchema(BaseModel):
 class UserInfoSchema(BaseModel):
     id: int
     username: str
-    telegram_username: Optional[str] = None
+    telegram_username: str | None = None
     created_at: datetime
 
     class Config:

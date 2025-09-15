@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends
 
 from app.core.dependencies import get_admin_service
@@ -9,13 +7,13 @@ from app.services.admin_service import AdminService
 router = APIRouter()
 
 
-@router.get("/get_users", response_model=List[UserResponse])
+@router.get("/get_users", response_model=list[UserResponse])
 async def get_users(admin_service: AdminService = Depends(get_admin_service)):
     """Получить всех пользователей"""
     return await admin_service.get_all_users()
 
 
-@router.get("/get_vacancies", response_model=List[VacancyResponse])
+@router.get("/get_vacancies", response_model=list[VacancyResponse])
 async def get_vacancies(admin_service: AdminService = Depends(get_admin_service)):
     """Получить все вакансии"""
     return await admin_service.get_all_vacancies()
@@ -27,7 +25,7 @@ async def get_stages(admin_service: AdminService = Depends(get_admin_service)):
     return await admin_service.get_all_stages()
 
 
-@router.get("/get_tokens", response_model=List[TokenResponse])
+@router.get("/get_tokens", response_model=list[TokenResponse])
 async def get_tokens(admin_service: AdminService = Depends(get_admin_service)):
     """Получить все refresh токены"""
     return await admin_service.get_all_tokens()

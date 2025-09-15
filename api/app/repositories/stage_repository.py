@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,28 +27,28 @@ class StageRepository:
         await self.db.refresh(stage)
         return stage
 
-    async def get_by_id(self, stage_id: int) -> Optional[StageModel]:
+    async def get_by_id(self, stage_id: int) -> StageModel | None:
         """Получает этап по ID"""
         result = await self.db.execute(
             select(StageModel).where(StageModel.id == stage_id)
         )
         return result.scalar_one_or_none()
 
-    async def get_by_vacancy_id(self, vacancy_id: int) -> List[StageModel]:
+    async def get_by_vacancy_id(self, vacancy_id: int) -> list[StageModel]:
         """Получает все этапы вакансии"""
         result = await self.db.execute(
             select(StageModel).where(StageModel.vacancy_id == vacancy_id)
         )
         return result.scalars().all()
 
-    async def get_all(self) -> List[StageModel]:
+    async def get_all(self) -> list[StageModel]:
         """Получает все этапы"""
         result = await self.db.execute(select(StageModel))
         return result.scalars().all()
 
     async def update(
         self, stage_id: int, stage_data: StageUpdateSchema
-    ) -> Optional[StageModel]:
+    ) -> StageModel | None:
         """Обновляет этап"""
         stage = await self.get_by_id(stage_id)
         if not stage:

@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -8,9 +6,8 @@ from app.models import VacancyModel
 from app.schemas.stage import GetStageSchema
 from app.schemas.vacancy import (
     GetVacancySchema,
-    VacancyCreateSchema,
-    VacancyUpdateSchema,
     VacancyBaseSchema,
+    VacancyUpdateSchema,
 )
 
 
@@ -26,7 +23,7 @@ class VacancyRepository:
         await self.db.refresh(vacancy)
         return vacancy
 
-    async def get_by_id(self, vacancy_id: int) -> Optional[VacancyModel]:
+    async def get_by_id(self, vacancy_id: int) -> VacancyModel | None:
         """Получает вакансию по ID"""
         result = await self.db.execute(
             select(VacancyModel).where(VacancyModel.id == vacancy_id)
@@ -75,14 +72,14 @@ class VacancyRepository:
             for vacancy in vacancies
         ]
 
-    async def get_all(self) -> List[VacancyModel]:
+    async def get_all(self) -> list[VacancyModel]:
         """Получает все вакансии"""
         result = await self.db.execute(select(VacancyModel))
         return result.scalars().all()
 
     async def update(
         self, vacancy_id: int, vacancy_data: VacancyUpdateSchema
-    ) -> Optional[VacancyModel]:
+    ) -> VacancyModel | None:
         """Обновляет вакансию"""
         vacancy = await self.get_by_id(vacancy_id)
         if not vacancy:

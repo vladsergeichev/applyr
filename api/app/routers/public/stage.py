@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from fastapi import APIRouter, Depends, Path
 
@@ -29,7 +28,7 @@ async def get_stage(
     return await stage_service.get_stage_by_id(stage_id)
 
 
-@router.get("/get_stages/{vacancy_id}", response_model=List[StageSchema])
+@router.get("/get_stages/{vacancy_id}", response_model=list[StageSchema])
 async def get_stages(
     vacancy_id: int = Path(..., description="ID вакансии"),
     stage_service: StageService = Depends(get_stage_service),

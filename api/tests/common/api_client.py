@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, Dict, Optional, Self
+from typing import Any, Self
 
 from faker import Faker
 from fastapi import FastAPI, status
@@ -25,7 +25,7 @@ class AsyncTestAPIClient(AsyncClient):
 
     @classmethod
     def build_authorized_app_client(
-        cls, app: FastAPI, access_token: Optional[str] = None
+        cls, app: FastAPI, access_token: str | None = None
     ) -> Self:
         """Создает авторизованный клиент для тестов"""
         headers = {}
@@ -53,9 +53,7 @@ class AsyncTestAPIClient(AsyncClient):
         raise ValueError("Invalid access token or missing user_id")
 
     # Аутентификация
-    async def register_user(
-        self, user_data: Optional[Dict[str, Any]] = None
-    ) -> Response:
+    async def register_user(self, user_data: dict[str, Any] | None = None) -> Response:
         """Регистрация пользователя"""
         if user_data is None:
             user_data = {
@@ -77,13 +75,13 @@ class AsyncTestAPIClient(AsyncClient):
         """Выход пользователя"""
         return await self.post("/auth/logout", json={"refresh_token": refresh_token})
 
-    async def update_telegram_username(self, telegram_data: Dict[str, Any]) -> Response:
+    async def update_telegram_username(self, telegram_data: dict[str, Any]) -> Response:
         """Обновление Telegram username"""
         return await self.put("/auth/update_telegram", json=telegram_data)
 
     # Вакансии
     async def create_vacancy(
-        self, vacancy_data: Optional[Dict[str, Any]] = None
+        self, vacancy_data: dict[str, Any] | None = None
     ) -> Response:
         """Создание вакансии"""
         if vacancy_data is None:
@@ -105,7 +103,7 @@ class AsyncTestAPIClient(AsyncClient):
         return await self.get("/api/internal/get_vacancies")
 
     async def update_vacancy(
-        self, vacancy_id: int, vacancy_data: Dict[str, Any]
+        self, vacancy_id: int, vacancy_data: dict[str, Any]
     ) -> Response:
         """Обновление вакансии"""
         return await self.put(
@@ -117,9 +115,7 @@ class AsyncTestAPIClient(AsyncClient):
         return await self.delete(f"/vacancy/delete_vacancy/{vacancy_id}")
 
     # Этапы
-    async def create_stage(
-        self, stage_data: Optional[Dict[str, Any]] = None
-    ) -> Response:
+    async def create_stage(self, stage_data: dict[str, Any] | None = None) -> Response:
         """Создание этапа"""
         if stage_data is None:
             stage_data = {
@@ -137,7 +133,7 @@ class AsyncTestAPIClient(AsyncClient):
         """Получение этапов вакансии"""
         return await self.get(f"/stage/get_stages/{vacancy_id}")
 
-    async def update_stage(self, stage_id: int, stage_data: Dict[str, Any]) -> Response:
+    async def update_stage(self, stage_id: int, stage_data: dict[str, Any]) -> Response:
         """Обновление этапа"""
         return await self.put(f"/stage/update_stage/{stage_id}", json=stage_data)
 
@@ -146,7 +142,7 @@ class AsyncTestAPIClient(AsyncClient):
         return await self.delete(f"/stage/delete_stage/{stage_id}")
 
     # Утилиты для тестов
-    async def create_test_user(self) -> tuple[Dict[str, Any], str]:
+    async def create_test_user(self) -> tuple[dict[str, Any], str]:
         """Создает тестового пользователя и возвращает данные и токен"""
         # Регистрируем пользователя
         user_data = {
@@ -183,7 +179,7 @@ class AsyncTestAPIClient(AsyncClient):
             assert False, f"Response is not JSON: {response.text}"
 
     def assert_response_has_error(
-        self, response: Response, expected_error_type: Optional[str] = None
+        self, response: Response, expected_error_type: str | None = None
     ):
         """Проверяет наличие ошибки в ответе"""
         assert (

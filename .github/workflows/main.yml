@@ -94,7 +94,7 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no ./docker-compose.yml ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/docker-compose.yml
+          scp -i private_key.pem -o StrictHostKeyChecking=no ./compose.yml ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/compose.yml
           rm private_key.pem
 
       - name: Load env
@@ -143,4 +143,4 @@ jobs:
             docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" -p "${{ secrets.REGISTRY_KEY_SECRET }}"
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest
-            docker compose -f /applyr/docker-compose.yml up -d
+            docker compose -f /applyr/compose.yml up -d

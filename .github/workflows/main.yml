@@ -10,29 +10,11 @@ env:
   REGISTRY: applyr.cr.cloud.ru
   IMAGE_NAME_BOT: applyr-bot
   IMAGE_NAME_API: applyr-api
-  DEPLOY_HOST: "84.54.59.21"
+  DEPLOY_HOST: "45.132.176.39"
   DEPLOY_USER: deployer
 
 jobs:
-#   lint:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-
-#       - name: Set up Python
-#         uses: actions/setup-python@v5
-#         with:
-#           python-version: '3.12'
-
-#       # - name: Install ruff
-#       #   run: pip install ruff
-
-#       # - name: Run ruff linter
-#       #   run: ruff .
-
   build:
-    # needs: lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -60,29 +42,7 @@ jobs:
           docker build ./api -t $REGISTRY/$IMAGE_NAME_API:latest
           docker push $REGISTRY/$IMAGE_NAME_API:latest
 
-  # test:
-  #   needs: build-and-push
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: '3.11'
-
-  #     - name: Install dependencies
-  #       run: |
-  #         pip install -r requirements.txt
-  #         pip install pytest
-
-  #     - name: Run tests
-  #       run: pytest tests/
-
   deploy:
-    # needs: test
     needs: build
     runs-on: ubuntu-latest
 
@@ -90,44 +50,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Load docker-compose
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
-          chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no ./compose.yml ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/compose.yml
-          rm private_key.pem
-
-      - name: Load env
+      - name: Upload env
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           echo "${{ secrets.ENV }}" > .env
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/applyr/.env
+          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/opt/applyr/.env
+          rm private_key.pem
           rm .env
 
-      - name: List dist contents
-        run: |
-          echo "static/ contents:"
-          ls -lah static/
-
-      - name: Upload staticfiles
+      - name: Upload files
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ env.DEPLOY_HOST }}
           username: ${{ env.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: static/
-          target: /applyr
-
-      - name: Upload nginx files
-        uses: appleboy/scp-action@v1.0.0
-        with:
-          host: ${{ env.DEPLOY_HOST }}
-          username: ${{ env.DEPLOY_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: nginx/nginx.conf
-          target: /applyr
-
+          source: "compose.yml,static,nginx/nginx.conf"
+          target: /opt/applyr
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
@@ -143,4 +82,4 @@ jobs:
             docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" -p "${{ secrets.REGISTRY_KEY_SECRET }}"
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest
-            docker compose -f /applyr/compose.yml up -d
+            docker compose -f /opt/applyr/compose.yml up -d

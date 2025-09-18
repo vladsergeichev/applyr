@@ -338,7 +338,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: var(--space);
-    padding-bottom: var(--space);
+    padding-bottom: calc(var(--space) * 5);
 }
 
 .content-header-outer {
@@ -612,12 +612,14 @@ body {
 .action-btn {
     background: none;
     border: none;
-    padding: calc(var(--space) * 0.2);
     cursor: pointer;
     color: var(--gray-medium);
-    transition: color var(--transition);
+    transition: all var(--transition);
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
 }
 
 .action-btn svg {
@@ -633,6 +635,8 @@ body {
 
 .action-btn:hover {
     color: var(--primary-hover);
+    background: var(--gray-light);
+    border-radius: var(--radius);
 }
 
 .add-vacancy-btn {

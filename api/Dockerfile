@@ -10,5 +10,5 @@ COPY ./app /opt/applyr_api/app
 COPY ./tests /opt/applyr_api/tests
 COPY alembic.ini /opt/applyr_api/
 
-#CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+#CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000"]

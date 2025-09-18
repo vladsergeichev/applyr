@@ -31,6 +31,8 @@ services:
       DB__USER: ${DB__USER}
       DB__PASSWORD: ${DB__PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
+      DOMAIN: ${DOMAIN}
+      EMAIL: ${EMAIL}
     depends_on:
       postgres:
         condition: service_healthy

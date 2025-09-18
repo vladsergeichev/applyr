@@ -292,14 +292,14 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
             const data = {
                 name: form.title.value.trim(),
                 link: form.link.value.trim(),
-                company_name: form.company.value,
-                description: form.description.value,
-                salary: form.salary.value,
-                experience: form.experience.value,
-                location: form.location.value,
-                employment: form.employment.value,
-                requirements: form.requirements.value,
-                conditions: form.conditions.value
+                company_name: form.company.value.trim(),
+                description: form.description.value.trim(),
+                salary: form.salary.value.trim(),
+                experience: form.experience.value.trim(),
+                location: form.location.value.trim(),
+                employment: form.employment.value.trim(),
+                requirements: form.requirements.value.trim(),
+                conditions: form.conditions.value.trim()
             };
 
             try {

@@ -19,9 +19,3 @@ pydantic-settings = "2.1.0"
 [tool.poetry.group.dev.dependencies]
 ruff = "0.1.0"
 
-[tool.alembic]
-script_location = "%(here)s/app/alembic"
-file_template = "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
-prepend_sys_path = [
-    "."
-]

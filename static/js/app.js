@@ -40,40 +40,27 @@ class App {
 
         // Кнопка профиля и выпадающее меню
         const profileBtn = document.getElementById('profile-btn');
-        const profileDropdown = document.getElementById('profile-dropdown');
         const dropdownIcon = profileBtn?.querySelector('.dropdown-icon');
+        const profileDropdownContainer = document.querySelector('.user-profile');
 
-        if (profileBtn && profileDropdown && dropdownIcon) {
-            profileBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                profileDropdown.classList.toggle('show');
-                dropdownIcon.classList.toggle('open');
+        if (profileBtn && dropdownIcon && profileDropdownContainer) {
+            const dropdown = new Dropdown({
+                triggerButton: profileBtn,
+                items: [
+                    {
+                        text: 'Выход',
+                        className: 'clr-red',
+                        onClick: () => this.logout()
+                    }
+                ],
+                onShow: () => dropdownIcon.classList.add('open'),
+                onHide: () => dropdownIcon.classList.remove('open')
             });
 
-            // Закрытие меню при клике вне его
-            document.addEventListener('click', (e) => {
-                if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-                    profileDropdown.classList.remove('show');
-                    dropdownIcon.classList.remove('open');
-                }
-            });
-
-            // Закрытие меню при нажатии Escape
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    profileDropdown.classList.remove('show');
-                    dropdownIcon.classList.remove('open');
-                }
-            });
+            profileDropdownContainer.appendChild(dropdown.getContainer());
         }
 
-        // Кнопка выхода
-        const logoutBtn = document.getElementById('logout-btn');
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.logout();
-        });
+        // Кнопка выхода больше не нужна, так как обработчик добавляется в дропдауне
     }
 
     async checkAuthStatus() {
@@ -225,7 +212,7 @@ class App {
     showLoginModal() {
         const formContent = `
             <div class="form-group">
-                <label for="login-username">Username:</label>
+                <label for="login-username">Логин:</label>
                 <input type="text" id="login-username" name="username" required>
             </div>
             <div class="form-group">
@@ -261,7 +248,7 @@ class App {
         console.log('Opening register modal');
         const formContent = `
             <div class="form-group">
-                <label for="register-username">Username:</label>
+                <label for="register-username">Логин:</label>
                 <input type="text" id="register-username" name="username" required>
                 <div class="error-message" id="username-error"></div>
             </div>

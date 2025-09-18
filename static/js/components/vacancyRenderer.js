@@ -127,79 +127,33 @@ class VacancyRenderer {
     createActionButtons(vacancy) {
         const buttons = [];
 
-        // Создаем контейнер для дропдауна
-        const dropdownContainer = document.createElement('div');
-        dropdownContainer.className = 'user-profile';
-
-        // Кнопка троеточия
-        const toggleBtn = document.createElement('button');
-        toggleBtn.className = 'action-btn p-2 hover:bg-gray-100 rounded-md';
-        toggleBtn.title = 'Действия';
-        toggleBtn.innerHTML = Icons.threeDots;
-        
-        // Создаем меню
-        const menu = document.createElement('div');
-        menu.className = 'profile-dropdown';
-        
-        // Пункт "Редактировать"
-        const editItem = document.createElement('a');
-        editItem.className = 'profile-dropdown-item';
-        editItem.textContent = 'Редактировать';
-        editItem.href = '#';
-        editItem.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            menu.classList.remove('show');
-            window.showVacancyModal({mode: 'edit', vacancy});
-        };
-        
-        // Пункт "Удалить"
-        const deleteItem = document.createElement('a');
-        deleteItem.className = 'profile-dropdown-item clr-red';
-        deleteItem.textContent = 'Удалить';
-        deleteItem.href = '#';
-        deleteItem.onclick = async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            menu.classList.remove('show');
-            
-            if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
-                try {
-                    await window.app.vacancyClient.deleteVacancy(vacancy.id);
-                    const item = document.querySelector(`[data-vacancy-id="${vacancy.id}"]`);
-                    if (item) item.remove();
-                    window.app.messageManager.showSuccess('Вакансия удалена!');
-                } catch (err) {
-                    window.app.messageManager.showError('Ошибка при удалении вакансии');
+        // Создаем дропдаун с пунктами меню
+        const dropdown = new Dropdown({
+            items: [
+                {
+                    text: 'Редактировать',
+                    onClick: () => window.showVacancyModal({mode: 'edit', vacancy})
+                },
+                {
+                    text: 'Удалить',
+                    className: 'clr-red',
+                    onClick: async () => {
+                        if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
+                            try {
+                                await window.app.vacancyClient.deleteVacancy(vacancy.id);
+                                const item = document.querySelector(`[data-vacancy-id="${vacancy.id}"]`);
+                                if (item) item.remove();
+                                window.app.messageManager.showSuccess('Вакансия удалена!');
+                            } catch (err) {
+                                window.app.messageManager.showError('Ошибка при удалении вакансии');
+                            }
+                        }
+                    }
                 }
-            }
-        };
+            ]
+        });
 
-        // Собираем меню
-        menu.appendChild(editItem);
-        menu.appendChild(deleteItem);
-        
-        // Собираем дропдаун
-        dropdownContainer.appendChild(toggleBtn);
-        dropdownContainer.appendChild(menu);
-        
-        // Добавляем обработчик для открытия/закрытия меню
-        toggleBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            menu.classList.toggle('show');
-            
-            // Закрываем при клике вне меню
-            const closeMenu = (e) => {
-                if (!dropdownContainer.contains(e.target)) {
-                    menu.classList.remove('show');
-                    document.removeEventListener('click', closeMenu);
-                }
-            };
-            document.addEventListener('click', closeMenu);
-        };
-
-        buttons.push(dropdownContainer);
+        buttons.push(dropdown.getContainer());
         return buttons;
     }
 

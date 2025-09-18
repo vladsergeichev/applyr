@@ -515,7 +515,7 @@ body {
     border-radius: var(--radius);
     position: relative;
     margin: 0;
-    animation: fadeIn 0.2s ease;
+    /*animation: fadeIn 0.2s ease;*/
     box-shadow: var(--shadow);
 
     display: flex;

@@ -137,17 +137,11 @@ class VacancyRenderer {
                 {
                     text: 'Удалить',
                     className: 'clr-red',
-                    onClick: async () => {
-                        if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
-                            try {
-                                await window.app.vacancyClient.deleteVacancy(vacancy.id);
-                                const item = document.querySelector(`[data-vacancy-id="${vacancy.id}"]`);
-                                if (item) item.remove();
-                                window.app.messageManager.showSuccess('Вакансия удалена!');
-                            } catch (err) {
-                                window.app.messageManager.showError('Ошибка при удалении вакансии');
-                            }
-                        }
+                    onClick: () => {
+                        showDeleteVacancyConfirm(vacancy, () => {
+                            const item = document.querySelector(`[data-vacancy-id="${vacancy.id}"]`);
+                            if (item) item.remove();
+                        });
                     }
                 }
             ]
@@ -357,5 +351,25 @@ function updateVacancyInDOM(isEdit, oldVacancy, newVacancy) {
     }
 }
 
+// Функция для показа модального окна подтверждения удаления
+function showDeleteVacancyConfirm(vacancy, onSuccess) {
+    modalManager.createConfirmModal({
+        title: 'Удалить вакансию?',
+        message: 'Вы уверены, что хотите удалить эту вакансию? Это действие нельзя отменить.',
+        confirmText: 'Удалить',
+        cancelText: 'Отмена',
+        onConfirm: async () => {
+            try {
+                await window.app.vacancyClient.deleteVacancy(vacancy.id);
+                window.app.messageManager.showSuccess('Вакансия удалена!');
+                if (onSuccess) onSuccess();
+            } catch (err) {
+                window.app.messageManager.showError('Ошибка при удалении вакансии');
+            }
+        }
+    });
+}
+
 // Экспорт в глобальную область
 window.showVacancyModal = showVacancyModal;
+window.showDeleteVacancyConfirm = showDeleteVacancyConfirm;

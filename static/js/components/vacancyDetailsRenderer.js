@@ -43,16 +43,10 @@ class VacancyDetailsRenderer {
                 {
                     text: 'Удалить',
                     className: 'clr-red',
-                    onClick: async () => {
-                        if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
-                            try {
-                                await this.vacancyClient.deleteVacancy(vacancy.id);
-                                window.app.messageManager.showSuccess('Вакансия удалена!');
-                                window.app.router.navigate('/');
-                            } catch (err) {
-                                window.app.messageManager.showError('Ошибка при удалении вакансии');
-                            }
-                        }
+                    onClick: () => {
+                        showDeleteVacancyConfirm(vacancy, () => {
+                            window.app.router.navigate('/');
+                        });
                     }
                 }
             ]

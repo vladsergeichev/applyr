@@ -41,7 +41,9 @@ async def handle_message(message: Message):
     description = message.text
 
     # Создаем
-    success, result = await api_client.create_vacancy(user_id, vacancy_name, link, description)
+    success, result = await api_client.create_vacancy(
+        user_id, vacancy_name, link, description
+    )
 
     if success:
         await message.answer(

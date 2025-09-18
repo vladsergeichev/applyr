@@ -1,3 +1,7 @@
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
+
 from app.models import VacancyModel
 from app.schemas.stage import GetStageSchema
 from app.schemas.vacancy import (
@@ -5,9 +9,6 @@ from app.schemas.vacancy import (
     VacancyBaseSchema,
     VacancyUpdateSchema,
 )
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
 
 class VacancyRepository:

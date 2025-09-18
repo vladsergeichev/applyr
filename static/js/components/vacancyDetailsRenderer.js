@@ -1,10 +1,46 @@
 class VacancyDetailsRenderer {
     constructor() {
         this.container = document.getElementById('vacancies-container');
+        this.dropdownInstance = null;
     }
 
     get vacancyClient() {
         return window.app.vacancyClient;
+    }
+
+    // Создаем или обновляем дропдаун
+    setupDropdown(vacancy) {
+        const actionsContainer = document.getElementById('vacancy-actions');
+        if (!actionsContainer) return;
+
+        const dropdownItems = [
+            {
+                text: 'Редактировать',
+                onClick: () => window.showVacancyModal({mode: 'edit', vacancy})
+            },
+            {
+                text: 'Удалить',
+                className: 'clr-red',
+                onClick: () => {
+                    showDeleteVacancyConfirm(vacancy, () => {
+                        window.app.router.navigate('/');
+                    });
+                }
+            }
+        ];
+
+        // Если дропдаун уже существует, обновляем только обработчики
+        if (this.dropdownInstance) {
+            this.dropdownInstance.updateItems(dropdownItems);
+            return;
+        }
+
+        // Создаем новый дропдаун
+        this.dropdownInstance = new Dropdown({
+            items: dropdownItems
+        });
+
+        actionsContainer.appendChild(this.dropdownInstance.getContainer());
     }
 
     // Отображение детальной информации о вакансии
@@ -32,27 +68,8 @@ class VacancyDetailsRenderer {
         document.getElementById('vacancy-data-conditions').innerHTML = (vacancy.conditions || '–').replace(/\n/g, '<br>');
         document.getElementById('vacancy-data-link').href = vacancy.link;
 
-        // Добавляем дропдаун с действиями
-        const actionsContainer = document.getElementById('vacancy-actions');
-        const dropdown = new Dropdown({
-            items: [
-                {
-                    text: 'Редактировать',
-                    onClick: () => window.showVacancyModal({mode: 'edit', vacancy})
-                },
-                {
-                    text: 'Удалить',
-                    className: 'clr-red',
-                    onClick: () => {
-                        showDeleteVacancyConfirm(vacancy, () => {
-                            window.app.router.navigate('/');
-                        });
-                    }
-                }
-            ]
-        });
-
-        actionsContainer.appendChild(dropdown.getContainer());
+        // Обновляем дропдаун
+        this.setupDropdown(vacancy);
     }
 
     // Отображение ошибки

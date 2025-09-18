@@ -102,6 +102,30 @@ class Dropdown {
     getContainer() {
         return this.container;
     }
+
+    updateItems(items) {
+        // Очищаем текущие пункты меню
+        this.menu.innerHTML = '';
+        
+        // Добавляем новые пункты
+        items.forEach(item => {
+            const menuItem = document.createElement('a');
+            menuItem.href = '#';
+            menuItem.className = 'dropdown-menu-item' + (item.className ? ` ${item.className}` : '');
+            menuItem.textContent = item.text;
+            
+            menuItem.onclick = async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hide();
+                if (item.onClick) {
+                    await item.onClick(e);
+                }
+            };
+
+            this.menu.appendChild(menuItem);
+        });
+    }
 }
 
 // Экспорт в глобальную область

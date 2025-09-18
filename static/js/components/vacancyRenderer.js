@@ -293,11 +293,11 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
                 name: form.title.value.trim(),
                 link: form.link.value.trim(),
                 company_name: form.company.value.trim(),
-                description: form.description.value.trim(),
                 salary: form.salary.value.trim(),
                 experience: form.experience.value.trim(),
                 location: form.location.value.trim(),
                 employment: form.employment.value.trim(),
+                description: form.description.value.trim(),
                 requirements: form.requirements.value.trim(),
                 conditions: form.conditions.value.trim()
             };

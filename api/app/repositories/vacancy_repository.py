@@ -1,7 +1,3 @@
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
-
 from app.models import VacancyModel
 from app.schemas.stage import GetStageSchema
 from app.schemas.vacancy import (
@@ -9,6 +5,9 @@ from app.schemas.vacancy import (
     VacancyBaseSchema,
     VacancyUpdateSchema,
 )
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 
 class VacancyRepository:
@@ -86,14 +85,8 @@ class VacancyRepository:
             return None
 
         # Обновляем только переданные поля
-        if vacancy_data.name is not None:
-            vacancy.name = vacancy_data.name
-        if vacancy_data.link is not None:
-            vacancy.link = vacancy_data.link
-        if vacancy_data.company_name is not None:
-            vacancy.company_name = vacancy_data.company_name
-        if vacancy_data.description is not None:
-            vacancy.description = vacancy_data.description
+        for key, value in vacancy_data.model_dump(exclude_none=True).items():
+            setattr(vacancy, key, value)
 
         await self.db.commit()
         await self.db.refresh(vacancy)

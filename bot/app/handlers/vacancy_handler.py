@@ -38,9 +38,10 @@ async def handle_message(message: Message):
 
     vacancy_name = extract_vacancy_name(message.text)
     link = generate_link(message.forward_from_chat.id, message.forward_from_message_id)
+    description = message.text
 
     # Создаем
-    success, result = await api_client.create_vacancy(user_id, vacancy_name, link)
+    success, result = await api_client.create_vacancy(user_id, vacancy_name, link, description)
 
     if success:
         await message.answer(

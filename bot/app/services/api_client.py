@@ -1,7 +1,6 @@
 import logging
 
 import aiohttp
-
 from app.config import app_config
 
 logger = logging.getLogger(__name__)
@@ -14,7 +13,7 @@ class APIClient:
         self.base_url = base_url or app_config.api_url
 
     async def create_vacancy(
-        self, user_id: int, name: str, link: str
+        self, user_id: int, name: str, link: str, description: str
     ) -> tuple[bool, str]:
         """Создает отклик через API"""
         try:
@@ -23,7 +22,7 @@ class APIClient:
                     "user_id": user_id,
                     "name": name,
                     "link": link,
-                    "description": "Создано через Telegram бот",
+                    "description": description,
                 }
 
                 async with session.post(

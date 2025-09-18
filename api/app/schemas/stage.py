@@ -7,7 +7,7 @@ class StageBaseSchema(BaseModel):
     vacancy_id: int = Field(..., gt=0, description="ID вакансии")
     stage_type: str = Field(..., min_length=1, max_length=255, description="Тип этапа")
     title: str | None = Field(None, max_length=255, description="Название этапа")
-    description: str | None = Field(None, max_length=1000, description="Описание этапа")
+    description: str | None = Field(None, description="Описание этапа")
 
 
 class StageCreateSchema(StageBaseSchema):
@@ -19,7 +19,7 @@ class StageUpdateSchema(BaseModel):
         None, min_length=1, max_length=255, description="Тип этапа"
     )
     title: str | None = Field(None, max_length=255, description="Название этапа")
-    description: str | None = Field(None, max_length=1000, description="Описание этапа")
+    description: str | None = Field(None, description="Описание этапа")
 
 
 class StageSchema(StageBaseSchema):

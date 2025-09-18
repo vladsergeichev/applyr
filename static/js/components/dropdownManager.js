@@ -4,8 +4,8 @@ class Dropdown {
         triggerButton = null,
         items = [],
         containerClass = 'user-profile',
-        menuClass = 'profile-dropdown',
-        itemClass = 'profile-dropdown-item',
+        menuClass = 'dropdown-menu',
+        itemClass = 'dropdown-menu-item',
         onShow = null,
         onHide = null
     }) {

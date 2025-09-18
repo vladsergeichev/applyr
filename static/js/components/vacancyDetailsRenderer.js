@@ -31,6 +31,34 @@ class VacancyDetailsRenderer {
         document.getElementById('vacancy-data-requirements').innerHTML = (vacancy.requirements || '–').replace(/\n/g, '<br>');
         document.getElementById('vacancy-data-conditions').innerHTML = (vacancy.conditions || '–').replace(/\n/g, '<br>');
         document.getElementById('vacancy-data-link').href = vacancy.link;
+
+        // Добавляем дропдаун с действиями
+        const actionsContainer = document.getElementById('vacancy-actions');
+        const dropdown = new Dropdown({
+            items: [
+                {
+                    text: 'Редактировать',
+                    onClick: () => window.showVacancyModal({mode: 'edit', vacancy})
+                },
+                {
+                    text: 'Удалить',
+                    className: 'clr-red',
+                    onClick: async () => {
+                        if (confirm('Вы уверены, что хотите удалить эту вакансию?')) {
+                            try {
+                                await this.vacancyClient.deleteVacancy(vacancy.id);
+                                window.app.messageManager.showSuccess('Вакансия удалена!');
+                                window.app.router.navigate('/');
+                            } catch (err) {
+                                window.app.messageManager.showError('Ошибка при удалении вакансии');
+                            }
+                        }
+                    }
+                }
+            ]
+        });
+
+        actionsContainer.appendChild(dropdown.getContainer());
     }
 
     // Отображение ошибки

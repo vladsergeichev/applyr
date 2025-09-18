@@ -319,15 +319,21 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
 
             try {
                 let newVacancy;
-                if (isEdit && vacancy) {
-                    newVacancy = await window.app.vacancyClient.updateVacancy(vacancy.id, data);
-                } else {
-                    newVacancy = await window.app.vacancyClient.createVacancy(data);
-                }
+                    if (isEdit && vacancy) {
+                        newVacancy = await window.app.vacancyClient.updateVacancy(vacancy.id, data);
+                    } else {
+                        newVacancy = await window.app.vacancyClient.createVacancy(data);
+                    }
 
-                modalInstance.close();
-                updateVacancyInDOM(isEdit, vacancy, newVacancy);
-                window.app.messageManager.showSuccess(isEdit ? 'Вакансия обновлена!' : 'Вакансия добавлена!');
+                    modalInstance.close();
+                    updateVacancyInDOM(isEdit, vacancy, newVacancy);
+                    window.app.messageManager.showSuccess(isEdit ? 'Вакансия обновлена!' : 'Вакансия добавлена!');
+
+                    // Если мы на странице вакансии и редактируем её, обновляем данные в карточке
+                    const currentPath = window.location.pathname;
+                    if (isEdit && currentPath === `/vacancy/${vacancy.id}`) {
+                        window.app.vacancyDetailsRenderer.renderVacancyDetails(newVacancy);
+                    }
             } catch (err) {
                 window.app.messageManager.showError(isEdit ? 'Ошибка обновления вакансии' : 'Ошибка добавления вакансии');
             }

@@ -13,11 +13,11 @@ class VacancyBaseSchema(BaseModel):
     company_name: str | None = Field(
         None, max_length=255, description="Название компании"
     )
-    description: str | None = Field(None, max_length=1000, description="Описание")
     salary: str | None = Field(None, description="Уровень дохода")
     experience: str | None = Field(None, max_length=100, description="Опыт работы")
     location: str | None = Field(None, max_length=200, description="Локация")
     employment: str | None = Field(None, max_length=100, description="Тип занятости")
+    description: str | None = Field(None, description="Описание")
     requirements: str | None = Field(None, description="Требования к кандидату")
     conditions: str | None = Field(None, description="Условия работы")
 

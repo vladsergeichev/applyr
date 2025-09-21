@@ -73,21 +73,6 @@ class VacancySchema(VacancyBaseSchema):
         from_attributes = True
 
 
-class BaseFavoriteSchema(BaseModel):
-    notes: str | None = None
-
-
-class FavoriteSchema(BaseFavoriteSchema):
-    id: int
-    user_id: int
-    vacancy_id: int
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
 class GetVacancySchema(VacancyBaseSchema):
     id: int
     user_id: int

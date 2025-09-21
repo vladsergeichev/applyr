@@ -254,7 +254,6 @@ body {
     width: 100%;
     padding: calc(var(--space) * 0.625) calc(var(--space) * 0.75);
     border: 1px solid #d1d5db;
-    /*border-radius: calc(var(--radius) * 0.5);*/
     border-radius: var(--radius);
     font-size: 0.875rem;
     transition: all var(--transition);
@@ -401,7 +400,6 @@ textarea.form-control {
     top: calc(100% + 4px);
     right: 0;
     background: var(--white);
-    /*border: 1px solid var(--border);*/
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
     min-width: 200px;
@@ -428,7 +426,6 @@ textarea.form-control {
     text-decoration: none;
     transition: background var(--transition);
     cursor: pointer;
-    /*border-bottom: 1px solid var(--border);*/
 }
 
 .dropdown-menu-item:last-child {
@@ -438,7 +435,6 @@ textarea.form-control {
 .dropdown-menu-item:hover {
     border-radius: var(--radius);
     background: var(--gray-light);
-    /*color: var(--primary);*/
 }
 .clr-red:hover {
     color: var(--danger);

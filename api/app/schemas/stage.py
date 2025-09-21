@@ -1,6 +1,31 @@
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field
+
+
+class StageTypes(Enum):
+    NEW = "new"
+    HR = "hr"
+    TECH = "tech"
+    BUSINESS = "business"
+    REJECTED = "rejected"
+    OFFER = "offer"
+
+
+# На будущее, для перехода на подробную state-машину
+# class StatusEnum(Enum):
+#     NEW = "Новая вакансия"
+#     APPLY_SENT = "Отклик отправлен"  # Ожидание ответа от HR
+#     HR_INTERVIEW = "Собеседование с HR"
+#     WAITING_HR_FEEDBACK = "Ожидание обратной связи от HR"
+#     TECH_INTERVIEW = "Техническое собеседование"
+#     WAITING_TECH_FEEDBACK = "Ожидание обратной связи о техническом собеседовании"
+#     BUSINESS_INTERVIEW = "Собеседование с бизнесом"
+#     WAITING_BUSINESS_FEEDBACK = "Ожидание обратной связи о бизнес-собеседовании"
+#     WAITING_RESULT = "Ожидание итогового ответа"
+#     REJECTED = "Отказ"
+#     OFFER_RECEIVED = "Получен оффер"
 
 
 class StageBaseSchema(BaseModel):

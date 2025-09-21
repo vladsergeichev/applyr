@@ -1,20 +1,16 @@
 from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.sql import func
 
 from app.database import Base
-from app.schemas.stage import StageTypes
 
 
-class StageModel(Base):
-    __tablename__ = "stage"
+class FavoriteModel(Base):
+    __tablename__ = "favorite"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     vacancy_id = Column(
         BigInteger, ForeignKey("vacancy.id", ondelete="CASCADE"), nullable=False
     )
-    stage_type = Column(ENUM(StageTypes), default=StageTypes.NEW)
-    title = Column(Text)
-    description = Column(Text)
+    notes = Column(Text)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

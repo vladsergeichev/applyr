@@ -42,6 +42,7 @@ class AdminService:
                 name=vacancy.name,
                 description=vacancy.description,
                 link=vacancy.link,
+                contact_link=vacancy.contact_link,
                 company_name=vacancy.company_name,
                 user_id=vacancy.user_id,
                 created_at=vacancy.created_at,

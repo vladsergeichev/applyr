@@ -258,6 +258,10 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
             <input type="text" name="link" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.link || '') : ''}" />
         </div>
         <div class="form-group">
+            <label>Ссылка на контактное лицо</label>
+            <input type="text" name="contact_link" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.contact_link || '') : ''}" />
+        </div>
+        <div class="form-group">
             <label>Компания</label>
             <input type="text" name="company" class="form-control" maxlength="300" value="${isEdit && vacancy ? Utils.escapeHtml(vacancy.company_name || '') : ''}" />
         </div>
@@ -301,6 +305,7 @@ function showVacancyModal({mode = 'add', vacancy = null}) {
             const data = {
                 name: form.title.value.trim(),
                 link: form.link.value.trim(),
+                contact_link: form.contact_link.value.trim(),
                 company_name: form.company.value.trim(),
                 salary: form.salary.value.trim(),
                 experience: form.experience.value.trim(),

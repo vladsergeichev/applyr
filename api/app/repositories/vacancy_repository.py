@@ -47,6 +47,7 @@ class VacancyRepository:
                 user_id=vacancy.user_id,
                 name=vacancy.name,
                 link=vacancy.link,
+                contact_link=vacancy.contact_link,
                 company_name=vacancy.company_name,
                 description=vacancy.description,
                 salary=vacancy.salary,

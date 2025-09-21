@@ -1,15 +1,24 @@
 from datetime import datetime
-
-from pydantic import BaseModel, Field, field_validator
+from enum import Enum
 
 from app.schemas.stage import GetStageSchema
+from pydantic import BaseModel, Field, field_validator
+
+
+class VacancyStatus(Enum):
+    DRAFT = "draft"
+    MODERATION = "moderation"
+    PUBLISHED = "published"
+    EXPIRED = "expired"
 
 
 class VacancyBaseSchema(BaseModel):
     name: str = Field(
         ..., min_length=1, max_length=500, description="Название вакансии"
     )
+    status: str = Field(VacancyStatus.DRAFT, description="Статус вакансии")
     link: str = Field(..., min_length=1, description="Ссылка на вакансию")
+    contact_link: str | None = Field(None, description="Ссылка на контактное лицо")
     company_name: str | None = Field(
         None, max_length=255, description="Название компании"
     )

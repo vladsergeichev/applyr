@@ -15,6 +15,7 @@ class VacancyResponse(BaseModel):
     name: str
     description: str | None = None
     link: str | None = None
+    contact_link: str | None = None
     company_name: str | None = None
     user_id: int
     created_at: datetime

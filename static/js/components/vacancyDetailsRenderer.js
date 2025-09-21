@@ -67,6 +67,7 @@ class VacancyDetailsRenderer {
         document.getElementById('vacancy-data-requirements').innerHTML = (vacancy.requirements || '–').replace(/\n/g, '<br>');
         document.getElementById('vacancy-data-conditions').innerHTML = (vacancy.conditions || '–').replace(/\n/g, '<br>');
         document.getElementById('vacancy-data-link').href = vacancy.link;
+        document.getElementById('vacancy-data-contact-link').href = vacancy.contact_link || vacancy.link;
 
         // Обновляем дропдаун
         this.setupDropdown(vacancy);

@@ -2,10 +2,16 @@ class VacancyDetailsRenderer {
     constructor() {
         this.container = document.getElementById('vacancies-container');
         this.dropdownInstance = null;
+        this.currentVacancyId = null;
+        this.setupNotesHandlers();
     }
 
     get vacancyClient() {
         return window.app.vacancyClient;
+    }
+
+    get favoriteClient() {
+        return window.app.favoriteClient;
     }
 
     // Создаем или обновляем дропдаун
@@ -43,10 +49,34 @@ class VacancyDetailsRenderer {
         actionsContainer.appendChild(this.dropdownInstance.getContainer());
     }
 
+    // Настройка обработчиков для заметок
+    setupNotesHandlers() {
+        const saveButton = document.getElementById('update-notes-btn');
+        if (saveButton) {
+            saveButton.addEventListener('click', () => this.updateNotes());
+        }
+    }
+
+    // Сохранение заметок
+    async updateNotes() {
+        if (!this.currentVacancyId) return;
+
+        const notesTextarea = document.getElementById('vacancy-notes');
+        const notes = notesTextarea.value.trim();
+
+        try {
+            await this.favoriteClient.updateNotes(this.currentVacancyId, notes);
+            window.app.messageManager.showSuccess('Заметки сохранены');
+        } catch (error) {
+            window.app.messageManager.showError('Не удалось сохранить заметки');
+        }
+    }
+
     // Отображение детальной информации о вакансии
     async render(vacancyId) {
         try {
             const vacancy = await this.vacancyClient.getVacancy(vacancyId);
+            this.currentVacancyId = vacancyId;
             this.renderVacancyDetails(vacancy);
             document.getElementById('vacancies-container').classList.add('hidden');
         } catch (error) {
@@ -68,6 +98,7 @@ class VacancyDetailsRenderer {
         document.getElementById('vacancy-data-conditions').innerHTML = (vacancy.conditions || '–').replace(/\n/g, '<br>');
         document.getElementById('vacancy-data-link').href = vacancy.link;
         document.getElementById('vacancy-data-contact-link').href = vacancy.contact_link || vacancy.link;
+        document.getElementById('vacancy-notes').value = vacancy.notes || '';
 
         // Обновляем дропдаун
         this.setupDropdown(vacancy);

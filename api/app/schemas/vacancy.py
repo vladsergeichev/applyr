@@ -1,7 +1,6 @@
 from datetime import datetime
 from enum import Enum
 
-from app.schemas.stage import GetStageSchema
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -74,9 +73,27 @@ class VacancySchema(VacancyBaseSchema):
         from_attributes = True
 
 
+class BaseFavoriteSchema(BaseModel):
+    notes: str | None = None
+
+
+class FavoriteSchema(BaseFavoriteSchema):
+    id: int
+    user_id: int
+    vacancy_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class GetVacancySchema(VacancyBaseSchema):
     id: int
     user_id: int
     created_at: datetime
     updated_at: datetime
-    stages: list[GetStageSchema]
+    notes: str | None = None
+
+    class Config:
+        from_attributes = True

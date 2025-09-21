@@ -9,10 +9,12 @@ from app.database import get_async_db
 from app.exceptions import TokenInvalidException, UserNotFoundException
 from app.models import UserModel
 from app.repositories.auth_repository import AuthRepository
+from app.repositories.favorite_repository import FavoriteRepository
 from app.repositories.stage_repository import StageRepository
 from app.repositories.vacancy_repository import VacancyRepository
 from app.services.admin_service import AdminService
 from app.services.auth_service import AuthService
+from app.services.favorite_service import FavoriteService
 from app.services.stage_service import StageService
 from app.services.vacancy_service import VacancyService
 
@@ -62,6 +64,13 @@ def get_vacancy_repository(
     return VacancyRepository(db)
 
 
+def get_favorite_repository(
+    db: AsyncSession = Depends(get_async_db),
+) -> FavoriteRepository:
+    """Создает репозиторий вакансий"""
+    return FavoriteRepository(db)
+
+
 def get_stage_repository(db: AsyncSession = Depends(get_async_db)) -> StageRepository:
     """Создает репозиторий этапов"""
     return StageRepository(db)
@@ -80,6 +89,13 @@ def get_vacancy_service(
 ) -> VacancyService:
     """Создает сервис вакансий"""
     return VacancyService(vacancy_repo, auth_repo)
+
+
+def get_favorite_service(
+    favorite_repo: FavoriteRepository = Depends(get_favorite_repository),
+) -> FavoriteService:
+    """Создает сервис вакансий"""
+    return FavoriteService(favorite_repo)
 
 
 def get_stage_service(

@@ -8,6 +8,9 @@ class FavoriteModel(Base):
     __tablename__ = "favorite"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
+    user_id = Column(
+        BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
+    )
     vacancy_id = Column(
         BigInteger, ForeignKey("vacancy.id", ondelete="CASCADE"), nullable=False
     )

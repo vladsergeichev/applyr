@@ -2,7 +2,11 @@ import logging
 
 from fastapi import APIRouter, Depends, Path
 
-from app.core.dependencies import get_current_user, get_vacancy_service
+from app.core.dependencies import (
+    get_current_user,
+    get_favorite_service,
+    get_vacancy_service,
+)
 from app.models import UserModel
 from app.schemas.vacancy import (
     GetVacancySchema,
@@ -11,6 +15,7 @@ from app.schemas.vacancy import (
     VacancySchema,
     VacancyUpdateSchema,
 )
+from app.services.favorite_service import FavoriteService
 from app.services.vacancy_service import VacancyService
 
 router = APIRouter(prefix="/vacancy")
@@ -28,13 +33,17 @@ async def create_vacancy(
     return await vacancy_service.create_vacancy(data)
 
 
-@router.get("/get_vacancy/{vacancy_id}", response_model=VacancySchema)
+@router.get("/get_vacancy/{vacancy_id}", response_model=GetVacancySchema)
 async def get_vacancy(
     vacancy_id: int = Path(..., description="ID вакансии"),
+    current_user: UserModel = Depends(get_current_user),
     vacancy_service: VacancyService = Depends(get_vacancy_service),
+    favorite_service: FavoriteService = Depends(get_favorite_service),
 ):
     """Получение вакансии по ID"""
-    return await vacancy_service.get_vacancy_by_id(vacancy_id)
+    vacancy = await vacancy_service.get_vacancy_by_id(vacancy_id)
+    vacancy.notes = await favorite_service.get_notes(vacancy_id, current_user.id)
+    return vacancy
 
 
 @router.get("/get_vacancies", response_model=list[GetVacancySchema])

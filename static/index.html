@@ -94,13 +94,20 @@
             </div>
 
         </div>
-        <div class="right-content white-box">
-            Компания
-            <h3 id="vacancy-data-company" class="mb-2">–</h3>
-            <a id="vacancy-data-link" class="btn btn-secondary">Открыть вакансию</a>
-            <a id="vacancy-data-contact-link" class="btn btn-secondary">Откликнуться</a>
+        <div class="right-content">
+            <div class="white-box">
+                Компания
+                <h3 id="vacancy-data-company" class="mb-2">–</h3>
+                <a id="vacancy-data-link" class="btn btn-secondary">Открыть вакансию</a>
+                <a id="vacancy-data-contact-link" class="btn btn-secondary mt-2">Откликнуться</a>
+            </div>
+            <div class="white-box">
+                <div class="content-header-inner">Заметки</div>
+                <textarea id="vacancy-notes" class="form-control" rows="4"
+                          placeholder="Добавьте свои заметки о вакансии"></textarea>
+                <button id="update-notes-btn" class="btn btn-secondary">Сохранить</button>
+            </div>
         </div>
-
     </div>
 </div>
 
@@ -112,6 +119,7 @@
 <script src="/js/api/baseClient.js"></script>
 <script src="/js/api/authClient.js"></script>
 <script src="/js/api/vacancyClient.js"></script>
+<script src="/js/api/favoriteClient.js"></script>
 <script src="/js/api/stageClient.js"></script>
 <script src="/js/api/apiManager.js"></script>
 

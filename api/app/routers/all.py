@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.routers.admin import admin
 from app.routers.internal import bot
-from app.routers.public import auth, stage, vacancy
+from app.routers.public import auth, favorite, stage, vacancy
 
 admin_router = APIRouter(
     prefix="/admin",
@@ -39,4 +39,8 @@ public_router.include_router(
 public_router.include_router(
     stage.router,
     tags=["Этапы"],
+)
+public_router.include_router(
+    favorite.router,
+    tags=["Избранное"],
 )

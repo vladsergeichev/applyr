@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.models import VacancyModel
-from app.schemas.stage import GetStageSchema
 from app.schemas.vacancy import (
     GetVacancySchema,
     VacancyBaseSchema,
@@ -58,17 +57,6 @@ class VacancyRepository:
                 conditions=vacancy.conditions,
                 created_at=vacancy.created_at,
                 updated_at=vacancy.updated_at,
-                stages=[
-                    GetStageSchema(
-                        id=stage.id,
-                        stage_type=stage.stage_type.value,
-                        title=stage.title,
-                        description=stage.description,
-                        created_at=stage.created_at,
-                        updated_at=stage.updated_at,
-                    )
-                    for stage in vacancy.stages
-                ],
             )
             for vacancy in vacancies
         ]

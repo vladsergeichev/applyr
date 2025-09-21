@@ -2,9 +2,9 @@
 from app.database import Base
 
 from .auth import RefreshModel, UserModel
+from .favorite import FavoriteModel
 from .stage import StageModel
 from .vacancy import VacancyModel
-from .favorite import FavoriteModel
 
 __all__ = [
     "Base",

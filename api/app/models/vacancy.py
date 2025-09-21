@@ -16,7 +16,9 @@ class VacancyModel(Base):
         BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False
     )
     name = Column(String(500), nullable=False)
-    status = Column(ENUM(VacancyStatus, name="vacancy_status"), default=VacancyStatus.DRAFT)
+    status = Column(
+        ENUM(VacancyStatus, name="vacancy_status"), default=VacancyStatus.DRAFT
+    )
     link = Column(Text, nullable=False)
     contact_link = Column(Text)
     company_name = Column(Text)

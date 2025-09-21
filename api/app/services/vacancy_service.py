@@ -31,14 +31,14 @@ class VacancyService:
         )
         return vacancy
 
-    async def get_vacancy_by_id(self, vacancy_id: int) -> VacancySchema:
+    async def get_vacancy_by_id(self, vacancy_id: int) -> GetVacancySchema:
         """Получает вакансию по ID"""
         vacancy = await self.vacancy_repo.get_by_id(vacancy_id)
         if not vacancy:
             raise VacancyNotFoundException()
 
         logger.info(f"Получена вакансия {vacancy_id}")
-        return vacancy
+        return GetVacancySchema.model_validate(vacancy)
 
     async def get_vacancies_by_user_id(self, user_id: int) -> list[GetVacancySchema]:
         """Получает вакансии пользователя по username"""

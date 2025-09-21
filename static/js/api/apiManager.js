@@ -4,11 +4,13 @@ class ApiManager {
         this.authClient = new AuthClient();
         this.vacancyClient = new VacancyClient();
         this.stageClient = new StageClient();
-        
+        this.favoriteClient = new FavoriteClient();
+
         this.clients = [
             this.authClient,
             this.vacancyClient,
-            this.stageClient
+            this.stageClient,
+            this.favoriteClient
         ];
     }
 
@@ -21,19 +23,4 @@ class ApiManager {
     clearAuthToken() {
         this.clients.forEach(client => client.clearAuthToken());
     }
-
-    // Получает клиент по имени
-    getClient(clientName) {
-        const clientMap = {
-            'auth': this.authClient,
-            'vacancy': this.vacancyClient,
-            'stage': this.stageClient
-        };
-        return clientMap[clientName];
-    }
-
-    // Проверяет, авторизован ли пользователь
-    isAuthenticated() {
-        return this.authClient.accessToken !== null;
-    }
-} 
+}

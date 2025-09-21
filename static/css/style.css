@@ -321,7 +321,7 @@ body {
     margin-bottom: calc(var(--space) * 0.3);
 }
 
-.modal form textarea.form-control {
+textarea.form-control {
     resize: vertical;
     font-family: inherit;
     min-height: calc(var(--space) * 10);
@@ -842,4 +842,12 @@ body {
 
 .mb-2 {
     margin-bottom: calc(var(--space) * 1.0);
+}
+
+.mt-2 {
+    margin-top: calc(var(--space) * 1.0);
+}
+
+.mt-4 {
+    margin-top: calc(var(--space) * 2.0);
 }

@@ -3,7 +3,7 @@ class FavoriteClient extends BaseClient {
         super('/favorite');
     }
 
-    async updateNotes(vacancyId, notes) {
-        return this.post(`/${vacancyId}/update_notes`, {notes});
+    async updateNotes(vacancyId, favoriteData) {
+        return this.put(`/${vacancyId}`, favoriteData);
     }
 } 

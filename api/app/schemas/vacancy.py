@@ -3,6 +3,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator
 
+from app.schemas.favorite import FavoriteStage
+
 
 class VacancyStatus(Enum):
     DRAFT = "draft"
@@ -79,6 +81,7 @@ class GetVacancySchema(VacancyBaseSchema):
     created_at: datetime
     updated_at: datetime
     notes: str | None = None
+    stage: FavoriteStage = FavoriteStage.NOTHING
 
     class Config:
         from_attributes = True

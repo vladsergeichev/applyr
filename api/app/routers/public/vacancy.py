@@ -42,7 +42,9 @@ async def get_vacancy(
 ):
     """Получение вакансии по ID"""
     vacancy = await vacancy_service.get_vacancy_by_id(vacancy_id)
-    vacancy.notes = await favorite_service.get_notes(vacancy_id, current_user.id)
+    favorite = await favorite_service.get_favorite(vacancy_id, current_user.id)
+    vacancy.notes = favorite.notes
+    vacancy.stage = favorite.stage
     return vacancy
 
 

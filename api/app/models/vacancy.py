@@ -32,4 +32,6 @@ class VacancyModel(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
-    stages = relationship("StageModel", backref="vacancy", cascade="all, delete-orphan")
+    favorite = relationship(
+        "FavoriteModel", backref="favorite", cascade="all, delete-orphan"
+    )

@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
 from app.models import VacancyModel
+from app.schemas.favorite import FavoriteStage
 from app.schemas.vacancy import (
     GetVacancySchema,
     VacancyBaseSchema,
@@ -60,6 +61,25 @@ class VacancyRepository:
             )
             for vacancy in vacancies
         ]
+
+    async def get_all_by_user_id(self, user_id: int) -> list[GetVacancySchema]:
+        """Получает все вакансии пользователя с этапами"""
+        query = (
+            select(VacancyModel)
+            .options(joinedload(VacancyModel.favorite))
+            .where(VacancyModel.user_id == user_id)
+            .order_by(VacancyModel.created_at.desc())
+        )
+        result = await self.db.execute(query)
+        vacancies = result.unique().scalars().all()  # Убираем дубли с помощью unique()
+        for vacancy in vacancies:
+            if vacancy.favorite:
+                vacancy.notes = vacancy.favorite[0].notes
+                vacancy.stage = vacancy.favorite[0].stage
+            else:
+                vacancy.notes = None
+                vacancy.stage = FavoriteStage.NOTHING
+        return [GetVacancySchema.model_validate(vacancy) for vacancy in vacancies]
 
     async def get_all(self) -> list[VacancyModel]:
         """Получает все вакансии"""

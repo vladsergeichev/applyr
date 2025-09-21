@@ -11,6 +11,7 @@
     /* Нейтральная палитра */
     --white: #ffffff;
     --gray-light: #f9fafb;
+    --gray-light-two: #ececec;
     --gray-medium: #6b7280;
     --gray-dark: #374151;
     --gray-darker: #111827;
@@ -250,7 +251,8 @@ body {
 }
 
 .form-group input,
-.form-control {
+.form-control,
+select.form-control {
     width: 100%;
     padding: calc(var(--space) * 0.625) calc(var(--space) * 0.75);
     border: 1px solid #d1d5db;
@@ -598,6 +600,15 @@ textarea.form-control {
     justify-content: space-between;
     align-items: center;
     gap: calc(var(--space) * 1);
+}
+
+.vacancy-stage {
+    font-size: 0.85em;
+    color: var(--gray-medium);
+    background: var(--gray-light-two);
+    padding: calc(var(--space) * 0.2) calc(var(--space) * 0.4);
+    border-radius: calc(var(--radius) * 0.5);
+    white-space: nowrap;
 }
 
 .vacancy-location,

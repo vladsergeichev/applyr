@@ -107,6 +107,7 @@ class VacancyRenderer {
                     <span class="vacancy-company">${Utils.escapeHtml(vacancy.company_name || 'unknown')}</span>
                     ${vacancy.salary ? `<span class="vacancy-salary">${Utils.escapeHtml(vacancy.salary)}</span>` : ''}
                     <div class="vacancy-details">
+                        ${vacancy.stage ? `<span class="vacancy-stage">${Utils.escapeHtml(VACANCY_STAGES[vacancy.stage])}</span>` : ''}
                         ${vacancy.location ? `<span class="vacancy-location">${Utils.escapeHtml(vacancy.location)}</span>` : ''}
                         ${vacancy.employment ? `<span class="vacancy-employment">${Utils.escapeHtml(vacancy.employment)}</span>` : ''}
                         ${vacancy.experience ? `<span class="vacancy-experience">${Utils.escapeHtml(vacancy.experience)}</span>` : ''}

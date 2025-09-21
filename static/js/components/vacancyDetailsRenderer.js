@@ -4,6 +4,27 @@ class VacancyDetailsRenderer {
         this.dropdownInstance = null;
         this.currentVacancyId = null;
         this.setupNotesHandlers();
+        this.setupStageSelect();
+    }
+
+    // Инициализация выпадающего списка с этапами
+    setupStageSelect() {
+        const stageSelect = document.getElementById('vacancy-data-stage');
+        if (!stageSelect) return;
+
+        // Очищаем текущие опции
+        stageSelect.innerHTML = '';
+
+        // Добавляем опции из констант
+        Object.entries(VACANCY_STAGES).forEach(([value, label]) => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = label;
+            stageSelect.appendChild(option);
+        });
+
+        // Добавляем обработчик изменения
+        stageSelect.addEventListener('change', () => this.updateNotes());
     }
 
     get vacancyClient() {
@@ -63,14 +84,14 @@ class VacancyDetailsRenderer {
 
         const favoriteData = {
             notes: document.getElementById('vacancy-data-notes').value.trim(),
-            stage: "nothing"
+            stage: document.getElementById('vacancy-data-stage').value
         };
 
         try {
             await this.favoriteClient.updateNotes(this.currentVacancyId, favoriteData);
-            window.app.messageManager.showSuccess('Заметки сохранены');
+            window.app.messageManager.showSuccess('Изменения сохранены');
         } catch (error) {
-            window.app.messageManager.showError('Не удалось сохранить заметки');
+            window.app.messageManager.showError('Не удалось сохранить изменения');
         }
     }
 
@@ -101,6 +122,7 @@ class VacancyDetailsRenderer {
         document.getElementById('vacancy-data-link').href = vacancy.link;
         document.getElementById('vacancy-data-contact-link').href = vacancy.contact_link || vacancy.link;
         document.getElementById('vacancy-data-notes').value = vacancy.notes || '';
+        document.getElementById('vacancy-data-stage').value = vacancy.stage || 'nothing';
 
         // Обновляем дропдаун
         this.setupDropdown(vacancy);

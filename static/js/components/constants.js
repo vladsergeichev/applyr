@@ -1,5 +1,18 @@
 // Константы
 
+// Этапы вакансии
+const VACANCY_STAGES = {
+    nothing: "Новая вакансия",
+    apply_sent: "Отклик отправлен",
+    hr_interview: "HR собес",
+    tech_interview: "Тех. собес",
+    business_interview: "Бизнес-собес",
+    waiting_feedback: "Ожидание ОС",
+    rejected: "Отказ",
+    offer_received: "Получен оффер",
+    archive: "Архив"
+};
+
 // Цвета для статусов
 const STATUS_COLORS = {
     new: '#b8bdea',

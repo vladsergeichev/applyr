@@ -42,7 +42,7 @@ class VacancyService:
 
     async def get_vacancies_by_user_id(self, user_id: int) -> list[GetVacancySchema]:
         """Получает вакансии пользователя по username"""
-        vacancies = await self.vacancy_repo.get_by_user_id(user_id)
+        vacancies = await self.vacancy_repo.get_all_by_user_id(user_id)
         logger.info(f"Получено {len(vacancies)} вакансий для пользователя {user_id}")
         return vacancies
 

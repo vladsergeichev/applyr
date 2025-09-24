@@ -72,24 +72,6 @@ class FormValidator {
         };
     }
 
-    // Валидация этапа
-    validateStageForm(stageData) {
-        const errors = {};
-
-        if (!stageData.stage_type) {
-            errors.stage_type = this.errorMessages.required;
-        }
-
-        if (!stageData.date) {
-            errors.date = this.errorMessages.required;
-        }
-
-        return {
-            isValid: Object.keys(errors).length === 0,
-            errors
-        };
-    }
-
     // Проверка URL
     isValidUrl(string) {
         try {

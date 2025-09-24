@@ -9,7 +9,6 @@ class App {
         this.authClient = this.apiManager.authClient;
         this.vacancyClient = this.apiManager.vacancyClient;
         this.favoriteClient = this.apiManager.favoriteClient;
-        this.stageClient = this.apiManager.stageClient;
 
         this.messageManager = new MessageManager();
         this.vacancyRenderer = new VacancyRenderer();

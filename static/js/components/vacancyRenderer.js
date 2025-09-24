@@ -7,20 +7,6 @@ const Utils = {
         div.textContent = text || '';
         return div.innerHTML;
     },
-
-    formatDate(date) {
-        return new Date(date).toLocaleDateString('ru-RU', {
-            day: '2-digit',
-            month: '2-digit',
-            year: '2-digit'
-        });
-    },
-
-    getLastStage(vacancy) {
-        return Array.isArray(vacancy.stages) && vacancy.stages.length > 0
-            ? vacancy.stages[vacancy.stages.length - 1]
-            : null;
-    }
 };
 
 // Иконки SVG

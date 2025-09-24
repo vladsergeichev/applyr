@@ -1,4 +1,4 @@
-/* ===== CSS ПЕРЕМЕННЫЕ (МИНИМАЛЬНЫЙ НАБОР) ===== */
+/* ===== переменные ===== */
 :root {
     /* Основные цвета */
     --primary: #3b82f6;
@@ -102,7 +102,7 @@ body {
     cursor: pointer;
     transition: all var(--transition);
     text-decoration: none;
-    display: inline-flex;
+    display: inline;
     align-items: center;
     justify-content: center;
     gap: calc(var(--space) * 0.5);
@@ -361,21 +361,12 @@ textarea.form-control {
 
 .filter-toggle-btn {
     display: none;
-
-    /*align-items: center;*/
-    /*gap: calc(var(--space) * 0.5);*/
-    /*margin-bottom: var(--space);*/
 }
 
 .filter-close-btn {
     display: none;
 }
 
-.left-content {
-}
-
-.right-content {
-}
 .white-box {
     background: var(--white);
     border-radius: var(--radius);
@@ -671,19 +662,12 @@ textarea.form-control {
 
 .group-btn {
     margin-left: auto;
-    /*font-size: 1em;*/
-    /*padding: calc(var(--space) * 0.5) calc(var(--space) * 1.2);*/
-    /*border-radius: var(--radius);*/
-    /*font-weight: 500;*/
-    /*cursor: pointer;*/
 }
 
 .add-vacancy-btn {
-    /*margin-left: auto;*/
     font-size: 1em;
     padding: calc(var(--space) * 0.5) calc(var(--space) * 1.2);
     border-radius: var(--radius);
-    /*font-weight: 500;*/
     cursor: pointer;
 }
 
@@ -890,7 +874,7 @@ textarea.form-control {
     }
 
     .filter-toggle-btn {
-        display: inline-block;
+        display: inline;
     }
 
     #content-filters {

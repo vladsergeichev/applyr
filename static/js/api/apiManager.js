@@ -3,13 +3,11 @@ class ApiManager {
     constructor() {
         this.authClient = new AuthClient();
         this.vacancyClient = new VacancyClient();
-        this.stageClient = new StageClient();
         this.favoriteClient = new FavoriteClient();
 
         this.clients = [
             this.authClient,
             this.vacancyClient,
-            this.stageClient,
             this.favoriteClient
         ];
     }

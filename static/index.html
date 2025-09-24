@@ -36,8 +36,16 @@
         <h3>Мои вакансии</h3>
         <span id="vacancies-count" class="vacancies-count-simple"></span>
         <div class="group-btn">
-            <button id="filter-toggle-btn" class="btn add-vacancy-btn filter-toggle-btn">Фильтр</button>
-            <button class="btn add-vacancy-btn" onclick="showVacancyModal({ mode: 'add' })">+ Добавить</button>
+            <button id="filter-toggle-btn" class="btn add-vacancy-btn filter-toggle-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <path fill="currentColor" d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
+                </svg>
+            </button>
+            <button class="btn add-vacancy-btn" onclick="showVacancyModal({ mode: 'add' })">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                    <path fill="currentColor" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -134,7 +142,6 @@
 <script src="/js/api/authClient.js"></script>
 <script src="/js/api/vacancyClient.js"></script>
 <script src="/js/api/favoriteClient.js"></script>
-<script src="/js/api/stageClient.js"></script>
 <script src="/js/api/apiManager.js"></script>
 
 <!-- Utils -->

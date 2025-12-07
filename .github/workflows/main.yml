@@ -54,7 +54,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           echo "${{ secrets.ENV }}" > .env
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.PATH_TO_DIR }}/.env
+          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ env.PATH_TO_DIR }}/.env
           rm private_key.pem
           rm .env
 

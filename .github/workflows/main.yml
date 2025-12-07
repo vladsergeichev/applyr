@@ -10,7 +10,7 @@ env:
   REGISTRY: applyr.cr.cloud.ru
   IMAGE_NAME_BOT: applyr-bot
   IMAGE_NAME_API: applyr-api
-  PATH: /opt/vss/applyr
+  PATH_TO_DIR: /opt/vss/applyr
 
 jobs:
   build:
@@ -54,7 +54,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           echo "${{ secrets.ENV }}" > .env
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.PATH }}/.env
+          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.PATH_TO_DIR }}/.env
           rm private_key.pem
           rm .env
 
@@ -65,7 +65,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "compose.yml,static,nginx/nginx.conf"
-          target: ${{ env.PATH }}
+          target: ${{ env.PATH_TO_DIR }}
 
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
@@ -80,4 +80,4 @@ jobs:
             echo "${{ secrets.REGISTRY_KEY_SECRET }}" | docker login $REGISTRY -u "${{ secrets.REGISTRY_KEY_ID }}" --password-stdin
             docker pull $REGISTRY/$IMAGE_NAME_BOT:latest
             docker pull $REGISTRY/$IMAGE_NAME_API:latest
-            docker compose -f ${{ env.PATH }}/compose.yml up -d
+            docker compose -f ${{ env.PATH_TO_DIR }}/compose.yml up -d

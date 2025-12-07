@@ -10,8 +10,6 @@ env:
   REGISTRY: applyr.cr.cloud.ru
   IMAGE_NAME_BOT: applyr-bot
   IMAGE_NAME_API: applyr-api
-  DEPLOY_HOST: "45.132.176.39"
-  DEPLOY_USER: deployer
 
 jobs:
   build:
@@ -55,15 +53,15 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           echo "${{ secrets.ENV }}" > .env
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:/opt/applyr/.env
+          scp -i private_key.pem -o StrictHostKeyChecking=no .env ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/applyr/.env
           rm private_key.pem
           rm .env
 
       - name: Upload files
         uses: appleboy/scp-action@v1.0.0
         with:
-          host: ${{ env.DEPLOY_HOST }}
-          username: ${{ env.DEPLOY_USER }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "compose.yml,static,nginx/nginx.conf"
           target: /opt/applyr
@@ -71,8 +69,8 @@ jobs:
       - name: Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ env.DEPLOY_HOST }}
-          username: ${{ env.DEPLOY_USER }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             export REGISTRY=${{ env.REGISTRY }}
